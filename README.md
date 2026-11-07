@@ -9,6 +9,10 @@ Jezik interfejsa: srpski (latinica). Vremenska zona izveštavanja: `Europe/Belgr
 - `client/`: React/Vite **povezana početna aplikacija** sa prijavom, osnovnim ekranima za tri uloge, API pozivima, PWA manifestom i service worker-om. Klijent nije finalni pixel-perfect prenos svih ranije usvojenih mockupova. Za to je potreban poseban UI prolaz.
 - `docker-compose.dev.yml`: lokalni MongoDB za razvoj.
 
+Pravila daljeg rada su u [AGENTS.md](AGENTS.md). Pregled koda, ovlašćenja, ispravki i otvorenih problema je u [analizi projekta](docs/ANALIZA_PROJEKTA.md), a predlog implementacije 27 odobrenih ekrana u [planu frontend-a](docs/PLAN_FRONTEND.md).
+
+`client` i `server` sada imaju zasebne `package-lock.json` i `node_modules` direktorijume. Root nema npm workspaces ni svoje zavisnosti; `package.json` služi za pomoćne komande. Stari root `node_modules` nastajao je zbog npm workspaces hoisting-a. Verzije paketa pri razdvajanju nisu menjane.
+
 **Važno:** Ovo je razvojna v0.1 osnova, ne sertifikovana gotova produkciona aplikacija. Završno integraciono, mobilno, sigurnosno i PWA testiranje obavezno je pre pristupa stvarnim podacima kompanije.
 
 ## 1. Tehnički zahtevi
@@ -26,17 +30,18 @@ Jezik interfejsa: srpski (latinica). Vremenska zona izveštavanja: `Europe/Belgr
 # Ako imate Docker Desktop:
 docker compose -f docker-compose.dev.yml up -d
 
-# Instalacija paketa za oba workspace-a:
-npm install
+# Nezavisna instalacija oba dela iz njihovih lock fajlova:
+# Pre reinstalacije zaustaviti razvojne procese (Windows zaključava esbuild.exe).
+npm run install:all
 
 # Kreiranje konfiguracije servera:
-Copy-Item server/.env.example server/.env
+if (!(Test-Path server/.env)) { Copy-Item server/.env.example server/.env }
 ```
 
 U `server/.env` podesiti:
 
 ```dotenv
-MONGODB_URI=mongodb://127.0.0.1:27017/zepter_management
+MONGODB_URI=mongodb://127.0.0.1:27017/zepter_management_demo
 CLIENT_ORIGIN=http://localhost:5173
 JWT_SECRET=OVDE_UPISATI_NOVU_DUGACKU_NASUMICNU_VREDNOST
 COOKIE_SECURE=false
@@ -58,10 +63,14 @@ npm run dev:server
 npm run dev:client
 ```
 
+Zasebno je moguće pokrenuti `npm ci`, `npm run dev` i ostale komande iz odgovarajućeg `client/` ili `server/` direktorijuma. Ne treba pokretati `npm install` u root-u. Za deployment server zavisnosti mogu se instalirati komandom `npm ci --omit=dev` iz `server/`, dok frontend build zahteva i njegove dev zavisnosti.
+
 - React PWA u razvoju: `http://localhost:5173`
 - API: `http://localhost:4000`
 - Provera API-ja: `http://localhost:4000/health`
 - U Vite-u se `/api` i `/socket.io` prosleđuju Express serveru.
+- Vite development/preview je podrazumevano dostupan samo na `localhost`. Za testiranje PWA na telefonu pripremiti odgovarajuće HTTPS okruženje.
+- Production frontend je `client/dist`; potrebno je posebno podesiti hosting sa SPA fallback-om, `/api` i `/socket.io` proxy-jem. Express trenutno ne servira frontend build.
 
 ### Prvi admin i predsednik
 
@@ -80,7 +89,7 @@ BOOTSTRAP_LAST_NAME=Zepter
 Zatim pokrenuti:
 
 ```powershell
-npm run bootstrap -w server
+npm run bootstrap
 ```
 
 Promeniti `BOOTSTRAP_ROLE=president` i postaviti drugi mejl i drugu, jaku lozinku, pa ponovo izvršiti komandu. Sistem neće napraviti drugi nalog iste privilegovane uloge. **Izbrisati `BOOTSTRAP_*` podatke iz `.env` odmah posle inicijalizacije.** Nalog predsednika je odobren automatski.
@@ -225,15 +234,26 @@ GET /api/comments?targetType=activity&targetId=<activityId>
 6. Za više server instanci uvesti Redis adapter za Socket.IO i distribuirani rate limiting; trenutni rate limit je po procesu.
 7. Uvesti scheduler za podsetnike zaposlenima na dnevni unos, sa vremenskom zonom, radnim danima i praznicima prema pravilima kompanije.
 8. Uskladiti React vizuelne komponente sa svih 27 ranije dizajniranih ekrana, testirati na Androidu i iPhone-u, uključujući realne korisničke tokove i obaveštenja.
-9. Dodati automatizovane API, autentifikacione, E2E i load testove. Trenutno su dodati samo početni unit testovi.
+9. Dopuniti automatizovane API, autentifikacione, E2E i load testove. Postoje početni unit/regresioni testovi i posebna lokalna integraciona RBAC grupa; to nije potpuna testna matrica.
 10. Precizirati izvore istine za procenat realizacije (jednostavan prosek aktivnosti u v0.1), međusektorske projekte i tok odobravanja izveštaja.
 
 ## 8. Testiranje i izgradnja
 
 ```powershell
 npm run test:server
+npm run check:server
 npm run build:client
 ```
 
-Napomena: u okruženju u kojem je ovaj arhiv napravljen **nije bio dostupan npm registry** za instalaciju paketa. Izvršena je statička provera sintakse serverskih JavaScript datoteka, ali nije bilo moguće potvrditi uspešan `npm install`, stvarnu MongoDB integraciju ili PWA build. Pokrenuti ove korake na svojoj mašini pre korišćenja.
-# Zepter-Project-Overview
+Za integracione provere prvo pokrenuti backend sa postojećom lokalnom demo bazom. U lokalnom `server/.env` mora biti podešena `DEMO_SEED_PASSWORD` koja odgovara već postojećim nalozima. Ove komande ne seeduju i ne resetuju bazu:
+
+```powershell
+npm run smoke:demo
+npm run test:rbac
+```
+
+`API_TEST_BASE_URL` opciono menja adresu RBAC testa (podržan samo lokalni API); `PORT` menja port postojećeg smoke testa. Live testovi čitaju poslovne podatke; prijava pravi sesiju i ažurira `lastLoginAt`. RBAC grupa na kraju odjavljuje svoje testne sesije. Auth rate limit je 12 pokušaja na 15 minuta po IP-u; ne ponavljati suite u petlji. Unit/regresioni testovi ne pristupaju MongoDB-u, ali regresije ruta koriste privremeni localhost HTTP port.
+
+**Potvrđeno 7. novembra 2026:** nezavisne instalacije, 11/11 unit/regresionih testova, serverska sintaksa, frontend/PWA build i 20/20 live RBAC podprovera prolaze. Postojeći smoke ima 17/19 uspešnih provera: dva očekivanja ne odgovaraju trenutnoj bazi jer je raniji demo kandidat na čekanju već odobren. To je zatečeno pre izmena; nalog nije vraćan na čekanje radi testa. Zabrana prijave za pending/rejected/disabled naloge dodatno je proverena regresionim testom sa modelima u memoriji. Detalji i ostala ograničenja su u [analizi](docs/ANALIZA_PROJEKTA.md#rezultati-verifikacije).
+
+`npm audit` je prijavio 0 serverskih i 6 frontend build-tool nalaza (2 low, 4 moderate, bez high/critical). Automatsko ažuriranje nije rađeno. Pokrenuti relevantne testove nakon svake značajne izmene; uspešan build nije dokaz da je mobilni dizajn ili stvarna PWA instalacija završena.

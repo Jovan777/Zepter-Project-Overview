@@ -5,6 +5,7 @@ import {schemas} from '../lib/validation.js';
 import {managing,sectorAccess,omniscient} from '../lib/access.js';
 import {belgradeDay,periodRange,requireId,same,safePage} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
+import {allow} from '../lib/auth.js';
 import {audit,notify} from '../services/events.js';
 const r=Router();
 r.get('/preview',async(req,res)=>{
@@ -42,13 +43,13 @@ r.get('/:id',async(req,res)=>{
  if(req.user.role==='president'&&report.status!=='published')fail(403,'Izveštaj još nije objavljen.');
  res.json({report});
 });
-r.patch('/:id',async(req,res)=>{
+r.patch('/:id',allow('manager','admin'),async(req,res)=>{
  const report=await Report.findById(requireId(req.params.id));if(!report)fail(404,'Izveštaj ne postoji.');
  if(!managing(req.user,report.sector)||report.status==='published')fail(403,'Objavljen izveštaj se ne može menjati.');
  const d=schemas.reportPatch.parse(req.body);Object.assign(report,d);await report.save();
  await audit(req,'report.edited','Report',report._id,{fields:Object.keys(d)});res.json({report});
 });
-r.post('/:id/publish',async(req,res)=>{
+r.post('/:id/publish',allow('manager','admin'),async(req,res)=>{
  const report=await Report.findById(requireId(req.params.id));if(!report)fail(404,'Izveštaj ne postoji.');
  if(!managing(req.user,report.sector))fail(403,'Samo rukovodilac sektora objavljuje njegov izveštaj.');
  if(report.status!=='draft')fail(409,'Izveštaj je već objavljen.');
