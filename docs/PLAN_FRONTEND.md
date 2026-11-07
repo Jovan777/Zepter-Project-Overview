@@ -1,5 +1,7 @@
 # Predlog faznog razvoja React frontend-a
 
+**Naknadno usvojen redosled:** korisnik je odredio razvoj zaposlenih ekrana pre predsedničkog dela, na `develop`, u talasima po dve reference. Implementirana su prva četiri ekrana: [prvi talas](EMPLOYEE_WAVE_01.md) i [detalji projekta/aktivnosti](EMPLOYEE_WAVE_02.md). Plan ispod čuva prvobitni predlog i preostale oblasti, a aktuelni redosled prati najnovije korisničke instrukcije.
+
 Ovo je plan narednih zadataka; novi ekrani nisu implementirani u početnoj analizi. Postojeća povezana aplikacija ostaje osnova. Redosled počinje predsedničkim interfejsom. Usvojene slike svih ekrana treba prikupiti pre precizne vizuelne implementacije; u repozitorijumu trenutno nisu dostupne.
 
 ## Faza 0 — stabilna osnova i priprema dizajna

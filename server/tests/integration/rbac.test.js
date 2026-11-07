@@ -92,6 +92,71 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
       assert.equal((await call(route, employee)).status, 403);
       assert.equal((await call(route, president)).status, 200);
     });
+    const mine = await call('/projects/mine?limit=50', employee);
+    await t.test('Personal project list contains only accessible projects and assigned activities', async () => {
+      assert.equal(mine.status, 200);
+      const ownIds = new Set(ownProjects.data.items.map(p => p._id));
+      assert.equal(mine.data.total, ownProjects.data.total);
+      assert.ok(mine.data.items.every(p => ownIds.has(p._id)));
+      for (const project of mine.data.items) {
+        const source = await call(`/activities/project/${project._id}`, employee);
+        const assigned = source.data.items.filter(a => a.assignees.some(u => u._id === employee.user._id));
+        assert.deepEqual(project.myActivities.map(a => a._id).sort(), assigned.map(a => a._id).sort());
+      }
+    });
+    await t.test('Caller cannot override identity or sector of personal project list', async () => {
+      const overridden = await call(`/projects/mine?limit=50&sectorId=${otherEmployee.user.sector}&userId=${otherEmployee.user._id}`, employee);
+      assert.equal(overridden.status, 200);
+      assert.deepEqual(overridden.data.items.map(p => p._id), mine.data.items.map(p => p._id));
+    });
+    await t.test('Personal search treats regex symbols literally', async () => {
+      const search = await call('/projects/mine?q=' + encodeURIComponent('.*'), employee);
+      assert.equal(search.status, 200);
+      assert.equal(search.data.total, ownProjects.data.items.filter(p => p.title.includes('.*')).length);
+    });
+    await t.test('Project tabs preserve real project states and personal review assignments', async () => {
+      for (const tab of ['active', 'review', 'completed']) {
+        const response = await call('/projects/mine?tab=' + tab, employee);
+        assert.equal(response.status, 200);
+        assert.ok(response.data.items.every(p => tab === 'review' ? p.myActivities.some(a => a.status === 'review') : tab === 'completed' ? p.status === 'completed' : ['active', 'at_risk', 'on_hold'].includes(p.status)));
+      }
+      assert.equal((await call('/projects/mine?tab=invalid', employee)).status, 422);
+    });
+    await t.test('Employee home feed only returns accessible activities and leadership comments', async () => {
+      const overview = await call('/dashboard/employee', employee);
+      assert.equal(overview.status, 200);
+      assert.equal(overview.data.stats.totalProjects, ownProjects.data.total);
+      assert.ok(overview.data.projects.length <= 2);
+      const targets = [...overview.data.activities.items.map(a => '/activities/' + a._id), ...overview.data.attention.map(a => a.link), ...overview.data.latestComments.map(c => c.link)];
+      for (const route of new Set(targets)) assert.equal((await call(route, employee)).status, 200, route);
+      assert.ok(overview.data.latestComments.every(c => ['president', 'manager'].includes(c.author?.role)));
+      const tampered = await call(`/dashboard/employee?sectorId=${otherEmployee.user.sector}&userId=${otherEmployee.user._id}`, employee);
+      assert.equal(tampered.status, 200);
+      assert.deepEqual(tampered.data.stats, overview.data.stats);
+    });
+    await t.test('Other roles cannot use the personal employee feed', async () => {
+      for (const session of [admin, president, manager]) {
+        assert.equal((await call('/dashboard/employee', session)).status, 403);
+        assert.equal((await call('/projects/mine', session)).status, 403);
+      }
+    });
+    await t.test('Upload configuration requires authentication and exposes only formats and a size limit', async () => {
+      assert.equal((await call('/attachments/config')).status, 401);
+      const config = await call('/attachments/config', employee);
+      assert.equal(config.status, 200);
+      assert.ok(Number.isInteger(config.data.maxBytes) && config.data.maxBytes > 0);
+      assert.ok(config.data.extensions.includes('.png') && config.data.extensions.includes('.pdf'));
+      assert.deepEqual(Object.keys(config.data).sort(), ['extensions', 'maxBytes']);
+    });
+    await t.test('Activity detail returns the project context, assigned people and a usable save version', async () => {
+      const project = mine.data.items.find(p => p.myActivities.length);
+      assert.ok(project, 'Assigned activity fixture required');
+      const detail = await call('/activities/' + project.myActivities[0]._id, employee);
+      assert.equal(detail.status, 200);
+      assert.equal(detail.data.project._id, project._id);
+      assert.ok(detail.data.activity.assignees.some(person => person._id === employee.user._id));
+      assert.ok(Number.isFinite(Date.parse(detail.data.activity.updatedAt)));
+    });
   } finally {
     for (const session of sessions) {
       if (session.cookie) {

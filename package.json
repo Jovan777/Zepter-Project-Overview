@@ -10,6 +10,7 @@
     "build:client":"npm --prefix client run build",
     "start:server":"npm --prefix server start",
     "test:server":"npm --prefix server test",
+    "test:client":"npm --prefix client test",
     "check:server":"npm --prefix server run check",
     "smoke:demo":"npm --prefix server run smoke:demo",
     "test:rbac":"npm --prefix server run test:rbac",

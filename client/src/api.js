@@ -6,7 +6,7 @@ export function connectSocket(onNotification){
  if(!accessToken)return;
  socket?.disconnect();
  socket=io('/',{path:'/socket.io',autoConnect:true,auth:{token:accessToken},transports:['websocket','polling']});
- socket.on('notification:new',onNotification);
+ socket.on('notification:new',()=>{onNotification();window.dispatchEvent(new Event('zepter:notifications-changed'));});
  socket.on('data:changed',()=>window.dispatchEvent(new Event('zepter:data-changed')));
  socket.on('connect_error',async()=>{
   try{await refresh();if(socket){socket.auth={token:accessToken};socket.connect();}}
@@ -21,10 +21,10 @@ async function refresh(){
  return refreshPromise;
 }
 export async function bootstrap(){try{return await refresh();}catch{return null;}}
-export async function api(endpoint,{method='GET',body,headers={},isForm=false,retry=true}={}){
- const send=()=>fetch('/api'+endpoint,{method,credentials:'same-origin',headers:{...(!isForm&&body!==undefined?{'Content-Type':'application/json'}:{}),...(accessToken?{Authorization:'Bearer '+accessToken}:{}),...headers},body:body===undefined?undefined:isForm?body:JSON.stringify(body)});
+export async function api(endpoint,{method='GET',body,headers={},isForm=false,retry=true,signal}={}){
+ const send=()=>fetch('/api'+endpoint,{method,signal,credentials:'same-origin',headers:{...(!isForm&&body!==undefined?{'Content-Type':'application/json'}:{}),...(accessToken?{Authorization:'Bearer '+accessToken}:{}),...headers},body:body===undefined?undefined:isForm?body:JSON.stringify(body)});
  let response;
- try { response=await send(); } catch { throw Error('Ne mogu da kontaktiram API. Proverite da li backend radi na portu 4000.'); }
+ try { response=await send(); } catch(error) { if(signal?.aborted)throw error;throw Error('Ne mogu da kontaktiram API. Proverite da li backend radi na portu 4000.'); }
  if(response.status===401&&retry&&!endpoint.startsWith('/auth/')){
   try{await refresh();response=await send();}catch{}
  }
@@ -34,8 +34,18 @@ export async function api(endpoint,{method='GET',body,headers={},isForm=false,re
  try { data=raw?JSON.parse(raw):null; } catch {
   throw Error(`Backend nije vratio JSON (HTTP ${response.status}). Proverite http://127.0.0.1:4000/health i Vite proxy.`);
  }
- if(!response.ok)throw Error(data?.error||`API greška: HTTP ${response.status}.`);
+ if(!response.ok){const error=Error(data?.error||`API greška: HTTP ${response.status}.`);error.status=response.status;throw error;}
+ if(method!=='GET'&&endpoint.startsWith('/notifications/'))window.dispatchEvent(new Event('zepter:notifications-changed'));
  return data;
+}
+export async function attachmentImageUrl(id,{signal}={}){
+ const call=()=>fetch('/api/attachments/'+id,{signal,cache:'no-store',headers:accessToken?{Authorization:'Bearer '+accessToken}:{},credentials:'same-origin'});
+ let response=await call();
+ if(response.status===401){await refresh();response=await call();}
+ if(!response.ok)throw Error('Slika nije dostupna.');
+ const blob=await response.blob();
+ if(!['image/png','image/jpeg','image/webp'].includes(blob.type))throw Error('Nepodržana slika.');
+ return URL.createObjectURL(blob);
 }
 export async function subscribePush(){
  if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window))throw Error('Ovaj uređaj ne podržava push.');

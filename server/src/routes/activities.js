@@ -28,7 +28,10 @@ r.get('/:id',async(req,res)=>{
  res.json({activity,project:{_id:project._id,title:project.title,sector:project.sector}});
 });
 r.patch('/:id',async(req,res)=>{
- const {activity:a,project:p}=await activityAccess(req.user,req.params.id,true);
+ const {activity:current,project:p}=await activityAccess(req.user,req.params.id,true);
+ let a=current;
+ const version=req.get('If-Match');
+ if(version&&version!==`"${a.updatedAt?.toISOString()}"`)fail(409,'Aktivnost je u međuvremenu promenjena. Pregledajte aktuelne podatke pre čuvanja.');
  const manager=managing(req.user,p.sector);
  const d=(manager?schemas.activityPatch:schemas.employeeUpdate).parse(req.body);
  if(d.assigneeIds){const assignees=await validateTeam(d.assigneeIds,p.sector);
@@ -38,7 +41,15 @@ r.patch('/:id',async(req,res)=>{
  if(d.dueDate!==undefined)a.dueDate=d.dueDate===null?null:dateValue(d.dueDate);
  if(a.status==='completed')a.progress=100;
  if(a.progress===100&&a.status!=='completed')a.status='review';
- await a.save();const projectProgress=await updateProjectProgress(p._id);
+ if(version){
+  const fields={status:a.status,progress:a.progress};
+  for(const key of ['title','description','priority','actualWork','nextStep','blockers'])if(d[key]!==undefined)fields[key]=a[key];
+  if(d.assigneeIds!==undefined)fields.assignees=a.assignees;
+  if(d.dueDate!==undefined)fields.dueDate=a.dueDate;
+  a=await Activity.findOneAndUpdate({_id:a._id,updatedAt:current.updatedAt},{$set:fields},{new:true,runValidators:true});
+  if(!a)fail(409,'Aktivnost je u međuvremenu promenjena. Vaše izmene nisu prepisale noviju verziju.');
+ }else await a.save();
+ const projectProgress=await updateProjectProgress(p._id);
  await audit(req,'activity.updated','Activity',a._id,{fields:Object.keys(d),projectProgress});
  const receivers=[...a.assignees.map(String),String(p.owner)];
  await notify(receivers,{type:'activity_updated',title:'Aktivnost ažurirana',body:a.title,link:`/activities/${a._id}`},req.user._id);

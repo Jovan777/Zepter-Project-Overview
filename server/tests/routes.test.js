@@ -4,7 +4,9 @@ import express from 'express';
 import userRoutes from '../src/routes/users.js';
 import reportRoutes from '../src/routes/reports.js';
 import authRoutes from '../src/routes/auth.js';
-import {User, Project, Report, Session} from '../src/models/index.js';
+import projectRoutes from '../src/routes/projects.js';
+import dashboardRoutes from '../src/routes/dashboard.js';
+import {User, Project, Report, Session, Activity, Idea, Comment, Notification, Sector, Attachment} from '../src/models/index.js';
 import bcrypt from 'bcryptjs';
 import {randomBytes} from 'node:crypto';
 import {errorHandler} from '../src/lib/errors.js';
@@ -21,6 +23,8 @@ async function withApp(user, run) {
   app.use('/users', userRoutes);
   app.use('/reports', reportRoutes);
   app.use('/auth', authRoutes);
+  app.use('/projects', projectRoutes);
+  app.use('/dashboard', dashboardRoutes);
   app.use(errorHandler);
   const server = app.listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
@@ -103,4 +107,49 @@ test('Pending, rejected and disabled accounts cannot log in even with a valid pa
     }
   });
   assert.equal(create.mock.callCount(), 0);
+});
+
+test('Personal employee endpoints reject other roles before querying any data', async t => {
+  const find = t.mock.method(Project, 'find', () => {throw Error('No data lookup is allowed');});
+  for (const role of ['manager', 'president', 'admin']) {
+    await withApp({_id: self, role, sector}, async base => {
+      assert.equal((await fetch(`${base}/dashboard/employee`)).status, 403);
+      assert.equal((await fetch(`${base}/projects/mine`)).status, 403);
+    });
+  }
+  assert.equal(find.mock.callCount(), 0);
+});
+
+test('Employee without a sector cannot request a personal data feed', async () => {
+  await withApp({_id: self, role: 'employee'}, async base => {
+    assert.equal((await fetch(`${base}/dashboard/employee`)).status, 403);
+    assert.equal((await fetch(`${base}/projects/mine`)).status, 403);
+  });
+});
+
+test('Employee without projects receives a valid empty overview and project list', async t => {
+  const query = result => {
+    const q = {lean: async () => result, then: (ok, fail) => Promise.resolve(result).then(ok, fail)};
+    for (const key of ['select', 'sort', 'skip', 'limit', 'populate']) q[key] = () => q;
+    return q;
+  };
+  for (const model of [Project, Activity, Idea, User, Comment, Attachment]) t.mock.method(model, 'find', () => query([]));
+  for (const model of [Project, Activity, Notification]) t.mock.method(model, 'countDocuments', async () => 0);
+  t.mock.method(Activity, 'distinct', async () => []);
+  t.mock.method(Sector, 'findById', () => query({name: 'Test sector'}));
+  await withApp({_id: self, role: 'employee', sector}, async base => {
+    const response = await fetch(`${base}/dashboard/employee`);
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.stats.totalProjects, 0);
+    assert.equal(data.stats.activeProjects, 0);
+    assert.equal(data.stats.pendingActivities, 0);
+    assert.deepEqual(data.projects, []);
+    assert.deepEqual(data.attention, []);
+    assert.deepEqual(data.latestComments, []);
+    assert.deepEqual(data.activities.items, []);
+    const projects = await fetch(`${base}/projects/mine`);
+    assert.equal(projects.status, 200);
+    assert.deepEqual((await projects.json()).items, []);
+  });
 });

@@ -19,7 +19,7 @@ r.post('/',async(req,res)=>{
   projectId=project._id;activityId=activity._id;
   if(d.updatedProgress!==undefined){
    if(activity.status==='completed'&&d.updatedProgress<100)fail(409,'Završena aktivnost ne može se vratiti na manji napredak dnevnim unosom.');
-   activity.progress=d.updatedProgress;if(activity.progress===100)activity.status='review';
+   activity.progress=d.updatedProgress;if(activity.progress===100&&activity.status!=='completed')activity.status='review';
    await activity.save();await updateProjectProgress(project._id);}
  }else if(d.projectId){
   const p=await projectAccess(req.user,d.projectId);projectId=p._id;

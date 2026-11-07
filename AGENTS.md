@@ -4,7 +4,7 @@
 
 - Nastavljaj postojeću MERN aplikaciju; ne pravi projekat ponovo i ne uklanjaj funkcionalnosti koje rade.
 - Pre izmene pročitaj `README.md`, `BACKEND_FUNKCIONALNOSTI.md`, `docs/ANALIZA_PROJEKTA.md`, `docs/PLAN_FRONTEND.md` i relevantan postojeći kod.
-- Početna analiza ne odobrava implementaciju novih ekrana. Sledeći UI rad počinje od predsedničkog interfejsa i zahteva konkretan zadatak.
+- Rad se nastavlja na grani `develop`. Prema najnovijem nalogu korisnika, prvo se uređuju ekrani zaposlenog, u talasima po dve dostavljene reference; zatim se nastavlja ostalim ulogama.
 - Ne radi automatski git commit, push, reset, force-push ili prepisivanje tuđih izmena.
 - Ne menjaj MongoDB šemu, nazive statusa ni API ugovore bez potrebe. Kada je promena potrebna, objasni kompatibilnost i eventualnu migraciju.
 
@@ -28,6 +28,7 @@
 - Ne hardkoduj lozinke i tajne. `.env.example` sadrži samo netajne primere i prazna polja za tajne; lokalni `.env` ne prepisuj ako postoji.
 - `node_modules`, `.env*` osim `.env.example`, upload direktorijumi, logovi, backup-i i dump-ovi ne idu u Git. Ako se promeni upload putanja unutar repozitorijuma, dopuni `.gitignore`.
 - Integracioni testovi nad postojećom bazom smeju samo da čitaju poslovne podatke. Prijava menja `lastLoginAt` i pravi sesiju; testne sesije odjavi. Testove pisanja izvršavaj sa modelima u memoriji ili posebnom izolovanom bazom.
+- Za browser provere pisanja dostupan je `server/tests/fixtures/employee-ui-server.mjs`, sa eksplicitnim `ZEPTER_UI_FIXTURE=1`, bez MongoDB veze, na loopback portu 4002. Pročitaj `docs/EMPLOYEE_WAVE_02.md` za pokretanje i gašenje; kroz agentski terminal koristi `tty:true` ako želiš da radi komanda `stop`. Ugasiti testni proces i očistiti njegove privremene priloge pre završetka zadatka.
 - Ne menjaj postojeće podatke da bi test postao zelen. Jasno prijavi zastarele demo pretpostavke i stvaran rezultat.
 
 ## Ovlašćenja
@@ -45,6 +46,7 @@
 ## Interfejs i izveštaji
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.
+- Implementirani prvi talas su „Moj pregled“ i „Moji projekti“; aktuelni drugi talas su „Detalji projekta“ i „Detalji aktivnosti — uređivanje“. Dostavljene slike određuju raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
 - Srpska latinica, bela pozadina, zlatni akcenti, tamna čitljiva tipografija. Ne izmišljaj novi identitet.
 - Koristi odobrene referentne slike kada budu dostupne. Ne tvrdi da je ekran veran dizajnu bez reference i vizuelne provere.
 - Komentari pripadaju sektoru, projektu, aktivnosti ili ideji; ne uvodi poseban ekran komentara zaposlenog.

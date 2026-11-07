@@ -11,6 +11,8 @@ Jezik interfejsa: srpski (latinica). Vremenska zona izveštavanja: `Europe/Belgr
 
 Pravila daljeg rada su u [AGENTS.md](AGENTS.md). Pregled koda, ovlašćenja, ispravki i otvorenih problema je u [analizi projekta](docs/ANALIZA_PROJEKTA.md), a predlog implementacije 27 odobrenih ekrana u [planu frontend-a](docs/PLAN_FRONTEND.md).
 
+**Aktuelni razvoj na `develop`:** uređena su četiri ekrana zaposlenog: „Moj pregled“, „Moji projekti“, „Detalji projekta“ i „Detalji aktivnosti — uređivanje“. Prijaviti se postojećim zaposlenim, otvoriti `/projects`, projekat i sopstvenu aktivnost. Detalji su u [prvom talasu](docs/EMPLOYEE_WAVE_01.md) i [drugom talasu](docs/EMPLOYEE_WAVE_02.md). Nova forma ima zaštitu nesačuvanog unosa i konkurentnih izmena, komentare, privatne priloge i preuzimanje teksta za dnevni izveštaj.
+
 `client` i `server` sada imaju zasebne `package-lock.json` i `node_modules` direktorijume. Root nema npm workspaces ni svoje zavisnosti; `package.json` služi za pomoćne komande. Stari root `node_modules` nastajao je zbog npm workspaces hoisting-a. Verzije paketa pri razdvajanju nisu menjane.
 
 **Važno:** Ovo je razvojna v0.1 osnova, ne sertifikovana gotova produkciona aplikacija. Završno integraciono, mobilno, sigurnosno i PWA testiranje obavezno je pre pristupa stvarnim podacima kompanije.
@@ -187,6 +189,7 @@ Sve rute osim `/health`, `/api/public/sectors` i javnih auth akcija zahtevaju **
 | Obaveštenja | `PATCH /api/notifications/:id/read` | Obeleži pročitano |
 | Obaveštenja | `POST /api/notifications/push/subscribe` | Pretplata uređaja |
 | Prilozi | `POST /api/attachments?targetType=...&targetId=...` | Zaštićen upload (`file`) |
+| Prilozi | `GET /api/attachments/config` | Dozvoljeni formati i stvarno ograničenje veličine |
 | Prilozi | `GET /api/attachments/target/:type/:id` | Prilozi sadržaja |
 | Prilozi | `GET /api/attachments/:id` | Autentifikovano preuzimanje |
 
@@ -241,6 +244,7 @@ GET /api/comments?targetType=activity&targetId=<activityId>
 
 ```powershell
 npm run test:server
+npm run test:client
 npm run check:server
 npm run build:client
 ```
@@ -254,6 +258,6 @@ npm run test:rbac
 
 `API_TEST_BASE_URL` opciono menja adresu RBAC testa (podržan samo lokalni API); `PORT` menja port postojećeg smoke testa. Live testovi čitaju poslovne podatke; prijava pravi sesiju i ažurira `lastLoginAt`. RBAC grupa na kraju odjavljuje svoje testne sesije. Auth rate limit je 12 pokušaja na 15 minuta po IP-u; ne ponavljati suite u petlji. Unit/regresioni testovi ne pristupaju MongoDB-u, ali regresije ruta koriste privremeni localhost HTTP port.
 
-**Potvrđeno 7. novembra 2026:** nezavisne instalacije, 11/11 unit/regresionih testova, serverska sintaksa, frontend/PWA build i 20/20 live RBAC podprovera prolaze. Postojeći smoke ima 17/19 uspešnih provera: dva očekivanja ne odgovaraju trenutnoj bazi jer je raniji demo kandidat na čekanju već odobren. To je zatečeno pre izmena; nalog nije vraćan na čekanje radi testa. Zabrana prijave za pending/rejected/disabled naloge dodatno je proverena regresionim testom sa modelima u memoriji. Detalji i ostala ograničenja su u [analizi](docs/ANALIZA_PROJEKTA.md#rezultati-verifikacije).
+**Potvrđeno 8. novembra 2026, posle drugog talasa:** prolaze 26/26 serverskih i 5/5 klijentskih testova, serverska sintaksa, frontend/PWA build i 28/28 live RBAC podprovera. Upisi kroz browser provereni su na izolovanim podacima u memoriji, bez MongoDB veze. Postojeći smoke sada ima 15/19: dve ranije pretpostavke o već odobrenom kandidatu i dve provere današnjih izveštaja, pošto demo evidencije završavaju 7. novembra, a za 8. novembar nema unosa. Baza nije menjana radi testa. Detalji su u [proverama drugog talasa](docs/EMPLOYEE_WAVE_02.md#provere).
 
 `npm audit` je prijavio 0 serverskih i 6 frontend build-tool nalaza (2 low, 4 moderate, bez high/critical). Automatsko ažuriranje nije rađeno. Pokrenuti relevantne testove nakon svake značajne izmene; uspešan build nije dokaz da je mobilni dizajn ili stvarna PWA instalacija završena.

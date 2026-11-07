@@ -3,7 +3,10 @@ import {Project,Activity,Idea,Comment,Assignment,Notification,Sector,User,Decisi
 import {omniscient} from '../lib/access.js';
 import {same,belgradeDay} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
+import {allow} from '../lib/auth.js';
+import {employeeOverview} from '../services/employee.js';
 const r=Router();
+r.get('/employee',allow('employee'),async(req,res)=>res.json(await employeeOverview(req.user,req.query)));
 r.get('/overview',async(req,res)=>{
  const u=req.user;let projectFilter={archived:false},activityFilter={},ideaFilter={};
  if(u.role==='manager'){projectFilter.sector=u.sector;activityFilter.sector=u.sector;ideaFilter={sector:u.sector,status:{$in:['submitted','in_review']}};}

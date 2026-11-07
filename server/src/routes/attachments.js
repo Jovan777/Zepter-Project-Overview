@@ -16,7 +16,8 @@ const fileMap={
  '.xlsx':['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
  '.pptx':['application/vnd.openxmlformats-officedocument.presentationml.presentation']
 };
-const maxSize=Number(process.env.MAX_UPLOAD_MB||12)*1024*1024;
+const maxSize=Math.floor(Number(process.env.MAX_UPLOAD_MB||12)*1024*1024);
+r.get('/config',(_req,res)=>res.json({maxBytes:maxSize,extensions:Object.keys(fileMap)}));
 const upload=multer({storage:multer.diskStorage({destination:(_req,_file,cb)=>cb(null,storageDir),filename:(_req,file,cb)=>cb(null,crypto.randomUUID()+path.extname(file.originalname).toLowerCase())}),limits:{fileSize:maxSize,files:1},fileFilter:(_req,file,cb)=>{
  const ext=path.extname(file.originalname).toLowerCase();
  if(!fileMap[ext])return cb(Object.assign(new Error('Nepodržan format priloga.'),{status:422}));cb(null,true);

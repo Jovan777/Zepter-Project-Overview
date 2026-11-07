@@ -1,5 +1,7 @@
 # Analiza postojećeg projekta
 
+Ovaj dokument beleži početnu analizu. Naknadno su implementirana prva četiri ekrana zaposlenog na `develop`; dopune i aktuelne provere su u [prvom talasu](EMPLOYEE_WAVE_01.md) i [drugom talasu](EMPLOYEE_WAVE_02.md). Drugi talas rešava i ranije evidentirani povratak completed aktivnosti u review pri dnevnom unosu na 100%.
+
 Datum: 7. novembar 2026. Analizirana je lokalna Git radna kopija; nije rađen commit/push. Nisu implementirani novi ekrani. MongoDB modeli i formati API odgovora nisu menjani.
 
 ## Struktura i npm organizacija
