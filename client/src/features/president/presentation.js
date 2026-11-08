@@ -15,3 +15,9 @@ export function recoverDecisionDraft(text,idea){
  if(idea.status==='forwarded'||!text.trim()||idea.decision?.note===text.trim())return '';
  return text;
 }
+export function ideaExcerpt(text,limit=175){
+ const value=String(text||'').replace(/\s+/g,' ').trim(),chars=Array.from(value);
+ if(chars.length<=limit)return value;
+ const slice=chars.slice(0,limit).join(''),space=slice.lastIndexOf(' ');
+ return (space>limit/2?slice.slice(0,space):slice)+'…';
+}

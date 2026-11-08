@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {projectTeam,projectActivities,presidentDate,recoverDecisionDraft} from '../src/features/president/presentation.js';
+import {projectTeam,projectActivities,presidentDate,recoverDecisionDraft,ideaExcerpt} from '../src/features/president/presentation.js';
 test('President team includes the real owner once and preserves all members',()=>{
  const owner={_id:'1',firstName:'Test'},member={_id:'2'};
  assert.deepEqual(projectTeam({owner,members:[owner,member]}),[owner,member]);
@@ -22,4 +22,10 @@ test('A different decision from another device preserves the unsent local instru
 test('A confirmed identical decision clears only the already saved draft',()=>{
  assert.equal(recoverDecisionDraft('  Moj plan  ',{status:'approved',decision:{note:'Moj plan'}}),'');
  assert.equal(recoverDecisionDraft('Moj plan',{status:'forwarded'}),'');
+});
+test('Idea excerpts use the existing description, normalize spacing and do not split Unicode characters',()=>{
+ assert.equal(ideaExcerpt('  Kratak\n opis. '),'Kratak opis.');
+ assert.equal(ideaExcerpt(''), '');
+ assert.equal(ideaExcerpt('😀'.repeat(180)), '😀'.repeat(175)+'…');
+ assert.equal(ideaExcerpt('Jedan veoma dug opis ideje',15),'Jedan veoma…');
 });

@@ -4,11 +4,12 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import multer from 'multer';
 import {fileTypeFromFile} from 'file-type';
-import {Attachment} from '../models/index.js';
+import {Attachment,Comment} from '../models/index.js';
+import {z} from 'zod';
 import {targetAccess,managing} from '../lib/access.js';
 import {requireId,same} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
-import {audit} from '../services/events.js';
+import {audit,userDataChanged} from '../services/events.js';
 const r=Router(),storageDir=path.resolve(process.env.UPLOAD_DIR||'./private-uploads');
 const fileMap={
  '.pdf':['application/pdf'],'.png':['image/png'],'.jpg':['image/jpeg'],'.jpeg':['image/jpeg'],'.webp':['image/webp'],
@@ -27,20 +28,35 @@ r.post('/',async(req,res)=>{
  const type=String(req.query.targetType||''),id=String(req.query.targetId||'');
  if(!['project','activity','idea'].includes(type))fail(422,'Nepodržana vrsta priloga.');
  const resource=await targetAccess(req.user,type,id);
+ const commentId=req.query.commentId,uploadId=req.query.uploadId;
+ if(commentId!==undefined){
+  requireId(commentId);const comment=await Comment.findById(commentId);
+  if(!comment||comment.targetType!==type||!same(comment.targetId,id)||!same(comment.author,req.user._id))fail(403,'Prilog možete dodati samo uz svoj komentar u istom razgovoru.');
+ }
+ if(uploadId!==undefined&&(!commentId||!z.uuid().safeParse(uploadId).success))fail(422,'Neispravan identifikator slanja priloga.');
  if(type==='project'&&req.user.role==='employee'&&!resource.members.some(x=>same(x,req.user._id)))fail(403,'Samo član projekta može dodati prilog.');
  if(type==='activity'&&!managing(req.user,resource.sector)&&!resource.assignees.some(x=>same(x,req.user._id)))fail(403,'Samo zadužena osoba dodaje priloge.');
- if(type==='idea'&&!same(resource.author,req.user._id))fail(403,'Samo autor ideje dodaje priloge.');
+ if(type==='idea'&&!same(resource.author,req.user._id)&&!(req.user.role==='president'&&commentId))fail(403,'Samo autor ideje ili predsednik uz svoj komentar dodaje priloge.');
+ const existing=async()=>{
+  const a=await Attachment.findOne({owner:req.user._id,uploadId});
+  if(a&&(!same(a.targetId,id)||a.targetType!==type||!same(a.comment,commentId)))fail(409,'Identifikator već pripada drugom prilogu.');
+  return a;
+ };
+ if(uploadId){const a=await existing();if(a)return res.json({attachment:a});}
  await fs.mkdir(storageDir,{recursive:true});
  await uploadOne(req,res);if(!req.file)fail(422,'Pošaljite fajl u polju file.');
  const full=path.join(storageDir,path.basename(req.file.filename));
+ let attachment;
  try{
   const ext=path.extname(req.file.originalname).toLowerCase(), detected=await fileTypeFromFile(full);
   if(!detected||!fileMap[ext].includes(detected.mime))fail(422,'Sadržaj fajla ne odgovara dozvoljenom formatu.');
-  const attachment=await Attachment.create({targetType:type,targetId:id,owner:req.user._id,
+  attachment=await Attachment.create({targetType:type,targetId:id,owner:req.user._id,...(commentId?{comment:commentId}:{}),...(uploadId?{uploadId}:{}),
    originalName:path.basename(req.file.originalname).slice(0,255),fileName:req.file.filename,mime:detected.mime,size:req.file.size});
-  await audit(req,'attachment.created','Attachment',attachment._id,{targetType:type,targetId:id});
-  res.status(201).json({attachment});
- }catch(e){await fs.unlink(full).catch(()=>{});throw e;}
+ }catch(e){await fs.unlink(full).catch(()=>{});if(uploadId&&e.code===11000){const a=await existing();if(a)return res.json({attachment:a});}throw e;}
+ // Once metadata exists, a later audit/socket failure must not remove its physical file.
+ await audit(req,'attachment.created','Attachment',attachment._id,{targetType:type,targetId:id});
+ if(commentId){for(const person of [resource.author,...(resource.assignees||[])].filter(Boolean))await userDataChanged(person,'Attachment');}
+ res.status(201).json({attachment});
 });
 r.get('/target/:type/:id',async(req,res)=>{
  await targetAccess(req.user,req.params.type,req.params.id);

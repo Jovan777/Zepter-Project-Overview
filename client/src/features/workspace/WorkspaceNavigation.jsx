@@ -10,7 +10,7 @@ export default function WorkspaceNavigation({user, logout}) {
   const role = president ? 'Predsednik' : manager ? 'Rukovodilac sektora' : 'Zaposleni';
   const secondary = president ? [['/reports?scope=company&type=daily','Izveštaji','chart'],['/attention','Potrebna pažnja','clock'],['/notifications','Obaveštenja','bell']] : manager ? [['/notifications', 'Obaveštenja', 'bell'], ['/assignments', 'Zaduženja predsednika', 'flag'], ['/daily', 'Moj dnevni unos', 'calendar']] : [['/daily', 'Moj dnevni unos', 'calendar']];
   const link = ([to, title, icon]) => {
-    const active = isWorkspaceLinkActive(pathname, to.split('?')[0]);
+    const active = isWorkspaceLinkActive(pathname, to.split('?')[0],user.role);
     return <Link key={to} to={to} aria-current={active ? 'page' : undefined} className={active ? 'is-active' : ''}><Icon name={icon} size={manager ? 23 : 28}/><span>{title}</span>{active && <i aria-hidden="true"/>}</Link>;
   };
   return <aside className={`workspace-navigation ${president ? 'president-bottom' : manager ? 'manager-bottom' : 'employee-bottom'}`} aria-label="Navigacija radnog prostora">

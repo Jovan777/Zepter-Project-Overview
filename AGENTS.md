@@ -46,6 +46,8 @@
 
 ## Interfejs i izveštaji
 
+- Predsednički treći talas je u `docs/PRESIDENT_WAVE_03.md`: detalji ideje i poseban read-only detalj aktivnosti, mobilni/tablet/desktop. Komentarski prilozi imaju opcioni Attachment.comment i stabilan uploadId sa parcijalnim jedinstvenim owner+uploadId indeksom. Prilog vezuj samo uz potvrđeni sopstveni komentar istog autorizovanog cilja; ne vraćaj slepi POST komentara posle nejasne potvrde. Nastavak priloga čuva iste ključeve i preskače potvrđene fajlove. Prilozi razgovora prikazuju se uz poruku, a ne ponovo kao izvorni dokumenti. Stari upload i odgovor komentara bez includeAttachments=1 ostaju kompatibilni.
+
 - Predsednički drugi talas je u docs/PRESIDENT_WAVE_02.md: projekat/aktivnosti i lista ideja, uz naknadno traženu konačnu odluku u detalju. Odobrenje zahteva komentar sa narednim koracima i isporuku rukovodiocu koji je prosledio ideju; odbijanje završava tok. approved/rejected su stvarna završna stanja, vidljiva i autoru/rukovodiocu, bez ponovnog review/resubmit. Predsednik vidi forwarded/approved/rejected, a samo forwarded čeka njegovu odluku i ulazi u pažnju.
 - Odluka o ideji koristi obavezne If-Match i requestId. Sačuvana odluka i tekst su izvor istine; idempotentni komentar/obaveštenja mogu biti pending i nastavljaju se postojećim worker-om ili ovlašćenim deliver endpointom. Ne uvodi slepo novo odlučivanje posle nejasne potvrde. IdeaRead pripada korisniku iz sesije; status Nova nije vremenska pretpostavka ni odobrenje.
 - Testovi pisanja drugog predsedničkog talasa koriste WAVE02 fixture ili eksplicitnu president-isolated-db.mjs privremenu bazu. Pre brisanja proveriti tačno ime, prefiks i aktivnu konekciju samo te testne baze. Nikada ne preusmeravati čišćenje na demo bazu.

@@ -158,6 +158,13 @@ if(authUser.role==='president'){
   }
  }
 }
+if(process.env.ZEPTER_UI_WAVE03==='1'&&authUser.role==='president'&&process.env.ZEPTER_UI_QA==='1'){
+ Object.assign(stores.Activity.get(activityId),{priority:'high',assignees:[self,colleague],description:'Priprema početne stranice i prilagođavanje rasporeda telefonu, tabletu i desktopu.',actualWork:'Završen je vizuelni koncept početne stranice. Pripremljene su dve varijante rasporeda i usaglašen sadržaj glavne sekcije.',nextStep:'Pregled predsednikove instrukcije i završna provera mobilne verzije.',blockers:'Čeka se potvrda poslednje verzije pratećih materijala.'});
+ for(const [index,name]of ['Pregled početne stranice.png','Mobilni raspored.png'].entries()){
+  const fileName='activity-'+index+'.png';await fs.writeFile(path.join(folder,fileName),preview);
+  const id='d3'+index.toString(16).padStart(22,'0');stores.Attachment.set(id,{_id:id,targetType:'activity',targetId:activityId,owner:self,originalName:name,fileName,mime:'image/png',size:preview.length,createdAt:now()});
+ }
+}
 function fixtureClone(value){
  if(value instanceof Date)return new Date(value);
  if(typeof value?.toHexString==='function')return value.toHexString();
@@ -187,6 +194,7 @@ function documentFor(name, raw) {
   doc.save = async () => {doc.updatedAt = now(); stores[name].set(doc._id, depopulate(plain())); return doc;};
   doc.deleteOne = async () => stores[name].delete(doc._id);
   doc.toJSON = ()=>{const value=plain();if(name==='Idea')delete value.decisionDelivery;return value;};
+  doc.toObject = plain;
   return doc;
 }
 function query(name, raw, one = false) {
@@ -240,9 +248,9 @@ models.Report.prototype.save=async function(){
 };
 const app = express(); app.use(express.json());app.use(cookieParser());
 if(authUser.role==='president'&&process.env.ZEPTER_UI_QA==='1'&&process.env.ZEPTER_UI_WAVE02==='1'){
- app.get('/__fixture/manager',async(req,res)=>{
+ for(const [role,personId]of [['manager',manager],['employee',self]])app.get('/__fixture/'+role,async(req,res)=>{
   const {createSession,setRefreshCookie}=await import('../../src/lib/auth.js');
-  const session=await createSession(req,documentFor('User',stores.User.get(manager)));
+  const session=await createSession(req,documentFor('User',stores.User.get(personId)));
   setRefreshCookie(res,session.refresh);res.redirect('/');
  });
 }
@@ -265,7 +273,10 @@ if(process.env.ZEPTER_UI_QA==='1'){
   const id='ae'+i.toString(16).padStart(22,'0');
   stores.Idea.set(id,{_id:id,sector,author:self,title:'QA predlog '+(i+1),description:'Izolovani predlog za proveru dodatnih stranica.',status:'submitted',createdAt:new Date(Date.now()+i*1000),updatedAt:now()});
  }
- const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false,commentResponseLostOnce:false,worklogResponseLostOnce:false,attachmentResponseLostOnce:false,presidentFailOnce:false,socketDisconnect:false,presidentIdeasFailOnce:false,ideaReadFailOnce:false,decisionResponseLostOnce:false,decisionDeliveryFailOnce:false,reportProjectListEmpty:false};
+ const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false,commentResponseLostOnce:false,worklogResponseLostOnce:false,attachmentResponseLostOnce:false,presidentFailOnce:false,socketDisconnect:false,presidentIdeasFailOnce:false,ideaReadFailOnce:false,decisionResponseLostOnce:false,decisionDeliveryFailOnce:false,reportProjectListEmpty:false,activityFailOnce:false,ideaDetailFailOnce:false,attachmentListFailOnce:false,commentsFailOnce:false};
+ for(const [route,key,label]of [['/api/activities/:id','activityFailOnce','Aktivnost'],['/api/ideas/:id','ideaDetailFailOnce','Ideja'],['/api/attachments/target/:type/:id','attachmentListFailOnce','Spisak priloga'],['/api/comments','commentsFailOnce','Razgovor']])app.get(route,(req,res,next)=>{
+  if(controls[key]&&(!req.params.id||/^[a-f0-9]{24}$/.test(req.params.id))){controls[key]=false;return res.status(503).json({error:'Test: '+label+' trenutno nije dostupan.'});}next();
+ });
  app.get('/api/projects',(req,res,next)=>{if(controls.reportProjectListEmpty&&req.query.limit==='50')return res.json({items:[],total:0,page:1,limit:50});next();});
  app.get('/api/ideas/president',(req,res,next)=>{if(controls.presidentIdeasFailOnce){controls.presidentIdeasFailOnce=false;return res.status(503).json({error:'Test: predsedničke ideje trenutno nisu dostupne.'});}next();});
  app.post('/api/ideas/:id/read',(req,res,next)=>{if(controls.ideaReadFailOnce){controls.ideaReadFailOnce=false;return res.status(503).json({error:'Test: oznaka čitanja nije sačuvana.'});}next();});

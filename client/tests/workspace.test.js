@@ -21,3 +21,11 @@ test('Project and idea deep links retain the relevant navigation context', () =>
   assert.equal(isWorkspaceLinkActive('/projects-other', '/projects'), false);
   assert.equal(isWorkspaceLinkActive('/', '/'), true);
 });
+test('President projects and activities stay inside the sector navigation context',()=>{
+ for(const path of ['/projects','/projects/444444444444444444444444','/activities/555555555555555555555555']){
+  assert.equal(isWorkspaceLinkActive(path,'/sectors','president'),true);
+  assert.equal(isWorkspaceLinkActive(path,'/sectors','manager'),false);
+  assert.equal(isWorkspaceLinkActive(path,'/','president'),false);
+ }
+ assert.equal(isWorkspaceLinkActive('/ideas/123','/sectors','president'),false);
+});

@@ -1,5 +1,9 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Treći predsednički talas
+
+Attachment dobija opcioni komentar i UUID operacije, uz parcijalni jedinstveni owner/uploadId indeks. POST priloga proverava isti cilj i autora komentara pre prihvata fajla; predsednik može dodati dokument prosleđenoj/završenoj ideji samo uz svoj komentar. Idempotentni retry vraća postojeći fajl. GET komentara opciono dodaje javne metapodatke priloga preko includeAttachments=1. Stari ugovori i dokumenti ostaju kompatibilni, bez migracije. [Ugovori, provere i ograničenja](docs/PRESIDENT_WAVE_03.md).
+
 ## Drugi predsednički talas
 
 Idea dobija aditivne approved/rejected statuse i opcione podatke odluke/isporuke; IdeaRead čuva korisničko čitanje. Novi president feed i read/decision/deliver endpointi zadržavaju granice uloga. Odobrenje zahteva neprazne naredne korake, If-Match i jedinstveni requestId; odluka je atomska, a komentar/obaveštenja se isporučuju idempotentno uz trajni nastavak posle greške. Rukovodilac dobija instrukciju, autor status; završeni predlozi ostaju u istoriji. [Ugovori, kompatibilnost i provere](docs/PRESIDENT_WAVE_02.md).

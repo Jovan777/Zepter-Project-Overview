@@ -111,9 +111,12 @@ export const Notification=models.Notification || model('Notification',notificati
 
 const attachmentSchema=new Schema({
  targetType:{type:String,enum:['project','activity','idea'],required:true},targetId:{type:O,required:true},
+ comment:ref('Comment'),uploadId:{type:String},
  owner:{...ref('User',true)},originalName:{...txt(255),required:true},fileName:{...txt(255),required:true},
  mime:{type:String,required:true},size:{type:Number,required:true}
 },opts);
+attachmentSchema.index({owner:1,uploadId:1},{unique:true,partialFilterExpression:{uploadId:{$type:'string'}}});
+attachmentSchema.index({targetType:1,targetId:1,comment:1});
 export const Attachment=models.Attachment || model('Attachment',attachmentSchema);
 
 const auditSchema=new Schema({actor:ref('User'),action:{type:String,required:true},entity:{type:String,required:true},entityId:O,

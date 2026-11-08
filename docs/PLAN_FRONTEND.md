@@ -1,5 +1,7 @@
 # Predlog faznog razvoja React frontend-a
 
+**Predsednik — treći talas:** završeni su posebni detalji ideje i aktivnosti prema sledećim referencama, za mobilni/tablet/desktop. Razgovor podržava priloge uz konkretan komentar i oporavak slanja, uz očuvane odluke o idejama. [Obuhvat, stvarne provere i granice](PRESIDENT_WAVE_03.md). Sledeći talas i dalje određuje korisnik.
+
 **Predsednik — drugi talas:** završeni su projekat/aktivnosti i lista ideja za mobilni/tablet/desktop. Naknadno je povezana predsednička odluka: odobrenje sa obaveznim narednim koracima rukovodiocu ili konačno odbijanje. [Obuhvat i provere](PRESIDENT_WAVE_02.md). Posebne sledeće reference i dalje određuju konačan dizajn detalja ideje/aktivnosti i preostale ekrane.
 
 **Predsednik — prvi talas:** implementirani su kompanija i sektor prema dve reference, prvo mobilno, zatim tablet/desktop. Predsednik ulazi istim ličnim linkom na svakom uređaju, bez login formulara, menija naloga i odjave. [Obuhvat, pomoćna odredišta, provere i granice](PRESIDENT_WAVE_01.md). Naredne ekrane određuje korisnik.

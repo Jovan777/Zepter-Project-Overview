@@ -13,10 +13,10 @@ function check(value,label){if(!value)throw Error('Check failed: '+label);checks
 try{
  await mongoose.connect(configured.href,{serverSelectionTimeoutMS:5000});connected=true;
  if(mongoose.connection.name!==database||!database.startsWith(prefix))throw Error('Unsafe database target.');
- const {User,Sector,Idea,IdeaRead,Comment,Notification}=await import('../../src/models/index.js');
+ const {User,Sector,Idea,IdeaRead,Comment,Notification,Attachment}=await import('../../src/models/index.js');
  const {decideIdea,deliverPendingIdeaDecisions}=await import('../../src/services/idea-decisions.js');
  const {presidentIdeas,markPresidentIdeaRead}=await import('../../src/services/president-ideas.js');
- await Promise.all([User.init(),Sector.init(),Idea.init(),IdeaRead.init(),Comment.init(),Notification.init()]);
+ await Promise.all([User.init(),Sector.init(),Idea.init(),IdeaRead.init(),Comment.init(),Notification.init(),Attachment.init()]);
  const sector=await Sector.create({name:'Isolated test sector',code:'ISOLATED_W02'});
  const makeUser=(role,index)=>User.create({firstName:'Test',lastName:role,email:'isolated-'+index+'@fixture.zepter.test',passwordHash:'synthetic-not-for-login',role,approval:'approved',...(role==='president'?{}:{sector:sector._id})});
  const [president,manager,author,otherManager]=await Promise.all([makeUser('president',1),makeUser('manager',2),makeUser('employee',3),makeUser('manager',4)]);
@@ -52,6 +52,12 @@ try{
  const queued=await Idea.create({title:'Isolated deliverable record',description:'This item must not starve behind failed records.',sector:sector._id,author:author._id,reviewedBy:manager._id,status:'approved',decision:{action:'approve',by:president._id,at:new Date(),note:'Deliver this instruction.',deliveryStatus:'pending',commentId:new mongoose.Types.ObjectId()},decisionDelivery:{requestId:randomUUID()}});
  await deliverPendingIdeaDecisions();await deliverPendingIdeaDecisions();
  check((await Idea.findById(queued._id)).decision.deliveryStatus==='complete','An unavailable manager cannot starve other sectors in the recovery queue.');
+ const uploadId=randomUUID(),file={targetType:'idea',targetId:idea._id,owner:president._id,comment:instruction._id,uploadId,originalName:'Synthetic.pdf',fileName:'synthetic-not-on-disk.pdf',mime:'application/pdf',size:50};
+ const files=await Promise.allSettled([Attachment.create(file),Attachment.create(file)]);
+ check(files.filter(x=>x.status==='fulfilled').length===1&&files.some(x=>x.status==='rejected'&&x.reason.code===11000),'Concurrent file keys have one winner.');
+ check(await Attachment.countDocuments({owner:president._id,uploadId})===1,'Unique comment upload persisted once.');
+ const otherUpload=await Attachment.create({...file,owner:author._id});check(String(otherUpload.comment)===String(instruction._id),'Optional comment reference casts correctly; operation keys belong to their owner.');
+ await Attachment.create({...file,uploadId:undefined});await Attachment.create({...file,uploadId:undefined});check(await Attachment.countDocuments({uploadId:{$exists:false}})===2,'Legacy attachments without a key remain compatible.');
  console.log('PASS '+checks+' real MongoDB checks in a temporary isolated database. Demo data unchanged.');
 }catch(error){
  console.error(error.message?.startsWith('Check failed:')?error.message:'Isolated MongoDB check failed ('+error.name+'). No configuration values printed.');process.exitCode=1;
