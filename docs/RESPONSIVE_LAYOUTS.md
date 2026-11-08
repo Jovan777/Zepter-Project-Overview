@@ -1,5 +1,7 @@
 # Mobilni, tablet i desktop raspored
 
+Naknadno je implementiran [drugi talas rukovodioca](MANAGER_WAVE_02.md): detalji i obrazac projekta imaju mobilni/desktop raspored, dok zasebna tablet vizuelna provera ostaje zabeleženo ograničenje. Ovaj dokument ispod opisuje prethodni prolaz kroz osam zaposlenih i prva dva rukovodiočeva ekrana.
+
 Datum: 8. novembar 2026. Rad na `develop`, bez commit-a ili push-a.
 
 Jedna React aplikacija sada prilagođava završene ekrane širini prozora. Telefon koristi postojeće mobilne komponente i donju navigaciju; desktop dobija bočnu navigaciju i sadržaj preko raspoložive širine. PWA manifest, service worker, autentifikacija, MongoDB šema i API ugovori nisu menjani. Instalacija PWA nije uslov za korišćenje aplikacije u običnom browseru.

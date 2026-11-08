@@ -16,7 +16,7 @@ r.get('/preview',async(req,res)=>{
 r.get('/',async(req,res)=>{
  const filter={};
  if(req.user.role==='employee')fail(403,'Sektorski izveštaji nisu dostupni zaposlenima.');
- if(req.user.role==='manager')filter.sector=req.user.sector;
+ if(req.user.role==='manager'){if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');filter.sector=req.user.sector;}
  else if(req.query.sectorId){requireId(req.query.sectorId);filter.sector=req.query.sectorId;}
  if(req.query.type){if(!['daily','weekly'].includes(req.query.type))fail(422,'Neispravan tip.');filter.type=req.query.type;}
  if(req.user.role==='president')filter.status='published';

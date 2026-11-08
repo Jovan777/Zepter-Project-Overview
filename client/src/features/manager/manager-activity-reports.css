@@ -1,0 +1,143 @@
+.manager-activity-detail > h1 {font-size: 22px; line-height: 1.25; margin: 0 0 7px;}
+.manager-activity-breadcrumb {display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; color: #70798d; margin-bottom: 14px;}
+.manager-activity-breadcrumb a {color: #59667d; overflow-wrap: anywhere;}
+.manager-activity-overview {border: 1px solid #e7e5ed; border-radius: 13px; background: white; padding: 13px;}
+.manager-activity-overview-heading {display: flex; align-items: start; gap: 10px; margin-bottom: 15px;}
+.manager-activity-overview-heading > .employee-icon-disc {width: 39px; height: 39px; border-radius: 8px; flex-shrink: 0;}
+.manager-activity-overview-heading > div {flex: 1; min-width: 0;}
+.manager-activity-overview-heading h2 {font-size: 17px; margin: 0 0 5px; line-height: 1.3; overflow-wrap: anywhere;}
+.manager-activity-overview-heading p {font-size: 12px; line-height: 1.5; margin: 0; color: #6b758b; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; overflow-wrap: anywhere;}
+.manager-activity-overview-heading > .employee-badge {font-size: 10px; padding: 5px 7px; flex-shrink: 0;}
+.manager-activity-overview > .employee-detail-progress > strong {display: none;}
+.manager-activity-overview > .employee-detail-progress .employee-progress {background: #efe9df; height: 10px;}
+.manager-activity-facts {display: grid; grid-template-columns: 1.25fr 1fr .7fr; gap: 9px; margin: 15px 0 0;}
+.manager-activity-facts > div {border-left: 1px solid #ebe7ee; padding-left: 9px; min-width: 0;}
+.manager-activity-facts > div:first-child {border: 0; padding: 0;}
+.manager-activity-facts dt {display: flex; gap: 5px; align-items: center; font-size: 11px; color: #778093;}
+.manager-activity-facts dd {font-size: 12px; margin: 6px 0 0; line-height: 1.4; color: #39455f; overflow-wrap: anywhere;}
+.manager-activity-facts .is-urgent {color: #bd4036; font-weight: 650;}
+.manager-activity-panel {display: none; min-width: 0; scroll-margin-top: 100px;}
+.manager-activity-panel.is-current {display: block;}
+.manager-activity-main {min-width: 0;}
+.manager-activity-work > article {display: flex; gap: 9px; margin-bottom: 15px;}
+.manager-activity-work .employee-icon-disc {width: 32px; height: 32px; flex-shrink: 0;}
+.manager-activity-work .employee-icon-disc svg {width: 21px; height: 21px;}
+.manager-activity-work h3 {font-size: 13px; margin: 0 0 4px;}
+.manager-activity-work p {font-size: 13px; line-height: 1.55; color: #4c5870; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere;}
+.manager-activity-blockers {padding: 10px; border: 1px solid #f3dfbf; border-radius: 10px; background: #fffaf0;}
+.manager-activity-panel .employee-attachment-panel {margin-block: 22px; padding: 13px;}
+.manager-activity-panel .employee-attachment-panel h2 {font-size: 18px;}
+.manager-activity-panel .employee-attachment-heading > .employee-icon-disc {display: none;}
+.manager-activity-panel .employee-attachment-heading {flex-wrap: wrap; gap: 7px;}
+.manager-activity-panel .employee-attachment-item {min-width: 0;}
+.manager-activity-panel .employee-discussion h2 {font-size: 19px;}
+.manager-activity-panel .employee-discussion-card {padding: 12px; gap: 10px;}
+.manager-activity-panel .employee-discussion-card > .employee-icon-disc {width: 32px; height: 32px; flex-shrink: 0;}
+.manager-activity-panel .employee-discussion-heading h3 {font-size: 13px;}
+.manager-activity-panel .employee-discussion-body > p {font-size: 13px;}
+.manager-activity-panel .employee-comment-composer {display: grid; grid-template-columns: minmax(0,1fr) auto;}
+.manager-activity-panel .employee-discussion-actions {flex-wrap: wrap;}
+.manager-activity-editor {scroll-margin-top: 110px;}
+.manager-activity-editor fieldset {border: 0; padding: 0; margin: 0; min-width: 0;}
+.manager-activity-editor label, .manager-activity-editor h3 {display: block; margin: 16px 0 7px; font-size: 14px; font-weight: 650;}
+.manager-activity-editor input:not([type=checkbox]), .manager-activity-editor textarea, .manager-activity-editor select, .manager-report-auto input, .manager-report-auto select {width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border-radius: 9px; border: 1px solid #dad8e2; background: white; font: inherit; color: #29344d; font-size: 16px; min-height: 44px;}
+.manager-activity-editor input[type=range] {accent-color: #b98018; padding-inline: 0;}
+.manager-activity-editor textarea {resize: vertical; line-height: 1.5;}
+.manager-activity-editor label > output {float: right; font-weight: 700; color: #a77219;}
+.manager-activity-editor .manager-person-option {display: flex; align-items: center; gap: 9px; margin: 0; min-height: 44px; padding: 7px 0; font-size: 13px;}
+.manager-activity-editor #managed-assignees {scroll-margin-top: 115px;}
+.manager-work-edit {border-top: 1px solid #e8e3da; padding-top: 14px; margin-top: 20px;}
+.manager-work-edit summary {font-size: 14px; min-height: 35px; cursor: pointer; color: #916522;}
+.manager-activity-edit-actions {display: flex; gap: 10px; margin-top: 18px;}
+.manager-activity-edit-actions > * {flex: 1; min-width: 0; margin: 0; font-size: 14px; min-height: 44px; padding: 10px;}
+.manager-activity-utilities {display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; flex-wrap: wrap;}
+.manager-activity-utilities button {font-size: 12px; min-height: 40px;}
+.manager-activity-history h2 {font-size: 20px; margin-bottom: 7px;}
+.manager-activity-history h3 {font-size: 16px; margin: 22px 0 12px;}
+.manager-worklog-card, .manager-history-event {border: 1px solid #e6e3eb; border-radius: 11px; padding: 13px; margin-bottom: 10px; background: white;}
+.manager-worklog-card > div {display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;}
+.manager-worklog-card strong, .manager-history-event strong {font-size: 13px;}
+.manager-worklog-card time, .manager-worklog-card small, .manager-history-event small {font-size: 11px; color: #798297;}
+.manager-worklog-card p, .manager-history-event p {font-size: 13px; line-height: 1.5; color: #58637a; white-space: pre-wrap; overflow-wrap: anywhere;}
+.manager-worklog-card .manager-history-blocker {color: #a5571d;}
+.manager-reports-heading {display: flex; align-items: center; gap: 12px; margin-bottom: 20px;}
+.manager-reports-heading > .employee-icon-disc {width: 47px; height: 47px; border-radius: 11px;}
+.manager-reports-heading h1 {font-size: 24px; line-height: 1.2; margin: 0 0 5px;}
+.manager-reports-heading p {font-size: 13px; color: #717c91; margin: 0;}
+.manager-report-tabs {display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); border: 1px solid #e0dce5; border-radius: 10px; overflow: hidden; margin-bottom: 19px;}
+.manager-report-tabs button {min-height: 44px; font-size: 13px; line-height: 1.3; color: #49546e; background: white; border: 0; padding: 9px; border-radius: 0;}
+.manager-report-tabs .is-active {color: white; font-weight: 650; background: linear-gradient(110deg,#d0a043,#b47815);}
+.manager-report-create-links {display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; margin-bottom: 24px;}
+.manager-report-create-links > a {display: flex; align-items: center; gap: 8px; min-width: 0; color: #28324d; padding: 11px 9px; border: 1px solid #e6e3eb; border-radius: 12px; box-shadow: 0 3px 8px #1c223509;}
+.manager-report-create-links .employee-icon-disc {width: 33px; height: 33px; border-radius: 9px; flex-shrink: 0;}
+.manager-report-create-links .employee-icon-disc svg {width: 23px; height: 23px;}
+.manager-report-create-links > a > div {min-width: 0; flex: 1;}
+.manager-report-create-links strong {display: block; font-size: 12px; line-height: 1.4;}
+.manager-report-create-links small {display: block; font-size: 10px; color: #798195; margin-top: 4px; line-height: 1.4;}
+.manager-report-create-links > a > svg {display: none;}
+.manager-report-list > .manager-form-section-heading h2 {font-size: 19px;}
+.manager-report-card {display: flex; align-items: center; gap: 10px; padding: 13px 11px; border: 1px solid #e5e3eb; border-radius: 12px; margin-bottom: 9px; background: white; color: #23304a;}
+.manager-report-card > .employee-icon-disc {width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;}
+.manager-report-card > div {flex: 1; min-width: 0;}
+.manager-report-card-title {display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;}
+.manager-report-card-title > strong {font-size: 14px;}
+.manager-report-card-title > .employee-badge {font-size: 10px; display: inline-flex; align-items: center; gap: 3px; padding: 4px 7px;}
+.manager-report-card time {font-size: 11px; color: #68758c; display: block; margin: 4px 0;}
+.manager-report-card p {font-size: 12px; margin: 0; color: #747e92; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;}
+.manager-report-auto {min-width: 0; margin-top: 26px;}
+.manager-report-auto > details {border: 1px solid #e7e1d7; border-radius: 12px; padding: 13px;}
+.manager-report-auto summary {display: flex; gap: 9px; align-items: center; min-height: 32px; color: #94691f; font-size: 14px; font-weight: 600; cursor: pointer;}
+.manager-report-auto label {display: block; margin: 15px 0 6px; color: #5c687d; font-size: 13px;}
+.manager-report-auto form > button[type=submit] {margin-top: 17px; width: 100%;}
+.manager-report-preview {margin-top: 22px;}
+.manager-report-preview h2 {font-size: 20px; margin-bottom: 7px;}
+.manager-report-preview > p {font-size: 13px; color: #737d91;}
+.manager-report-preview-stats {display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px;}
+.manager-report-preview-stats > div {padding: 14px 9px; border: 1px solid #e9dfcf; border-radius: 10px;}
+.manager-report-preview-stats strong {display: block; font-size: 23px; color: #ac7821;}
+.manager-report-preview-stats span {font-size: 11px; color: #6e778a;}
+.manager-report-preview-section h3 {font-size: 17px; margin: 22px 0 12px;}
+.manager-report-preview-section article {border-bottom: 1px solid #ede8e1; padding: 11px 0;}
+.manager-report-preview-section strong, .manager-report-preview-section time {display: block; font-size: 12px;}
+.manager-report-preview-section time {color: #778094; font-size: 11px; margin: 5px 0;}
+.manager-report-preview-section article p {font-size: 13px; line-height: 1.55; color: #505e75; white-space: pre-wrap; overflow-wrap: anywhere;}
+@media (max-width: 359px) {
+  .manager-activity-detail > h1 {font-size: 20px;}
+  .manager-activity-overview-heading {flex-wrap: wrap;}
+  .manager-activity-overview-heading > .employee-badge {margin-left: 49px;}
+  .manager-activity-actions > * {min-width: 80px;}
+  .manager-report-create-links > a {flex-wrap: wrap;}
+  .manager-report-create-links > a > div {flex-basis: 100%;}
+}
+@media (min-width: 768px) {
+  .manager-activity-detail > h1 {font-size: 30px;}
+  .manager-activity-overview {padding: 24px;}
+  .manager-activity-overview-heading h2 {font-size: 23px;}
+  .manager-activity-overview-heading p {font-size: 15px;}
+  .manager-activity-facts {max-width: 880px; margin-top: 22px;}
+  .manager-activity-facts :is(dt,dd) {font-size: 14px;}
+  .manager-activity-panel .employee-attachment-panel {padding: 20px;}
+  .manager-activity-work h3 {font-size: 15px;}
+  .manager-activity-work p {font-size: 15px;}
+  .manager-activity-editor {max-width: 850px; padding: 22px; border: 1px solid #e6e1d8; border-radius: 12px;}
+  .manager-activity-utilities {justify-content: flex-end;}
+  .manager-reports-heading h1 {font-size: 31px;}
+  .manager-report-tabs {max-width: 750px;}
+  .manager-report-create-links {max-width: 900px; gap: 18px;}
+  .manager-report-create-links > a {padding: 19px;}
+  .manager-report-create-links strong {font-size: 16px;}
+  .manager-report-create-links small {font-size: 13px;}
+  .manager-report-create-links > a > svg {display: block;}
+  .manager-report-card {padding: 18px; gap: 15px;}
+  .manager-report-card-title > strong {font-size: 16px;}
+  .manager-report-card time, .manager-report-card p {font-size: 13px;}
+  .manager-report-auto {max-width: 1000px;}
+}
+@media (min-width: 1200px) {
+  .manager-activity-content-grid {display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,.9fr); gap: 30px; align-items: start;}
+  .manager-activity-panel--comments {display: block; border-left: 1px solid #e7e1d8; padding-left: 25px;}
+  .manager-activity-panel .employee-discussion {margin-top: 0;}
+  .manager-activity-panel .employee-discussion h2 {margin-top: 0;}
+  .manager-reports-content {display: grid; grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); gap: 32px; align-items: start;}
+  .manager-report-auto {margin-top: 0;}
+}

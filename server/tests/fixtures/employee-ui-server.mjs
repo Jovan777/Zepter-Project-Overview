@@ -24,7 +24,7 @@ const user = {_id: self, firstName: 'Test', lastName: 'Zaposleni', jobTitle: 'UI
 const people = [user, {_id: manager, firstName: 'Test', lastName: 'Rukovodilac', role: 'manager', approval: 'approved', sector}, {_id: president, firstName: 'Test', lastName: 'Predsednik', role: 'president', approval: 'approved'}, {_id: colleague, firstName: 'Test', lastName: 'Kolega', role: 'employee', approval: 'approved', sector}];
 const authUser = process.env.ZEPTER_UI_ROLE === 'manager' ? people.find(person => person.role === 'manager') : user;
 const now = () => new Date();
-const stores = Object.fromEntries(['User', 'Sector', 'Project', 'Activity', 'Comment', 'Attachment', 'WorkLog', 'Notification', 'Audit', 'Idea'].map(key => [key, new Map()]));
+const stores = Object.fromEntries(['User', 'Sector', 'Project', 'Activity', 'Comment', 'Attachment', 'WorkLog', 'Notification', 'Audit', 'Idea', 'Report'].map(key => [key, new Map()]));
 for (const p of people) stores.User.set(p._id, p);
 stores.Sector.set(sector, {_id: sector, name: 'Test sektor', code: 'UI_TEST', active: true, manager});
 stores.Project.set(projectId, {_id: projectId, title: 'Test projekat — web sajt', description: 'Izolovani podaci za proveru čuvanja, priloga i komentara. Ovaj projekat ne postoji u demo bazi.', status: 'active', progress: 80, priority: 'medium', sector, owner: manager, members: [self, manager, colleague], createdAt: now(), updatedAt: now(), dueDate: new Date('2026-12-15T12:00:00Z')});
@@ -62,6 +62,15 @@ if(authUser.role==='manager'){
  extraProject('f6'.repeat(12),{title:'Tuđi sektor — nedostupno',sector:'f7'.repeat(12)});
  extraProject('f8'.repeat(12),{title:'Arhivirani projekat',archived:true});
  for(const [id,project] of [['f3'.repeat(12),'f2'.repeat(12)],['f5'.repeat(12),'f4'.repeat(12)]])stores.Activity.set(id,{_id:id,project,sector,title:'Test provere roka',status:'review',progress:80,assignees:[self],dueDate:yesterday,createdAt:now(),updatedAt:now()});
+ stores.WorkLog.set('a1'.repeat(12),{_id:'a1'.repeat(12),user:self,sector,project:projectId,activity:activityId,day:'2026-11-07',done:'Pripremljen prvi predlog dizajna.',nextSteps:'Pregled sa rukovodiocem.',blockers:'',minutes:120,createdAt:now()});
+ stores.Audit.set('a2'.repeat(12),{_id:'a2'.repeat(12),entity:'Activity',entityId:activityId,actor:self,action:'activity.updated',details:{fields:['progress','actualWork']},ip:'fixture-private-value',createdAt:now()});
+ stores.Comment.set('a3'.repeat(12),{_id:'a3'.repeat(12),targetType:'activity',targetId:activityId,author:president,body:'Obratite pažnju na mobilni prikaz i pripremite novi pregled.',kind:'instruction',responseStatus:'open',createdAt:now()});
+ for(let i=0;i<13;i++){
+  const date=new Date('2026-11-08T12:00:00Z');date.setUTCDate(date.getUTCDate()-i);
+  const day=date.toISOString().slice(0,10),id='aa'+i.toString(16).padStart(22,'0');
+  stores.Report.set(id,{_id:id,scope:'sector',sector,type:i===2?'weekly':'daily',periodStart:i===2?'2026-11-02':day,periodEnd:i===2?'2026-11-08':day,status:i===1?'draft':'published',results:i===1?'':'Pripremljen pregled rezultata rada tima.',problems:'',nextSteps:'Nastavak planiranih aktivnosti.',generated:{periodStart:day,periodEnd:day,type:i===2?'weekly':'daily',stats:{projects:2,activities:3,workEntries:4,avgProgress:70,completedActivities:1,lateActivities:1},completed:[{day,employee:'Test Zaposleni',text:'Pripremljeni materijali.'}],blockers:[],nextSteps:[]},createdAt:now(),updatedAt:now()});
+ }
+ stores.Report.set('ab'.repeat(12),{_id:'ab'.repeat(12),sector:'f7'.repeat(12),type:'daily',periodStart:'2026-11-08',periodEnd:'2026-11-08',status:'published',results:'Strani sektor'});
 }
 for (const [index,[type,title,body,link,readAt]] of fixtureNotifications.entries()) {
  const id=('e'+index).repeat(12);
@@ -80,8 +89,10 @@ function matches(row, filter = {}) {
       if ('$nin' in value) return values.every(v => !value.$nin.some(candidate => refId(candidate) === refId(v)));
       if ('$ne' in value) return value.$ne === null ? current != null : values.every(v => refId(v) !== refId(value.$ne));
       if ('$regex' in value) return new RegExp(value.$regex, value.$options || '').test(current || '');
-      if ('$lt' in value) return current != null && new Date(current) < value.$lt;
-      if ('$gte' in value) return current != null && new Date(current) >= value.$gte;
+      if (['$lt','$lte','$gt','$gte'].some(key=>key in value)) {
+        const compare=other=>current instanceof Date||other instanceof Date?[+new Date(current),+new Date(other)]:[current,other];
+        return current!=null&&Object.entries(value).every(([key,other])=>{const [a,b]=compare(other);return key==='$lt'?a<b:key==='$lte'?a<=b:key==='$gt'?a>b:key==='$gte'?a>=b:true;});
+      }
     }
     if (current instanceof Date || value instanceof Date) return +new Date(current) === +new Date(value);
     if (value === null) return current == null;
@@ -126,6 +137,7 @@ function query(name, raw, one = false) {
   return q;
 }
 let failUploadOnce = process.env.ZEPTER_UI_FAIL_UPLOAD_ONCE === '1';
+let activityCreates = 0;
 for (const [name, store] of Object.entries(stores)) {
   const Model = models[name];
   Model.find = filter => query(name, [...store.values()].filter(row => matches(row, filter)));
@@ -133,7 +145,8 @@ for (const [name, store] of Object.entries(stores)) {
   Model.findOne = filter => {const rows = [...store.values()].filter(row => matches(row,filter));const q=query(name,rows);const original=q.then;q.then=(ok,fail)=>original(value=>ok(value[0]||null),fail);q.lean=async()=>JSON.parse(JSON.stringify((await q)||null));return q;};
   Model.distinct = async (field,filter) => [...new Set([...store.values()].filter(row=>matches(row,filter)).flatMap(row=>Array.isArray(row[field])?row[field]:[row[field]]).filter(value=>value!==undefined).map(refId))];
   Model.countDocuments = async filter => [...store.values()].filter(row => matches(row, filter)).length;
-  Model.create = async fields => {if (name === 'Attachment' && failUploadOnce) {failUploadOnce = false; throw Object.assign(new Error('Test: prvi upload nije uspeo. Pokušajte ponovo.'), {status: 503});} const raw = {_id: randomBytes(12).toString('hex'), createdAt: now(), updatedAt: now(), ...fields}; store.set(raw._id, raw); return documentFor(name, raw);};
+  Model.exists = async filter => {const row = [...store.values()].find(row => matches(row, filter)); return row ? {_id: row._id} : null;};
+  Model.create = async fields => {if (name === 'Attachment' && failUploadOnce) {failUploadOnce = false; throw Object.assign(new Error('Test: prvi upload nije uspeo. Pokušajte ponovo.'), {status: 503});} if(name==='Activity'&&++activityCreates===Number(process.env.ZEPTER_UI_FAIL_ACTIVITY_AT))throw Object.assign(new Error('Test: aktivnost nije dodata. Pokušajte ponovo.'),{status:422}); const defaults=name==='Project'?{progress:0,archived:false}:{}; const raw = {_id: randomBytes(12).toString('hex'), createdAt: now(), updatedAt: now(), ...defaults, ...fields}; store.set(raw._id, raw); return documentFor(name, raw);};
   Model.updateOne = async (filter, patch) => {const row = [...store.values()].find(item => matches(item, filter)); if (row) Object.assign(row, patch.$set); return {modifiedCount: row ? 1 : 0};};
   Model.findOneAndUpdate = async (filter, patch) => {const row = [...store.values()].find(item => matches(item, filter)); if (!row) return null; Object.assign(row, patch.$set, {updatedAt: now()}); for(const [key,value] of Object.entries(patch.$inc||{}))row[key]=(row[key]||0)+value; return documentFor(name, row);};
   Model.updateMany = async (filter, patch) => {const rows = [...store.values()].filter(item => matches(item, filter)); for(const row of rows)Object.assign(row,patch.$set); return {modifiedCount:rows.length};};
@@ -144,7 +157,7 @@ app.post('/api/auth/refresh', (_req, res) => res.json({user:authUser, accessToke
 app.post('/api/auth/logout', (_req, res) => res.json({ok: true}));
 app.use('/api', (req, _res, next) => {req.user = authUser; next();});
 app.get('/api/sectors', (_req, res) => res.json({items: [...stores.Sector.values()]}));
-for (const [prefix, file] of [['projects', 'projects'], ['activities', 'activities'], ['comments', 'comments'], ['attachments', 'attachments'], ['worklogs', 'worklogs'], ['ideas', 'ideas'], ['notifications','notifications'], ['dashboard','dashboard']]) {
+for (const [prefix, file] of [['projects', 'projects'], ['activities', 'activities'], ['comments', 'comments'], ['attachments', 'attachments'], ['worklogs', 'worklogs'], ['ideas', 'ideas'], ['notifications','notifications'], ['dashboard','dashboard'], ['sectors','sectors'], ['reports','reports']]) {
   app.use('/api/' + prefix, (await import('../../src/routes/' + file + '.js')).default);
 }
 app.use('/api', (_req, res) => res.status(404).json({error: 'Fixture route not implemented'}));

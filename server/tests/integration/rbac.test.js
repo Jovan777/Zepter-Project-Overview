@@ -269,6 +269,27 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
       assert.equal(other.data.sector._id,otherManager.user.sector);
       assert.notEqual(other.data.sector.name,all.data.sector.name);
     });
+    await t.test('Activity history is manager-only, sector-scoped and excludes private audit fields', async () => {
+      const ownProject=mine.data.items.find(project=>project.myActivities.length);
+      assert.ok(ownProject,'Assigned activity fixture required');
+      const id=ownProject.myActivities[0]._id;
+      const own=await call('/activities/'+id+'/history?limit=2',manager);
+      assert.equal(own.status,200);
+      assert.ok(Array.isArray(own.data.events.items));assert.ok(Array.isArray(own.data.worklogs.items));
+      assert.ok(own.data.events.items.every(event=>Object.keys(event).every(key=>['_id','action','createdAt','actor','fields'].includes(key))));
+      for(const session of [employee,president,admin,otherManager])assert.equal((await call('/activities/'+id+'/history',session)).status,403);
+      assert.equal((await call('/activities/'+id+'/history')).status,401);
+    });
+    await t.test('Manager report type filters retain session sector and paginated list metadata', async () => {
+      for(const type of ['daily','weekly']){
+        const source=await call('/reports?type='+type+'&limit=1',manager);
+        const spoof=await call('/reports?type='+type+'&limit=1&sectorId='+otherManager.user.sector,manager);
+        assert.equal(source.status,200);assert.equal(spoof.status,200);
+        assert.equal(source.data.total,spoof.data.total);assert.equal(source.data.limit,1);
+        assert.ok(source.data.items.every(report=>report.type===type&&report.sector._id===manager.user.sector));
+      }
+      assert.equal((await call('/reports',employee)).status,403);
+    });
   } finally {
     for (const session of sessions) {
       if (session.cookie) {

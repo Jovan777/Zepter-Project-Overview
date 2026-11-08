@@ -1,0 +1,148 @@
+.manager-project-header {border-bottom-color: #eae6df;}
+.manager-project-header > div:first-child {min-width: 0; gap: 10px;}
+.manager-project-header strong {font-size: 16px; line-height: 1.3; overflow-wrap: anywhere;}
+.manager-project-overview {border: 1px solid #e3e4ec; border-radius: 13px; padding: 13px; background: #fff;}
+.manager-project-overview-heading {display: flex; align-items: flex-start; gap: 11px;}
+.manager-project-overview-heading > .employee-icon-disc {width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0;}
+.manager-project-overview-heading > .employee-icon-disc svg {width: 27px; height: 27px;}
+.manager-project-overview-heading > div {flex: 1; min-width: 0;}
+.manager-project-overview h1 {font-size: 19px; line-height: 1.3; margin: 0 0 3px; overflow-wrap: anywhere;}
+.manager-project-overview-heading p {font-size: 12px; margin: 0; color: #68718a;}
+.manager-project-overview-heading .employee-badge {font-size: 11px; padding: 5px 9px;}
+.manager-project-overview-heading .employee-badge--gold {background: #eaf1ff; color: #2466b5;}
+.manager-project-description {font-size: 14px; line-height: 1.55; margin: 12px 0; padding-bottom: 10px; border-bottom: 1px solid #efedf2; color: #46516b; white-space: pre-wrap; overflow-wrap: anywhere;}
+.manager-project-progress-heading {display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 7px;}
+.manager-project-overview > .employee-detail-progress > strong {display: none;}
+.manager-project-overview > .employee-detail-progress .employee-progress {height: 11px; background: #efe9de;}
+.manager-project-facts {display: grid; grid-template-columns: 1.1fr 1fr .75fr; margin: 14px 0 0; gap: 8px;}
+.manager-project-facts > div {min-width: 0; padding-left: 8px; border-left: 1px solid #e8e8ee;}
+.manager-project-facts > div:first-child {padding-left: 0; border: 0;}
+.manager-project-facts dt {display: flex; align-items: center; gap: 5px; font-size: 12px; color: #3c4660;}
+.manager-project-facts dd {font-size: 12px; margin: 5px 0 0; color: #616c85; overflow-wrap: anywhere;}
+.manager-project-facts .is-urgent {color: #be3a35; font-weight: 650;}
+.manager-project-tabs {display: grid; grid-template-columns: 1.15fr .85fr 1.1fr .8fr; margin: 14px 0 21px; border: 1px solid #e0dce7; border-radius: 10px; overflow: hidden;}
+.manager-project-tabs button {min-width: 0; min-height: 44px; padding: 7px 3px; border: 0; border-left: 1px solid #e5e1e9; border-radius: 0; background: #fff; color: #3d4764; font-size: 12px; line-height: 1.35;}
+.manager-project-tabs button:first-child {border-left: 0;}
+.manager-project-tabs .is-active {background: linear-gradient(110deg,#cf9b3e,#b77b18); color: white; font-weight: 650;}
+.manager-project-panel {display: none; min-width: 0; scroll-margin-top: 95px;}
+.manager-project-panel.is-current {display: block;}
+.manager-form-section-heading {display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 7px; margin-bottom: 11px;}
+.manager-form-section-heading h2 {font-size: 18px; margin: 0; line-height: 1.3;}
+.manager-form-section-heading h2 small {font-size: 12px; font-weight: 400; color: #757d90;}
+.manager-form-section-heading > .employee-text-button {font-size: 12px; gap: 5px; min-height: 35px; padding: 0;}
+.manager-project-activity {display: flex; align-items: center; gap: 8px; padding: 11px 9px; margin-bottom: 7px; border: 1px solid #e5e5ed; border-radius: 11px; color: #18213b; background: white; box-shadow: 0 3px 8px #1d233909;}
+.manager-activity-state {display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; border-radius: 50%; background: #fff8e9; color: #b88728; flex-shrink: 0;}
+.manager-activity-state.is-completed {background: #e6f4e1; color: #5b9a4b;}
+.manager-activity-state.is-blocked {background: #fff0de; color: #b35818;}
+.manager-project-activity-copy {flex: 1; min-width: 0;}
+.manager-project-activity-copy > strong {display: block; font-size: 14px; line-height: 1.3; overflow-wrap: anywhere;}
+.manager-project-activity-copy > small {display: block; font-size: 11px; color: #6b748b; margin-block: 3px 5px; overflow-wrap: anywhere;}
+.manager-project-activity-copy .employee-detail-progress {gap: 7px;}
+.manager-project-activity-copy .employee-progress {height: 6px;}
+.manager-project-activity-copy .employee-detail-progress > strong {font-size: 11px; min-width: 30px;}
+.manager-project-activity-end {display: flex; align-items: center; gap: 4px; flex-shrink: 0;}
+.manager-project-activity-end > span {font-size: 10px; max-width: 68px; background: #f5f4f9; padding: 6px; border-radius: 15px; text-align: center;}
+.manager-project-activity .is-completed + .manager-project-activity-copy .employee-progress span {background: #7ead65;}
+.manager-latest-comment {margin-top: 24px;}
+.manager-latest-comment > article {display: flex; gap: 11px; padding: 13px; border: 1px solid #e8e5ed; border-radius: 12px;}
+.manager-latest-comment .employee-icon-disc {width: 34px; height: 34px; flex-shrink: 0;}
+.manager-latest-comment article > div {min-width: 0; flex: 1;}
+.manager-latest-comment article strong {font-size: 13px;}
+.manager-latest-comment article p {background: #f7f7fa; margin: 7px 0; border-radius: 8px; padding: 9px; font-size: 13px; color: #48536c; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere;}
+.manager-latest-comment article button {font-size: 12px; min-height: 36px;}
+.manager-project-actions {display: flex; gap: 7px; margin-top: 21px; flex-wrap: wrap;}
+.manager-project-actions > * {flex: 1; min-width: 90px; font-size: 12px; gap: 5px; padding: 10px 7px; min-height: 44px; margin: 0;}
+.manager-secondary-button {display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid #d5d4df; border-radius: 11px; background: #fff; color: #26314b; font-weight: 600; font-size: 14px; min-height: 44px; padding: 10px 14px; text-align: center;}
+.manager-comment-kind {grid-column: 1 / -1; font-size: 12px; color: #616b82; display: flex; gap: 10px; align-items: center; margin-bottom: 4px;}
+.manager-comment-kind select {flex: 1; min-width: 0; font-size: 14px; padding: 8px; border-radius: 8px; border: 1px solid #dcd9e3; background: white; color: #29354e;}
+.manager-project-panel .employee-comment-composer {display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: end;}
+.manager-project-panel .employee-discussion {margin: 0;}
+.manager-project-panel .employee-discussion h2 {font-size: 20px;}
+.manager-project-people > div {display: flex; gap: 12px; align-items: center; padding: 14px; border: 1px solid #e5e4eb; border-radius: 11px; margin-bottom: 9px;}
+.manager-project-people strong, .manager-project-people small, .manager-project-people > div > div > span {display: block; font-size: 14px;}
+.manager-project-people small, .manager-project-people > div > div > span {font-size: 12px; color: #70798c; margin-top: 4px;}
+.manager-form-sector {font-size: 13px; line-height: 1.5; color: #747d91; margin: 0 0 21px;}
+.manager-project-editor fieldset, .manager-activity-create fieldset {border: 0; min-width: 0; padding: 0; margin: 0;}
+.manager-project-editor :is(input:not([type=checkbox]),textarea,select), .manager-activity-create :is(input:not([type=checkbox]),textarea,select) {width: 100%; min-width: 0; box-sizing: border-box; font: inherit; font-size: 16px; line-height: 1.4; padding: 10px 11px; color: #25304a; border: 1px solid #d8d9e4; border-radius: 9px; background: white; min-height: 44px;}
+.manager-project-editor textarea, .manager-activity-create textarea {resize: vertical;}
+.manager-project-editor :is(label,legend), .manager-activity-fields > label, .manager-activity-fields .manager-form-pair label {display: block; font-size: 14px; font-weight: 650; margin: 16px 0 7px;}
+.manager-project-editor label > span[aria-hidden]:not(.manager-initials), .manager-activity-fields label > span[aria-hidden] {color: #c4443b;}
+.manager-project-fields > label:first-of-type, .manager-project-team-fields > label:first-of-type {margin-top: 0;}
+.manager-project-editor .manager-project-team-fields {margin-top: 22px;}
+.manager-character-count {display: block; text-align: right; color: #828a9b; font-size: 11px; margin-top: 6px;}
+.manager-form-pair {display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 12px;}
+.manager-start-date {margin-top: 14px; font-size: 13px; color: #646f86;}
+.manager-start-date summary {cursor: pointer; min-height: 38px; padding-block: 8px;}
+.manager-start-date input {margin-top: 6px;}
+.manager-project-team-fields > .manager-form-section-heading {margin-top: 22px;}
+.manager-team-avatars {display: flex; align-items: center; padding-left: 7px;}
+.manager-initials {width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; font-size: 12px; background: #f8eedc; color: #9a6d25; font-weight: 650; border: 2px solid white;}
+.manager-team-avatars > span {margin-left: -7px;}
+.manager-team-disclosure {border: 1px solid #e2ddcf; border-radius: 10px; padding: 0 10px;}
+.manager-team-disclosure summary {display: flex; align-items: center; gap: 8px; font-size: 14px; color: #a57424; padding-block: 12px; cursor: pointer; min-height: 44px; font-weight: 600;}
+.manager-team-picker {padding: 3px 0 9px;}
+.manager-team-options {max-height: 290px; overflow-y: auto; margin-top: 8px;}
+.manager-project-editor .manager-person-option {display: flex; align-items: center; gap: 9px; margin: 0; padding: 9px 0; border-bottom: 1px solid #f0edf2; cursor: pointer;}
+.manager-person-option input, .manager-assignee-picker input {accent-color: #b58121; width: 18px; height: 18px; flex-shrink: 0;}
+.manager-person-option strong {display: block; font-size: 13px; font-weight: 600;}
+.manager-person-option small {display: block; font-size: 11px; font-weight: 400; color: #7c8598; margin-top: 3px;}
+.manager-initial-activities {margin-top: 25px;}
+.manager-initial-activity {margin-top: 10px; border: 1px solid #e3e2eb; border-radius: 10px; padding: 0 10px 10px; background: #fdfdfd;}
+.manager-initial-activity-heading {display: flex; align-items: center; gap: 5px;}
+.manager-initial-activity-heading > button:first-child {display: flex; align-items: center; text-align: left; gap: 8px; flex: 1; min-width: 0; min-height: 45px; border: 0; background: transparent; padding: 7px 0; color: #39445e; font-size: 13px;}
+.manager-initial-activity-heading > button:first-child > span {flex: 1; overflow-wrap: anywhere;}
+.manager-initial-activity .manager-activity-fields > label:first-child {margin-top: 5px;}
+.manager-activity-fields .manager-assignee-picker {margin-top: 18px; padding: 12px; border: 1px solid #e5e1e9; border-radius: 10px;}
+.manager-assignee-picker legend {font-size: 13px; font-weight: 650; padding-inline: 3px; margin: 0;}
+.manager-project-editor .manager-assignee-picker label, .manager-activity-create .manager-assignee-picker label {display: flex; gap: 9px; align-items: center; min-height: 40px; font-size: 13px; font-weight: 400; margin: 0;}
+.manager-activity-fields label small {font-weight: 400; font-size: 12px; color: #7d8799;}
+.manager-form-notice {padding: 14px; border: 1px solid #ecd7ab; border-radius: 11px; background: #fffbf2; color: #635438; font-size: 13px; line-height: 1.55; margin-block: 16px; overflow-wrap: anywhere;}
+.manager-form-notice > div {margin-top: 12px; border-top: 1px solid #e9dabd; padding-top: 12px; white-space: pre-wrap;}
+.manager-project-form-actions {display: flex; align-items: stretch; gap: 11px; margin-top: 26px;}
+.manager-project-form-actions .manager-secondary-button {flex: 0 1 36%;}
+.manager-project-form-actions .employee-save-button {flex: 1; width: auto; min-width: 0; margin: 0; font-size: 15px; padding-inline: 12px; gap: 7px;}
+.manager-activity-create h1 {font-size: 24px; margin-bottom: 8px;}
+.manager-project-editor :disabled, .manager-activity-create :disabled {cursor: default;}
+@media (max-width: 359px) {
+  .manager-project-header strong {font-size: 14px;}
+  .manager-project-header .manager-header-actions {gap: 0;}
+  .manager-project-overview-heading {flex-wrap: wrap;}
+  .manager-project-overview-heading .employee-badge {margin-left: 50px;}
+  .manager-project-tabs button {font-size: 10px;}
+  .manager-project-activity-end {flex-direction: column; align-items: end;}
+  .manager-project-actions > * {font-size: 11px;}
+}
+@media (min-width: 768px) {
+  .manager-project-overview {padding: 24px;}
+  .manager-project-overview h1 {font-size: 26px;}
+  .manager-project-overview-heading p, .manager-project-facts :is(dt,dd) {font-size: 14px;}
+  .manager-project-description {font-size: 16px;}
+  .manager-project-facts {max-width: 800px; margin-top: 20px;}
+  .manager-project-tabs {max-width: 800px;}
+  .manager-project-tabs button {font-size: 14px;}
+  .manager-project-activity {padding: 15px; gap: 12px;}
+  .manager-project-activity-copy > strong {font-size: 16px;}
+  .manager-project-activity-copy > small {font-size: 12px;}
+  .manager-project-activity-end > span {font-size: 12px; max-width: 100px;}
+  .manager-project-activity-copy .employee-detail-progress {max-width: 550px;}
+  .manager-project-actions {justify-content: flex-end;}
+  .manager-project-actions > * {flex: 0 1 auto; min-width: 150px; padding-inline: 18px; font-size: 14px;}
+  .manager-project-editor, .manager-activity-create {max-width: 1100px; margin-inline: auto;}
+  .manager-project-editor form {padding: 24px; border: 1px solid #e5e3e8; border-radius: 14px;}
+  .manager-activity-create {max-width: 800px;}
+}
+@media (min-width: 1200px) {
+  .manager-project-content-grid {display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 30px; align-items: start;}
+  .manager-project-panel--activities, .manager-project-panel--team, .manager-project-panel--details {grid-column: 1; grid-row: 1;}
+  .manager-project-panel--activities, .manager-project-panel--comments {display: block;}
+  .manager-project-panel--comments {grid-column: 2; grid-row: 1; padding-left: 26px; border-left: 1px solid #ede9e2;}
+  .manager-project-detail:is([data-view=team],[data-view=details]) .manager-project-panel--activities {display: none;}
+  .manager-latest-comment {display: none;}
+  .manager-project-editor form {display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 28px 32px;}
+  .manager-project-editor .manager-project-team-fields {margin-top: 0;}
+  .manager-project-editor .manager-initial-activities {grid-column: 1 / -1; margin: 0;}
+  .manager-project-form-feedback, .manager-project-editor .manager-project-form-actions {grid-column: 1 / -1; margin: 0;}
+  .manager-project-editor .manager-project-form-actions {justify-content: flex-end;}
+  .manager-project-editor .manager-project-form-actions > * {flex: 0 1 auto; min-width: 180px;}
+  .manager-project-editor .manager-team-options {max-height: 410px;}
+}

@@ -1,5 +1,13 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Treći talas rukovodiočevih ekrana
+
+Upravljanje aktivnošću koristi postojeći verzionisani PATCH i privatne priloge/komentare. Nova read-only `GET /api/activities/:id/history` ruta namenjena je rukovodiocu njegovog sektora; odvojeno paginira stvarne dnevne unose aktivnosti i sanitizovane audit događaje, bez IP/kontakt podataka i sa `no-store` odgovorom. Izveštaji koriste postojeće filtriranje dnevnih/nedeljnih lista; manager bez sektora se odbija pre upita. Nema promene modela, statusa ili migracije. [Detalji i testovi](docs/MANAGER_WAVE_03.md).
+
+## Drugi talas rukovodiočevih ekrana
+
+Detalji, tim i obrazac koriste postojeće projektne, aktivnosne i komentarske rute. `PATCH /api/projects/:id` dodatno podržava opcioni `If-Match` sa `updatedAt` vremenom u navodnicima i atomsku proveru verzije; zastareo zahtev vraća 409. Promena tima zadržava odgovornu osobu i odbija uklanjanje člana sa postojećim dodelama. Dodavanje aktivnosti zatvorenom/arhiviranom projektu traži prethodno ponovno aktiviranje. MongoDB šema i nazivi statusa ostaju isti, bez migracije; zahtevi bez `If-Match` ostaju podržani. Detalji, kompatibilnost i testovi su u [drugom talasu rukovodioca](docs/MANAGER_WAVE_02.md).
+
 ## Prvi talas rukovodiočevih ekrana
 
 Dodati su autentifikovani, read-only `GET /api/dashboard/manager` i `GET /api/projects/sector`, samo za manager nalog sa sektorom. Pregled i globalni brojači su sektorski; podržani su pažnja, predsednikovi komentari, kašnjenja po beogradskom danu, ideje na pregledu, statusni/pretraživački filteri i paginacija. Modeli i stari ugovori ostaju isti. Semantika izvedenih oznaka i testovi su u [prvom talasu rukovodioca](docs/MANAGER_WAVE_01.md).

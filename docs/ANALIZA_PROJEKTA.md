@@ -1,5 +1,9 @@
 # Analiza postojećeg projekta
 
+Treći rukovodiočev talas dodaje [upravljanje aktivnošću i pregled izveštaja](MANAGER_WAVE_03.md), sa read-only istorijom rada i sanitizovanim audit događajima. Lista izveštaja sada ima tip/status/paginaciju u UI-ju i zadržava automatski pregled bez duplog unosa. Rukovodiočevo pravo uređivanja svih podataka aktivnosti više nije ograničeno starim osnovnim formularom. Prethodne tabele ispod predstavljaju početnu analizu; vizuelna provera novog talasa ostaje otvorena.
+
+Drugi rukovodiočev talas dodaje [detalje i obrazac projekta](MANAGER_WAVE_02.md), pretraživ izbor tima, početne aktivnosti i opcioni verzionisani upis projekta. Rešeni su raniji problemi mobilnog višestrukog izbora, izostavljenog `startDate`, brisanja datuma i uklanjanja članova sa postojećim dodelama. Modeli nisu menjani. Tabele početne analize ispod čuvaju istorijsko stanje; aktuelne rezultate i preostala ograničenja videti u dokumentaciji talasa.
+
 Naknadna dopuna, 8. novembar 2026: završeni zaposleni i prva dva rukovodiočeva ekrana imaju zajednički mobilni/tablet/desktop raspored. Browser pristup je dostupan; vizuelne i funkcionalne provere opisane su u [responsive dopuni](RESPONSIVE_LAYOUTS.md). Backend, modeli i API nisu menjani tom dopunom.
 
 Ovaj dokument beleži početnu analizu. Pregled i projekti rukovodiočevog sektora naknadno su uređeni u [prvom talasu rukovodioca](MANAGER_WAVE_01.md); naziv sektora više nije hardkodovan u rukovodiočevom novom početnom ekranu. Naknadno je implementirano svih osam ekrana zaposlenog ([ideje i nova ideja](EMPLOYEE_WAVE_03.md), [detalji ideje i obaveštenja](EMPLOYEE_WAVE_04.md)) na `develop`; dopune i aktuelne provere su u [prvom talasu](EMPLOYEE_WAVE_01.md) i [drugom talasu](EMPLOYEE_WAVE_02.md). Drugi talas rešava i ranije evidentirani povratak completed aktivnosti u review pri dnevnom unosu na 100%.

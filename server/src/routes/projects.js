@@ -41,7 +41,9 @@ r.get('/:id',async(req,res)=>{
  res.json({project:p});
 });
 r.patch('/:id',async(req,res)=>{
- const p=await projectAccess(req.user,req.params.id,true);const d=schemas.projectPatch.parse(req.body);
+ let p=await projectAccess(req.user,req.params.id,true);const d=schemas.projectPatch.parse(req.body);
+ const version=req.get('If-Match');
+ if(version&&version!==`"${p.updatedAt?.toISOString()}"`)fail(409,'Projekat je u međuvremenu promenjen. Pregledajte aktuelne podatke pre čuvanja.');
  if(d.memberIds){
   p.members=await validateTeam(d.memberIds,p.sector);
  }
@@ -49,10 +51,23 @@ r.patch('/:id',async(req,res)=>{
   if(d.ownerId){await validateTeam([d.ownerId],p.sector);p.owner=d.ownerId;if(!p.members.some(x=>same(x,d.ownerId)))p.members.push(d.ownerId);}
   else p.owner=undefined;
  }
+ // Keep the owner and all existing assignees in the effective project team.
+ if(d.memberIds!==undefined||d.ownerId!==undefined){
+  if(p.owner&&!p.members.some(x=>same(x,p.owner)))p.members.push(p.owner);
+  const assigned=await Activity.distinct('assignees',{project:p._id});
+  if(assigned.some(id=>!p.members.some(member=>same(member,id))))fail(409,'Član ima dodeljene aktivnosti. Prvo preraspodelite njegova zaduženja, pa ga uklonite iz tima.');
+ }
  for(const key of ['title','description','status','priority','archived'])if(d[key]!==undefined)p[key]=d[key];
  for(const key of ['dueDate','startDate'])if(d[key]!==undefined)p[key]=d[key]===null?null:dateValue(d[key]);
  if(p.status==='completed'&&await Activity.exists({project:p._id,status:{$ne:'completed'}}))fail(409,'Za završetak projekta potrebno je završiti sve aktivnosti.');
- const oldProgress=p.progress;await p.save();
+ const oldProgress=p.progress;
+ if(version){
+  const fields={};
+  for(const key of ['title','description','status','priority','archived','dueDate','startDate'])if(d[key]!==undefined)fields[key]=p[key];
+  if(d.memberIds!==undefined||d.ownerId!==undefined){fields.members=p.members;fields.owner=p.owner||null;}
+  p=await Project.findOneAndUpdate({_id:p._id,updatedAt:p.updatedAt},{$set:fields},{new:true,runValidators:true});
+  if(!p)fail(409,'Projekat je u međuvremenu promenjen. Vaše izmene nisu prepisale noviju verziju.');
+ }else await p.save();
  await audit(req,'project.updated','Project',p._id,{fields:Object.keys(d),oldProgress});
  await notify(p.members.map(String),{type:'project_updated',title:'Promena na projektu',body:p.title,link:`/projects/${p._id}`},req.user._id);
  res.json({project:p});
