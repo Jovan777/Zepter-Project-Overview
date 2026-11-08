@@ -30,7 +30,7 @@ if(authUser.role==='president'){
  process.env.COOKIE_SECURE='false';
 }
 const now = () => new Date();
-const stores = Object.fromEntries(['User', 'Sector', 'Project', 'Activity', 'Comment', 'Attachment', 'WorkLog', 'Notification', 'Audit', 'Idea', 'Report','DecisionRequest','Assignment','Session','PresidentAccessLink'].map(key => [key, new Map()]));
+const stores = Object.fromEntries(['User', 'Sector', 'Project', 'Activity', 'Comment', 'Attachment', 'WorkLog', 'Notification', 'Audit', 'Idea', 'IdeaRead', 'Report','DecisionRequest','Assignment','Session','PresidentAccessLink'].map(key => [key, new Map()]));
 for (const p of people) stores.User.set(p._id, p);
 stores.Sector.set(sector, {_id: sector, name: 'Test sektor', code: 'UI_TEST', active: true, manager});
 stores.Project.set(projectId, {_id: projectId, title: 'Test projekat — web sajt', description: 'Izolovani podaci za proveru čuvanja, priloga i komentara. Ovaj projekat ne postoji u demo bazi.', status: 'active', progress: 80, priority: 'medium', sector, owner: manager, members: [self, manager, colleague], createdAt: now(), updatedAt: now(), dueDate: new Date('2026-12-15T12:00:00Z')});
@@ -94,12 +94,14 @@ for (const [index,[type,title,body,link,readAt]] of fixtureNotifications.entries
  stores.Notification.set(id,{_id:id,user:self,actor:manager,type,title,body,link,readAt,createdAt:new Date(Date.now()-(index+1)*600000)});
 }
 const refId = value => String(value?._id || value);
+const readPath=(row,key)=>key.split('.').reduce((value,part)=>value?.[part],row);
+const setFields=(row,fields={})=>{for(const[key,value]of Object.entries(fields)){const parts=key.split('.');let target=row;for(const part of parts.slice(0,-1))target=target[part]??={};target[parts.at(-1)]=value;}};
 function matches(row, filter = {}) {
   if (!row) return false;
   return Object.entries(filter).every(([key, value]) => {
     if (key === '$or') return value.some(part => matches(row, part));
     if (key === '$and') return value.every(part => matches(row, part));
-    const current = row[key], values = Array.isArray(current) ? current : [current];
+    const current = readPath(row,key), values = Array.isArray(current) ? current : [current];
     if (value instanceof RegExp) return value.test(current || '');
     if (value && typeof value === 'object' && !(value instanceof Date)) {
       if ('$in' in value) return values.some(v => value.$in.some(candidate => refId(candidate) === refId(v)));
@@ -130,10 +132,42 @@ if(authUser.role==='president'){
  stores.Assignment.set('eb'.repeat(12),{_id:'eb'.repeat(12),sector,assignedTo:manager,createdBy:president,title:'Novo zaduženje čeka rukovodioca',status:'new',createdAt:old});
  const {tokenDigest}=await import('../../src/lib/auth.js');
  stores.PresidentAccessLink.set('ec'.repeat(12),{_id:'ec'.repeat(12),user:president,tokenHash:tokenDigest('p'.repeat(32)),generation:1,revokedAt:null});
+ if(process.env.ZEPTER_UI_WAVE02==='1'){
+  stores.User.set('c9'.repeat(12),{_id:'c9'.repeat(12),firstName:'Test',lastName:'Drugi rukovodilac',role:'manager',approval:'approved',sector});
+  const foreignAuthor='ca'.repeat(12),foreignManager='cb'.repeat(12);
+  stores.User.set(foreignAuthor,{_id:foreignAuthor,firstName:'Test',lastName:'IT autor',role:'employee',approval:'approved',sector:other});
+  stores.User.set(foreignManager,{_id:foreignManager,firstName:'Test',lastName:'IT rukovodilac',role:'manager',approval:'approved',sector:other});
+  stores.Sector.get(other).manager=foreignManager;
+  Object.assign(stores.Idea.get('b3'.repeat(12)),{reviewedBy:manager,forwardedAt:old});
+  for(let i=0;i<14;i++){
+   const id='c1'+i.toString(16).padStart(22,'0'),foreign=i===1;
+   stores.Idea.set(id,{_id:id,title:['Loyalty program za postojeće kupce','Optimizacija lagera pomoću analize','Ekološka ambalaža za proizvode','Interna edukacija o prodajnim tehnikama'][i]||'Predlog unapređenja '+(i+1),description:'Predlog zaposlenog sa konkretnim ciljem, očekivanim rezultatima i koracima primene. Podaci postoje samo u izolovanom testu.',benefit:'Bolja organizacija i saradnja.',author:foreign?foreignAuthor:self,sector:foreign?other:sector,status:'forwarded',reviewedBy:foreign?foreignManager:manager,forwardedAt:old,createdAt:old,updatedAt:old});
+   const notificationId='c2'+i.toString(16).padStart(22,'0');
+   stores.Notification.set(notificationId,{_id:notificationId,user:president,actor:foreign?foreignManager:manager,type:'idea_forwarded',title:'Nova ideja za pregled',body:'Prosleđen testni predlog.',link:'/ideas/'+id,readAt:null,createdAt:old});
+  }
+  const seen='c1'+'d'.padStart(22,'0'),commented='c1'+'c'.padStart(22,'0');
+  stores.IdeaRead.set('c3'.repeat(12),{_id:'c3'.repeat(12),user:president,idea:seen,seenAt:now()});
+  stores.Comment.set('c4'.repeat(12),{_id:'c4'.repeat(12),targetType:'idea',targetId:commented,author:president,body:'Pregledan predlog iz prethodnog razgovora.',kind:'comment',createdAt:now()});
+  for(const [id,status]of [['c5'.repeat(12),'approved'],['c6'.repeat(12),'rejected']]){
+   stores.Idea.set(id,{_id:id,title:status==='approved'?'Odobrena interna obuka':'Odbijen raniji predlog',description:'Predlog sa ranije potvrđenom konačnom odlukom.',sector,author:self,reviewedBy:manager,status,createdAt:old,updatedAt:old,forwardedAt:old,decision:{by:president,at:old,action:status==='approved'?'approve':'reject',note:status==='approved'?'Pripremite plan obuke i predlog termina.':'',deliveryStatus:'complete'}});
+  }
+  stores.Comment.set('c7'.repeat(12),{_id:'c7'.repeat(12),targetType:'idea',targetId:'c5'.repeat(12),author:president,body:'Pripremite plan obuke i predlog termina.',kind:'instruction',responseStatus:'open',addressedTo:[manager],createdAt:old});
+  for(let i=0;i<14;i++){
+   const id='c8'+i.toString(16).padStart(22,'0'),status=i===0?'completed':i===1?'planned':i===2?'blocked':i<13?'review':'in_progress',progress=i===0?100:i===1?0:i===2?60:i<13?90:60;
+   stores.Activity.set(id,{_id:id,project:projectId,sector,title:'Projektna aktivnost '+(i+3),status,progress,assignees:[i%2?self:colleague],dueDate:new Date('2026-12-16T12:00:00Z'),createdAt:new Date(Date.now()+i*1000),updatedAt:now(),actualWork:'Izolovani dnevni rezultat rada.'});
+  }
+ }
+}
+function fixtureClone(value){
+ if(value instanceof Date)return new Date(value);
+ if(typeof value?.toHexString==='function')return value.toHexString();
+ if(Array.isArray(value))return value.map(fixtureClone);
+ if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,fixtureClone(item)]));
+ return value;
 }
 function documentFor(name, raw) {
   if (!raw) return null;
-  const doc = structuredClone(raw);
+  const doc = fixtureClone(raw);
   const plain = () => Object.fromEntries(Object.entries(doc).filter(([, value]) => typeof value !== 'function'));
   const depopulate = data => {
     const copy = structuredClone(data);
@@ -152,7 +186,7 @@ function documentFor(name, raw) {
   };
   doc.save = async () => {doc.updatedAt = now(); stores[name].set(doc._id, depopulate(plain())); return doc;};
   doc.deleteOne = async () => stores[name].delete(doc._id);
-  doc.toJSON = plain;
+  doc.toJSON = ()=>{const value=plain();if(name==='Idea')delete value.decisionDelivery;return value;};
   return doc;
 }
 function query(name, raw, one = false) {
@@ -169,7 +203,7 @@ function query(name, raw, one = false) {
   return q;
 }
 let failUploadOnce = process.env.ZEPTER_UI_FAIL_UPLOAD_ONCE === '1';
-let activityCreates = 0;
+let activityCreates = 0,failIdeaDecisionCommentOnce=false;
 for (const [name, store] of Object.entries(stores)) {
   const Model = models[name];
   Model.aggregate=async pipeline=>{
@@ -187,8 +221,14 @@ for (const [name, store] of Object.entries(stores)) {
   Model.countDocuments = async filter => [...store.values()].filter(row => matches(row, filter)).length;
   Model.exists = async filter => {const row = [...store.values()].find(row => matches(row, filter)); return row ? {_id: row._id} : null;};
   Model.create = async fields => {if (name === 'Attachment' && failUploadOnce) {failUploadOnce = false; throw Object.assign(new Error('Test: prvi upload nije uspeo. Pokušajte ponovo.'), {status: 503});} if(name==='Activity'&&++activityCreates===Number(process.env.ZEPTER_UI_FAIL_ACTIVITY_AT))throw Object.assign(new Error('Test: aktivnost nije dodata. Pokušajte ponovo.'),{status:422}); const defaults=name==='Project'?{progress:0,archived:false}:{}; const raw = {_id: randomBytes(12).toString('hex'), createdAt: now(), updatedAt: now(), ...defaults, ...fields}; store.set(raw._id, raw); return documentFor(name, raw);};
-  Model.updateOne = async (filter, patch) => {const row = [...store.values()].find(item => matches(item, filter)); if (row) Object.assign(row, patch.$set); return {modifiedCount: row ? 1 : 0};};
-  Model.findOneAndUpdate = async (filter, patch) => {const row = [...store.values()].find(item => matches(item, filter)); if (!row) return null; Object.assign(row, patch.$set, {updatedAt: now()}); for(const [key,value] of Object.entries(patch.$inc||{}))row[key]=(row[key]||0)+value; return documentFor(name, row);};
+  Model.updateOne = async (filter, patch, options={}) => {
+   if(name==='Comment'&&patch.$setOnInsert?.kind==='instruction'&&failIdeaDecisionCommentOnce){failIdeaDecisionCommentOnce=false;throw Error('Fixture: instruction delivery unavailable.');}
+   let row=[...store.values()].find(item=>matches(item,filter)),inserted=false;
+   if(!row&&options.upsert){row={_id:filter._id?refId(filter._id):randomBytes(12).toString('hex'),createdAt:now(),updatedAt:now()};setFields(row,filter);row._id=refId(row._id);setFields(row,patch.$setOnInsert);store.set(row._id,row);inserted=true;}
+   if(row){setFields(row,patch.$set);row.updatedAt=now();}
+   return {modifiedCount:row?1:0,upsertedCount:inserted?1:0};
+  };
+  Model.findOneAndUpdate = (filter, patch) => {const row = [...store.values()].find(item => matches(item, filter)); if (!row) return query(name,null,true); setFields(row,patch.$set);row.updatedAt=now(); for(const [key,value] of Object.entries(patch.$inc||{}))row[key]=(row[key]||0)+value; return query(name,row,true);};
   Model.updateMany = async (filter, patch) => {const rows = [...store.values()].filter(item => matches(item, filter)); for(const row of rows)Object.assign(row,patch.$set); return {modifiedCount:rows.length};};
 }
 
@@ -199,6 +239,13 @@ models.Report.prototype.save=async function(){
  raw.createdAt=raw.createdAt||now();raw.updatedAt=now();stores.Report.set(raw._id,raw);Object.assign(this,raw);return this;
 };
 const app = express(); app.use(express.json());app.use(cookieParser());
+if(authUser.role==='president'&&process.env.ZEPTER_UI_QA==='1'&&process.env.ZEPTER_UI_WAVE02==='1'){
+ app.get('/__fixture/manager',async(req,res)=>{
+  const {createSession,setRefreshCookie}=await import('../../src/lib/auth.js');
+  const session=await createSession(req,documentFor('User',stores.User.get(manager)));
+  setRefreshCookie(res,session.refresh);res.redirect('/');
+ });
+}
 if(authUser.role==='president')app.use('/api/auth',(await import('../../src/routes/auth.js')).default);
 app.post('/api/auth/refresh', (_req, res) => res.json({user:authUser, accessToken: 'isolated-ui-fixture'}));
 app.post('/api/auth/logout', (_req, res) => res.json({ok: true}));
@@ -218,7 +265,14 @@ if(process.env.ZEPTER_UI_QA==='1'){
   const id='ae'+i.toString(16).padStart(22,'0');
   stores.Idea.set(id,{_id:id,sector,author:self,title:'QA predlog '+(i+1),description:'Izolovani predlog za proveru dodatnih stranica.',status:'submitted',createdAt:new Date(Date.now()+i*1000),updatedAt:now()});
  }
- const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false,commentResponseLostOnce:false,worklogResponseLostOnce:false,attachmentResponseLostOnce:false,presidentFailOnce:false,socketDisconnect:false};
+ const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false,commentResponseLostOnce:false,worklogResponseLostOnce:false,attachmentResponseLostOnce:false,presidentFailOnce:false,socketDisconnect:false,presidentIdeasFailOnce:false,ideaReadFailOnce:false,decisionResponseLostOnce:false,decisionDeliveryFailOnce:false,reportProjectListEmpty:false};
+ app.get('/api/projects',(req,res,next)=>{if(controls.reportProjectListEmpty&&req.query.limit==='50')return res.json({items:[],total:0,page:1,limit:50});next();});
+ app.get('/api/ideas/president',(req,res,next)=>{if(controls.presidentIdeasFailOnce){controls.presidentIdeasFailOnce=false;return res.status(503).json({error:'Test: predsedničke ideje trenutno nisu dostupne.'});}next();});
+ app.post('/api/ideas/:id/read',(req,res,next)=>{if(controls.ideaReadFailOnce){controls.ideaReadFailOnce=false;return res.status(503).json({error:'Test: oznaka čitanja nije sačuvana.'});}next();});
+ app.post('/api/ideas/:id/decision',(req,res,next)=>{
+  if(controls.decisionResponseLostOnce){controls.decisionResponseLostOnce=false;const json=res.json.bind(res);res.json=body=>body.idea&&res.statusCode<300?json.call(res.status(503),{error:'Test: potvrda odluke nije dostupna. Proverite aktuelni predlog.'}):json(body);}
+  next();
+ });
  app.get('/api/dashboard/president',(req,res,next)=>{if(controls.presidentFailOnce){controls.presidentFailOnce=false;return res.status(503).json({error:'Test: pregled kompanije trenutno nije dostupan.'});}next();});
  for(const [route,control,property]of [['comments','commentResponseLostOnce','comment'],['worklogs','worklogResponseLostOnce','workLog'],['attachments','attachmentResponseLostOnce','attachment']])app.post('/api/'+route,(req,res,next)=>{
   if(controls[control]){
@@ -233,6 +287,7 @@ if(process.env.ZEPTER_UI_QA==='1'){
    if(!Object.hasOwn(controls,key)||(key==='ideasMode'?!['normal','empty'].includes(value):typeof value!=='boolean'))return res.status(422).json({error:'Invalid fixture control'});
   }
   Object.assign(controls,req.body);io.to('sector:'+sector).emit('data:changed',{entity:'Fixture'});res.json({ok:true});
+  if(controls.decisionDeliveryFailOnce){controls.decisionDeliveryFailOnce=false;failIdeaDecisionCommentOnce=true;}
   if(controls.socketDisconnect){controls.socketDisconnect=false;io.disconnectSockets(true);}
  });
  app.get('/api/ideas/sector',async(req,res,next)=>{

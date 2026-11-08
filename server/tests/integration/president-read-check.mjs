@@ -20,6 +20,18 @@ try{
  const home=await get('/dashboard/president'),projects=await get('/projects?activeOnly=1');
  check(home.stats.activeProjects===projects.total,'Active project count differs from its destination.');
  const attention=await get('/dashboard/president/attention');check(home.stats.attention===attention.total,'Attention totals differ.');
+ const ideas=await get('/ideas/president');
+ check(ideas.items.every(idea=>['forwarded','approved','rejected'].includes(idea.status)),'A private unforwarded idea escaped.');
+ check(ideas.stats.total===ideas.total,'Idea totals differ.');
+ if(ideas.items[0]){
+  const item=ideas.items[0],detail=await get('/ideas/'+item._id),comments=await get('/comments?targetType=idea&targetId='+item._id);
+  check(detail.idea.status===item.status,'Idea state differs from its card.');
+  check(comments.total===item.commentCount,'Idea comment count differs.');
+ }
+ if(projects.items[0]){
+  const project=projects.items[0],detail=await get('/projects/'+project._id),activities=await get('/activities/project/'+project._id);
+  check(detail.project._id===project._id&&activities.items.every(a=>String(a.project?._id||a.project)===project._id),'Project/activity context differs.');
+ }
  for(const sector of home.sectors.items){
   const detail=await get('/sectors/'+sector._id+'/president'),list=await get('/sectors/'+sector._id+'/president/projects');
   check(detail.stats.attention===sector.attentionCount,'Sector attention differs from the company feed.');

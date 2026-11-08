@@ -1,5 +1,9 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Drugi predsednički talas
+
+Idea dobija aditivne approved/rejected statuse i opcione podatke odluke/isporuke; IdeaRead čuva korisničko čitanje. Novi president feed i read/decision/deliver endpointi zadržavaju granice uloga. Odobrenje zahteva neprazne naredne korake, If-Match i jedinstveni requestId; odluka je atomska, a komentar/obaveštenja se isporučuju idempotentno uz trajni nastavak posle greške. Rukovodilac dobija instrukciju, autor status; završeni predlozi ostaju u istoriji. [Ugovori, kompatibilnost i provere](docs/PRESIDENT_WAVE_02.md).
+
 ## Prvi predsednički talas
 
 Dodati su read-only feed-ovi kompanije, pitanja za pažnju i sektora/projekata; iste definicije služe brojačima i paginiranim listama. Projects feed prihvata opcioni activeOnly=1. Višekratni lični link uspostavlja sesiju preko POST /api/auth/president-link, bez formulara i odjave u predsedničkom UI-ju. Posebna PresidentAccessLink kolekcija i opciona polja sesije omogućavaju zamenu/opoziv bez promene poslovnih šema, naloga i lozinki. Autentifikacija ličnog pristupa proverava se i pre socket dostave. [Ugovori, komande, kompatibilnost i provere](docs/PRESIDENT_WAVE_01.md).

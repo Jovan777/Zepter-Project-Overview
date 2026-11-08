@@ -10,9 +10,10 @@ import {ActivityBadge, DetailProgress} from './EmployeeProjectDetail.jsx';
 import {useEmployeeBackLink} from './EmployeeShell.jsx';
 import EmployeeAttachments from './EmployeeAttachments.jsx';
 import EmployeeThread from './EmployeeThread.jsx';
+import {usePresidentBackLink} from '../president/navigation.jsx';
 
 function ActivityView({activity, project, user, reload}) {
-  const editable = activity.assignees.some(person => (person._id || person) === user._id);
+  const editable = user.role!=='president' && activity.assignees.some(person => (person._id || person) === user._id);
   const [draft, setDraft] = useState(() => activityDraft(activity));
   const [baseline, setBaseline] = useState(() => activityDraft(activity));
   const [version, setVersion] = useState(activity.updatedAt);
@@ -22,7 +23,7 @@ function ActivityView({activity, project, user, reload}) {
   const dialog = useRef(null), saveLock = useRef(false);
   const dirty = editable && !sameActivityDraft(draft, baseline);
   const guarded=dirty||threadDirty||saving;
-  const blocker = useBlocker(({currentLocation, nextLocation}) => guarded && nextLocation.pathname !== '/login' && currentLocation.pathname + currentLocation.search !== nextLocation.pathname + nextLocation.search);
+  const blocker = useBlocker(({currentLocation, nextLocation}) => guarded && !['/login','/predsednik','/president'].includes(nextLocation.pathname) && currentLocation.pathname + currentLocation.search !== nextLocation.pathname + nextLocation.search);
   useEffect(() => {
     if (!guarded) return;
     const unload = event => {event.preventDefault(); event.returnValue = '';};
@@ -74,7 +75,7 @@ function ActivityView({activity, project, user, reload}) {
       {!dirty && baseline.actualWork.trim() && <Link className="employee-daily-link" to="/daily" state={{activityId: activity._id}}><Icon name="calendar" size={18}/>Dodaj urađeno u dnevni izveštaj<Icon name="arrow" size={17}/></Link>}
     </form> : <><div className="employee-readonly-note"><Icon name="info" size={20}/><p>Ovu aktivnost uređuju dodeljene osobe. Možete pregledati priloge i učestvovati u razgovoru.</p></div><section className="employee-readonly-work"><h2>Šta je urađeno</h2><p>{activity.actualWork || 'Još nema unosa.'}</p>{activity.nextStep && <><h3>Sledeći korak</h3><p>{activity.nextStep}</p></>}{activity.blockers && <><h3>Prepreke</h3><p>{activity.blockers}</p></>}</section></>}
     <EmployeeAttachments type="activity" id={activity._id} user={user} editable={editable}/>
-    </div><div className="workspace-detail-aside"><EmployeeThread type="activity" id={activity._id} user={user} heading="Komentari i odgovori" sectionId="activity-comments" onDraftChange={setThreadDirty}/></div></div>
+    </div><div className="workspace-detail-aside"><EmployeeThread type="activity" id={activity._id} user={user} heading={user.role==='president'?'Komentari i instrukcije':'Komentari i odgovori'} allowInstructions={user.role==='president'} sectionId="activity-comments" onDraftChange={setThreadDirty}/></div></div>
     <dialog className="employee-unsaved-dialog" ref={dialog} aria-label="Nesačuvane izmene" onCancel={event => {event.preventDefault(); blocker.reset?.();}}><h2>Sačuvati izmene pre izlaska?</h2><p>{threadDirty?'Imate neposlat komentar. Ostanite na ekranu da biste završili razgovor.':'Uneli ste izmene u aktivnost koje još nisu sačuvane.'}</p><button className="employee-save-button" disabled={saving||threadDirty} onClick={async () => {if (await save()) blocker.proceed?.();}}>Sačuvaj i nastavi</button><button className="employee-text-button" disabled={saving} onClick={() => blocker.proceed?.()}>Odbaci izmene</button><button className="employee-text-button" disabled={saving} onClick={() => blocker.reset?.()}>Ostani ovde</button>{error && <p role="alert" className="employee-form-error">{error}</p>}</dialog>
   </div>;
 }
@@ -83,6 +84,7 @@ export default function EmployeeActivityDetail({user}) {
   const {id} = useParams();
   const resource = useEmployeeResource('/activities/' + id, {live: false, keepPreviousData: true});
   const project = resource.data?.project;
+  usePresidentBackLink(user.role==='president'?(project?'/projects/'+project._id:'/projects'):null,'Nazad na projekat');
   useEmployeeBackLink(project ? '/projects/' + project._id : '/projects', project ? 'Nazad na projekat' : 'Nazad na moje projekte');
   if (!resource.data) return <ResourceState {...resource} onRetry={resource.reload} noun="aktivnost"/>;
   return <><ResourceState error={resource.error} onRetry={resource.reload}/><ActivityView key={id} activity={resource.data.activity} project={project} user={user} reload={resource.reload}/></>;

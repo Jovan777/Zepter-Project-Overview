@@ -17,18 +17,18 @@ try{
  const overview=await call('/dashboard/president');check(overview.status===200,'Company overview responds.');
  check(overview.data.stats.activeProjects===3,'Active count excludes planned and closed projects.');
  check((await call('/projects?activeOnly=1')).data.total===overview.data.stats.activeProjects,'Active count opens precisely the active company project list.');
- check(overview.data.stats.attention===3,'Attention deduplicates delayed activities under at-risk and closed projects.');
+ check(overview.data.stats.attention===4,'Attention deduplicates delayed activities under at-risk and closed projects.');
  check(overview.data.sectors.total===5,'All five sectors are available.');
  for(const row of overview.data.sectors.items){
   const attention=await call('/dashboard/president/attention?sectorId='+row._id);
   check(attention.data.total===row.attentionCount,'Sector count equals its actual attention list.');
  }
  const page1=await call('/dashboard/president/attention?limit=2'),page2=await call('/dashboard/president/attention?limit=2&page=2');
- check(page1.data.items.length===2&&page2.data.items.length===1,'Attention pagination crosses categories without duplicates.');
- check(new Set([...page1.data.items,...page2.data.items].map(x=>x.key)).size===3,'Attention keys are unique.');
+ check(page1.data.items.length===2&&page2.data.items.length===2,'Attention pagination crosses categories without duplicates.');
+ check(new Set([...page1.data.items,...page2.data.items].map(x=>x.key)).size===4,'Attention keys are unique.');
  for(const item of overview.data.attention.items)check((await call(item.link)).status===200,'Attention destination exists: '+item.kind);
  const detail=await call('/sectors/'+sector+'/president');
- check(detail.data.stats.activeProjects===2&&detail.data.stats.attention===2&&detail.data.stats.avgProgress===23,'Sector statistics match current projects.');
+ check(detail.data.stats.activeProjects===2&&detail.data.stats.attention===3&&detail.data.stats.avgProgress===23,'Sector statistics match current projects.');
  const projects=await call('/sectors/'+sector+'/president/projects'),next=await call('/sectors/'+sector+'/president/projects?page=2');
  check(projects.data.total===11&&projects.data.items.length===8&&next.data.items.length===3,'Sector projects paginate all current items.');
  check(new Set([...projects.data.items,...next.data.items].map(x=>x._id)).size===11,'Project pagination has no repeats.');

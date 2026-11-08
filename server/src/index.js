@@ -13,6 +13,7 @@ import {verifyAccess,requireAuth} from './lib/auth.js';
 import {bindPresidentSocket} from './lib/president-socket.js';
 import {errorHandler} from './lib/errors.js';
 import {attachSocket} from './services/events.js';
+import {startIdeaDecisionDelivery} from './services/idea-decisions.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import sectorRoutes from './routes/sectors.js';
@@ -73,7 +74,8 @@ io.on('connection',socket=>{socket.join('user:'+socket.data.userId);if(socket.da
 attachSocket(io);
 await fs.mkdir(path.resolve(process.env.UPLOAD_DIR||'./private-uploads'),{recursive:true});
 await mongoose.connect(process.env.MONGODB_URI);
+const stopIdeaDelivery=startIdeaDecisionDelivery();
 const port=Number(process.env.PORT||4000);
 server.listen(port,()=>console.log(`ZEPTER API http://localhost:${port}`));
-const shutdown=async()=>{io.close();server.close();await mongoose.disconnect();process.exit(0);};
+const shutdown=async()=>{stopIdeaDelivery();io.close();server.close();await mongoose.disconnect();process.exit(0);};
 process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);

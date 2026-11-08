@@ -64,10 +64,15 @@ export const Comment=models.Comment || model('Comment',commentSchema);
 const ideaSchema=new Schema({
  title:{...txt(220),required:true},description:{...txt(7000),required:true},benefit:txt(4000),
  sector:{...ref('Sector',true),index:true},author:{...ref('User',true),index:true},
- status:{type:String,enum:['submitted','in_review','revision_requested','forwarded'],default:'submitted',index:true},
- reviewNote:txt(3000),reviewedBy:ref('User'),forwardedAt:Date,revisionCount:{type:Number,default:0}
+ status:{type:String,enum:['submitted','in_review','revision_requested','forwarded','approved','rejected'],default:'submitted',index:true},
+ reviewNote:txt(3000),reviewedBy:ref('User'),forwardedAt:Date,revisionCount:{type:Number,default:0},
+ decision:{type:new Schema({action:{type:String,enum:['approve','reject'],required:true},by:ref('User',true),at:{type:Date,required:true},note:txt(4000),commentId:O,deliveryStatus:{type:String,enum:['pending','complete'],required:true}},{_id:false}),default:undefined},
+ decisionDelivery:{type:Schema.Types.Mixed,select:false}
 },opts);
+ideaSchema.index({'decision.deliveryStatus':1,'decisionDelivery.lastAttemptAt':1,'decision.at':1});
+ideaSchema.set('toJSON',{transform(_doc,ret){delete ret.decisionDelivery;return ret;}});
 export const Idea=models.Idea || model('Idea',ideaSchema);
+export {IdeaRead} from './idea-read.js';
 
 const reportSchema=new Schema({
  scope:{type:String,enum:['sector'],default:'sector'},sector:{...ref('Sector',true),index:true},

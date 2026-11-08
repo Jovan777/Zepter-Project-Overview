@@ -94,7 +94,7 @@ test('Publishing a saved version atomically freezes the report and notifies the 
 });
 test('Manager idea feed groups review states, counts the entire sector and keeps pagination scoped',async t=>{
  const find=t.mock.method(Idea,'find',()=>query([{_id:id,status:'in_review',author:{firstName:'Test',lastName:'Autor'}}]));
- const count=t.mock.method(Idea,'countDocuments',async filter=>filter.status?.$in?10:filter.status==='revision_requested'?5:filter.status==='forwarded'?9:24);
+ const count=t.mock.method(Idea,'countDocuments',async filter=>filter.status?.$in?.includes('forwarded')?9:filter.status?.$in?10:filter.status==='revision_requested'?5:24);
  await withRoutes(account,routes,async base=>{
   const response=await fetch(base+'/ideas/sector?tab=review&page=2&limit=3&sectorId='+foreign+'&authorId='+foreign);assert.equal(response.status,200);
   const body=await response.json();assert.deepEqual(body.stats,{total:24,review:10,revision:5,forwarded:9});assert.equal(body.page,2);assert.equal(body.limit,3);

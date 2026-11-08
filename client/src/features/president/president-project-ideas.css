@@ -1,0 +1,95 @@
+.president-project,.president-ideas,.president-proposal{min-width:0;color:#232b3e;}
+.president-shell :is(.president-project,.president-proposal,.employee-activity-detail) .employee-comment-composer{display:flex;flex-wrap:wrap;gap:8px;min-width:0;}
+.president-shell :is(.president-project,.president-proposal,.employee-activity-detail) .employee-comment-composer>.manager-comment-kind{flex:0 0 100%;display:flex;gap:10px;align-items:center;font-size:12px;min-width:0;}
+.president-shell :is(.president-project,.president-proposal,.employee-activity-detail) .manager-comment-kind select{flex:1;min-width:0;max-width:100%;font:inherit;min-height:40px;border:1px solid #dedbd4;border-radius:7px;background:white;padding:7px;}
+.president-shell :is(.president-project,.president-proposal,.employee-activity-detail) .employee-comment-composer>textarea{flex:1;min-width:0;width:0;}
+.president-shell :is(.president-project,.president-proposal,.employee-activity-detail) .employee-comment-composer>.employee-send-button{flex-shrink:0;}
+.president-project-breadcrumb{display:flex;gap:7px;align-items:center;font-size:12px;color:#7a8290;margin-bottom:12px;}
+.president-project-breadcrumb>a{color:inherit;overflow-wrap:anywhere;}
+.president-project-title{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;}
+.president-project-title h1{font-size:25px;line-height:1.25;overflow-wrap:anywhere;margin:0;min-width:0;}
+.president-project-title>.employee-badge{flex-shrink:0;font-size:11px;margin-top:3px;}
+.president-project-description{font-size:13px;line-height:1.6;color:#71798b;white-space:pre-wrap;overflow-wrap:anywhere;margin:9px 0 16px;}
+.president-project-summary{border:1px solid #ece6db;border-radius:11px;background:white;padding:13px;margin-bottom:14px;}
+.president-project-progress-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:9px;}
+.president-project-progress-heading h2{font-size:13px;margin:0;}
+.president-project-progress-heading>strong{font-size:17px;color:#b37a1b;}
+.president-project-summary .employee-detail-progress>strong{display:none;}
+.president-project-summary .employee-detail-progress{margin:0;}
+.president-project-summary .employee-progress{height:7px;}
+.president-project-summary dl{display:grid;grid-template-columns:1fr 1.2fr .8fr;gap:9px;margin:13px 0 0;padding-top:12px;border-top:1px solid #eee8dd;}
+.president-project-summary dl>div{min-width:0;}
+.president-project-summary dt{display:flex;gap:5px;align-items:center;font-size:10px;color:#96918a;margin-bottom:4px;}
+.president-project-summary dt svg{color:#b37b24;flex-shrink:0;}
+.president-project-summary dd{font-size:11px;margin:0;color:#414b5e;overflow-wrap:anywhere;line-height:1.45;}
+.president-project-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:23px;}
+.president-project-shortcuts>a{padding:12px 8px;display:flex;align-items:flex-start;justify-content:flex-start;gap:7px;flex-direction:column;background:#fffbf3;border:1px solid #f1e8d8;border-radius:9px;color:#a66d19;min-width:0;min-height:88px;}
+.president-project-shortcuts>a:nth-child(2){background:#f4fafb;border-color:#e8f1f3;color:#558676;}
+.president-project-shortcuts>a:nth-child(3){background:#faf7fd;border-color:#f0eafb;color:#8a69b7;}
+.president-project-shortcuts>a:nth-child(4){background:#fafafa;border-color:#eee;color:#697284;}
+.president-project-shortcuts strong{font-size:11px;color:#323b50;line-height:1.4;}
+.president-project-shortcuts small{font-size:10px;color:#7c8493;margin-top:-4px;}
+.president-project .president-section-heading{gap:8px;margin:20px 0 12px;}
+.president-project .president-section-heading h2{font-size:19px;flex:1;}
+.president-project .president-section-heading>span{font-size:11px;color:#8991a1;}
+.president-project .president-section-heading>button{min-width:36px;min-height:44px;}
+.president-activity-filter{display:flex;gap:12px;align-items:center;font-size:12px;margin:0 0 12px;color:#717b8e;}
+.president-activity-filter select{font:inherit;background:#fff;border:1px solid #e4ddd2;border-radius:8px;padding:8px;min-height:44px;flex:1;min-width:0;}
+.president-project-task{display:grid;grid-template-columns:26px minmax(0,1fr) 13px;gap:8px;align-items:center;color:#263049;border:1px solid #e8e6e1;border-radius:10px;padding:11px 9px;margin-bottom:8px;background:#fff;}
+.president-task-number{align-self:start;display:flex;justify-content:center;align-items:center;min-height:30px;background:#fff6e8;color:#a77626;border-radius:7px;font-size:12px;}
+.president-project-task>div{min-width:0;}
+.president-task-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:7px;flex-wrap:wrap;}
+.president-task-heading h3{font-size:13px;line-height:1.4;margin:0;min-width:0;flex:1;overflow-wrap:anywhere;}
+.president-task-heading .employee-badge{font-size:9px;padding:4px 7px;}
+.president-task-assignees{display:flex;gap:5px;align-items:center;font-size:11px;line-height:1.5;color:#7b8496;margin:6px 0;overflow-wrap:anywhere;}
+.president-task-assignees svg{flex-shrink:0;}
+.president-task-progress{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.president-task-progress>.employee-detail-progress{flex:1;min-width:90px;margin:0;}
+.president-task-progress .employee-progress{height:5px;}
+.president-task-progress .employee-detail-progress strong{font-size:10px;}
+.president-task-progress>span{font-size:10px;color:#8991a0;display:flex;align-items:center;gap:4px;}
+.president-person-initials{width:36px;height:36px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#fcf1dc;color:#a97725;font-weight:650;font-size:12px;}
+.president-project .employee-detail-disclosure{margin-top:14px;scroll-margin-top:95px;}
+.president-project-conversation{border:1px solid #e9e4db;border-radius:12px;padding:14px;margin-top:20px;background:#fff;}
+.president-project-conversation .employee-discussion{margin:0;scroll-margin-top:95px;}
+.president-project-conversation .employee-discussion>h2{font-size:19px;margin-top:0;}
+.president-idea-tabs{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 0 8px;margin:0 0 12px;}
+.president-idea-tabs{scrollbar-width:none;}
+.president-idea-tabs::-webkit-scrollbar{display:none;}
+.president-idea-tabs>button{font:inherit;font-size:12px;white-space:nowrap;min-height:44px;padding:10px 15px;border:1px solid #e4e7ee;border-radius:22px;background:white;color:#626c80;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.president-idea-tabs>button[aria-pressed=true]{color:#fff;background:linear-gradient(120deg,#d5a745,#ab7218);border-color:#c79a37;}
+.president-idea-tabs>button>span{font-size:10px;background:#dc4b40;color:white;min-width:16px;min-height:16px;border-radius:10px;padding:1px 4px;display:grid;place-items:center;}
+.president-idea-card{display:grid;grid-template-columns:37px minmax(0,1fr) 12px;gap:10px;padding:15px 12px;border:1px solid #e6e7eb;border-radius:13px;margin-bottom:12px;color:#29334b;background:#fff;}
+.president-idea-card.is-new{background:linear-gradient(130deg,#fffaf0,#fffdf8);border-color:#efe0c5;}
+.president-idea-icon{width:37px;height:39px;border-radius:10px;background:#fff1d5;color:#bb8520;display:grid;place-items:center;}
+.president-idea-card>div{min-width:0;}
+.president-idea-card-heading{display:flex;justify-content:space-between;gap:9px;align-items:flex-start;flex-wrap:wrap;}
+.president-idea-card-heading h2{font-size:15px;line-height:1.4;margin:0;overflow-wrap:anywhere;flex:1;min-width:110px;}
+.president-idea-sector{font-size:10px;background:#fff0d8;padding:5px 8px;border-radius:20px;color:#a76b17;overflow-wrap:anywhere;max-width:100%;}
+.president-idea-description{font-size:12px;line-height:1.55;color:#758096;margin:7px 0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.president-idea-author{font-size:10px;color:#858c9b;margin:0 0 8px;overflow-wrap:anywhere;}
+.president-idea-meta{display:flex;gap:11px;align-items:center;flex-wrap:wrap;}
+.president-idea-meta>span:not(.employee-badge){display:flex;gap:5px;align-items:center;font-size:10px;color:#8590a0;}
+.president-idea-meta>.employee-badge{font-size:10px;margin-left:auto;}
+.president-idea-chevron{align-self:center;color:#8a94a5;}
+.president-proposal-summary,.president-proposal-decision{border:1px solid #e9e3d9;border-radius:12px;padding:17px;background:#fff;margin:0 0 18px;min-width:0;}
+.president-proposal-summary h2{font-size:21px;line-height:1.4;margin:12px 0;overflow-wrap:anywhere;}
+.president-proposal-summary h3{font-size:15px;margin:17px 0 7px;}
+.president-proposal-summary p{font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;}
+.president-proposal-meta{display:flex;gap:12px;justify-content:space-between;font-size:11px;color:#7b8595;border-top:1px solid #eee5d9;margin-top:18px;padding-top:12px;flex-wrap:wrap;}
+.president-proposal-decision{margin-top:18px;}
+.president-proposal-decision h2{font-size:19px;margin:0 0 13px;}
+.president-decision-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.president-decision-actions>button{flex:1;min-width:110px;min-height:46px;font-size:13px;}
+.president-decision-form{border-top:1px solid #eee4d5;margin-top:17px;padding-top:15px;}
+.president-decision-form h3{font-size:17px;margin:0 0 12px;}
+.president-decision-form label{font-size:13px;font-weight:600;display:block;margin-bottom:8px;}
+.president-decision-form textarea{font:inherit;font-size:16px;line-height:1.6;width:100%;min-height:110px;padding:11px;border:1px solid #dcd7cd;border-radius:9px;}
+.president-decision-form p{font-size:12px;color:#758095;line-height:1.6;}
+.president-decision-form>div{display:flex;justify-content:space-between;gap:10px;align-items:center;}
+.president-proposal-body>aside{min-width:0;}
+.president-proposal-body>aside .employee-discussion>h2{font-size:20px;}
+@media(max-width:359px){.president-project-title{flex-wrap:wrap;gap:8px;}.president-project-title h1{font-size:23px;}.president-project-shortcuts{gap:6px;}.president-project-shortcuts>a{padding:10px 6px;}.president-project-shortcuts strong{font-size:10px;}.president-task-heading{flex-direction:column;}.president-idea-card{grid-template-columns:30px minmax(0,1fr) 10px;gap:8px;padding:13px 10px;}.president-idea-icon{width:30px;}.president-idea-card-heading h2{font-size:14px;}.president-idea-meta{gap:8px;}}
+@media(min-width:768px){.president-project-title h1{font-size:32px;}.president-project-description{font-size:16px;max-width:1000px;}.president-project-summary{padding:20px;}.president-project-progress-heading h2{font-size:17px;}.president-project-summary dd{font-size:15px;}.president-project-summary dt{font-size:12px;}.president-project-shortcuts>a{min-height:105px;padding:18px;}.president-project-shortcuts strong{font-size:14px;}.president-project-task{padding:15px;gap:12px;grid-template-columns:32px minmax(0,1fr) 16px;}.president-task-heading h3{font-size:16px;}.president-task-assignees{font-size:13px;}.president-task-heading .employee-badge{font-size:11px;}.president-task-progress>span,.president-task-progress .employee-detail-progress strong{font-size:12px;}.president-idea-card{padding:20px;gap:15px;grid-template-columns:42px minmax(0,1fr) 14px;}.president-idea-icon{width:42px;height:45px;}.president-idea-card-heading h2{font-size:18px;}.president-idea-description{font-size:14px;}.president-idea-author{font-size:12px;}.president-idea-meta>span:not(.employee-badge){font-size:12px;}.president-idea-sector,.president-idea-meta>.employee-badge{font-size:11px;}.president-proposal-summary{padding:23px;}}
+@media(min-width:1024px){.president-idea-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}.president-idea-card{margin:0;height:100%;}.president-idea-tabs{margin-bottom:20px;}}
+@media(min-width:1200px){.president-project-body,.president-proposal-body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:30px;align-items:start;}.president-project-primary,.president-project-conversation,.president-proposal-body>div{min-width:0;}.president-project-conversation{margin-top:20px;padding:20px;}.president-project-summary dl{grid-template-columns:1fr 1.4fr 1fr;}.president-project-shortcuts{max-width:950px;}.president-proposal-body>aside .employee-discussion{margin-top:0;}}

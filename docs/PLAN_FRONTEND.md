@@ -1,5 +1,7 @@
 # Predlog faznog razvoja React frontend-a
 
+**Predsednik — drugi talas:** završeni su projekat/aktivnosti i lista ideja za mobilni/tablet/desktop. Naknadno je povezana predsednička odluka: odobrenje sa obaveznim narednim koracima rukovodiocu ili konačno odbijanje. [Obuhvat i provere](PRESIDENT_WAVE_02.md). Posebne sledeće reference i dalje određuju konačan dizajn detalja ideje/aktivnosti i preostale ekrane.
+
 **Predsednik — prvi talas:** implementirani su kompanija i sektor prema dve reference, prvo mobilno, zatim tablet/desktop. Predsednik ulazi istim ličnim linkom na svakom uređaju, bez login formulara, menija naloga i odjave. [Obuhvat, pomoćna odredišta, provere i granice](PRESIDENT_WAVE_01.md). Naredne ekrane određuje korisnik.
 
 **Pre predsedničkih referenci:** izvršen je [pregled zaposlenog i rukovodioca](REVIEW_EMPLOYEE_MANAGER.md), sa ispravkama, povezanim HTTP scenarijem do predsedničkog pristupa i naknadnim browser proverama obe uloge. Potvrđeni tokovi, širine i preostala ograničenja navedeni su u tom dokumentu. Predsednički ekrani još nisu predmet ove izmene.

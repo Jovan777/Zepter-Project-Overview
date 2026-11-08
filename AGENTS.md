@@ -46,6 +46,10 @@
 
 ## Interfejs i izveštaji
 
+- Predsednički drugi talas je u docs/PRESIDENT_WAVE_02.md: projekat/aktivnosti i lista ideja, uz naknadno traženu konačnu odluku u detalju. Odobrenje zahteva komentar sa narednim koracima i isporuku rukovodiocu koji je prosledio ideju; odbijanje završava tok. approved/rejected su stvarna završna stanja, vidljiva i autoru/rukovodiocu, bez ponovnog review/resubmit. Predsednik vidi forwarded/approved/rejected, a samo forwarded čeka njegovu odluku i ulazi u pažnju.
+- Odluka o ideji koristi obavezne If-Match i requestId. Sačuvana odluka i tekst su izvor istine; idempotentni komentar/obaveštenja mogu biti pending i nastavljaju se postojećim worker-om ili ovlašćenim deliver endpointom. Ne uvodi slepo novo odlučivanje posle nejasne potvrde. IdeaRead pripada korisniku iz sesije; status Nova nije vremenska pretpostavka ni odobrenje.
+- Testovi pisanja drugog predsedničkog talasa koriste WAVE02 fixture ili eksplicitnu president-isolated-db.mjs privremenu bazu. Pre brisanja proveriti tačno ime, prefiks i aktivnu konekciju samo te testne baze. Nikada ne preusmeravati čišćenje na demo bazu.
+
 - Predsednički prvi talas je u docs/PRESIDENT_WAVE_01.md: kompanija i sektor, mobilni/tablet/desktop. Predsednik nema login formular, meni naloga ni odjavu. Isti lični link otvara početni pregled i radi na novom uređaju; ne uvodi jednokratno vezivanje ili dodatne korisničke korake bez naloga korisnika. Autentifikacija je u pozadini; sama ruta nije ovlašćenje. Ključ izdaje eksplicitni CLI, čuva se hash i skida fragment pre router-a. Privatni izlaz je u ignorisanom server/private-access; ne ispisuj ceo link. Opoziv/zamena proveravaju se i pri socket dostavi. Standardne sesije ostaju kompatibilne.
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.

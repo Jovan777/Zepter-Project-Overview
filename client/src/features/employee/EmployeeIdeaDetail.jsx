@@ -8,10 +8,11 @@ import useEmployeeResource from './useEmployeeResource.js';
 import EmployeeAttachments from './EmployeeAttachments.jsx';
 import EmployeeThread from './EmployeeThread.jsx';
 import {formatDeadline} from './presentation.js';
+import IdeaDecisionSummary from '../workspace/IdeaDecisionSummary.jsx';
 
 const draftOf = idea => ({title: idea.title, description: idea.description, benefit: idea.benefit || ''});
 const sameDraft = (a, b) => ['title', 'description', 'benefit'].every(key => a[key] === b[key]);
-const statuses = {submitted: ['Na razmatranju', 'gold'], in_review: ['Na razmatranju', 'gold'], revision_requested: ['Vraćena na doradu', 'warning'], forwarded: ['Prosleđeno predsedniku', 'success']};
+const statuses = {submitted: ['Na razmatranju', 'gold'], in_review: ['Na razmatranju', 'gold'], revision_requested: ['Vraćena na doradu', 'warning'], forwarded: ['Prosleđeno predsedniku', 'success'], approved: ['Predsednik odobrio', 'success'], rejected: ['Predsednik odbio', 'warning']};
 export function IdeaView({initial, user}) {
   const [idea, setIdea] = useState(initial), [draft, setDraft] = useState(() => draftOf(initial));
   const [editing, setEditing] = useState(false), [working, setWorking] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
@@ -77,7 +78,8 @@ export function IdeaView({initial, user}) {
       <div className="employee-idea-author"><IconDisc name="user"/><div><strong>{authorName}{own ? ' (vi)' : ''}</strong><span>{idea.author?.jobTitle || 'Autor ideje'}</span></div><div className="employee-idea-dates"><span><Icon name="calendar" size={15}/><time dateTime={idea.createdAt}>{formatDeadline(idea.createdAt)}</time></span><span><Icon name="folder" size={15}/>{idea.sector?.name || 'Sektor ideje'}</span></div></div>
     </section>
     {idea.status === 'revision_requested' && <div className="employee-idea-review-note"><Icon name="info" size={21}/><div><strong>Zahtev za doradu</strong><p>{idea.reviewNote || 'Dopunite predlog prema smernicama rukovodioca.'}</p></div></div>}
-    <EmployeeAttachments type="idea" id={idea._id} user={user} editable={own} showCount/>
+    <IdeaDecisionSummary idea={idea}/>
+    <EmployeeAttachments type="idea" id={idea._id} user={user} editable={own&&!['approved','rejected'].includes(idea.status)} showCount/>
     {canEdit && editing && <form className="employee-idea-revision-form" aria-label="Dopuna ideje" onSubmit={async event => {event.preventDefault(); await persist(false);}}>
       <h2>Dopunite ideju</h2><p>Izmenite predlog i sačuvajte dopunu ili je odmah ponovo pošaljite.</p>
       <label htmlFor="revision-title">Naslov ideje</label><input ref={editor} id="revision-title" required maxLength={220} value={draft.title} disabled={working} onChange={event => setDraft({...draft, title: event.target.value})}/>

@@ -1,5 +1,7 @@
 # ZEPTER | Management Overview
 
+**Predsednik — drugi talas:** [projekat, aktivnosti i ideje](docs/PRESIDENT_WAVE_02.md) imaju mobilni/tablet/desktop prikaz. Odobrenje ideje zahteva komentar sa narednim koracima za rukovodioca koji ju je prosledio; odbijanje je završno. Dodati su stvarni završni statusi, lične oznake novih ideja i bezbedan nastavak isporuke odluke. Postojeće ideje ne zahtevaju migraciju.
+
 **Predsednik — prvi talas:** početni pregled kompanije i detaljan sektor prilagođeni su telefonu, tabletu i desktopu. Predsednik ulazi direktno preko istog ličnog linka na svakom uređaju, bez login formulara, menija naloga i odjave. Lokalni link je u ignorisanom server/private-access/predsednik-link.txt; ne objavljivati sadržaj. [Pristup, komande, API i stvarne provere](docs/PRESIDENT_WAVE_01.md).
 
 **Pregled pre predsedničkog interfejsa:** ispravke ovlašćenja, evidencije, komentara/priloga, prijave i konkurentnog računanja napretka opisane su u [pregledu zaposlenog i rukovodioca](docs/REVIEW_EMPLOYEE_MANAGER.md). Naknadna browser provera obuhvatila je obe uloge, 76 merenja rasporeda, tokove pisanja u izolovanom fixture-u i ispravku ulaska u novi nedeljni izveštaj. Dokument razlikuje potvrđene rezultate, preostale realne uređaje/produkcione provere i ograničenja demo smoke testa.

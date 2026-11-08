@@ -1,5 +1,5 @@
 import {Types} from 'mongoose';
-import {Project,Activity,Sector,Comment,Attachment,Assignment,DecisionRequest} from '../models/index.js';
+import {Project,Activity,Sector,Comment,Attachment,Assignment,DecisionRequest,Idea} from '../models/index.js';
 import {fail} from '../lib/errors.js';
 import {requireId,safePage,belgradeDay} from '../lib/utils.js';
 import {managerDayStart} from './manager.js';
@@ -19,7 +19,8 @@ async function signals(user,sectorId,now){
   {kind:'request',Model:DecisionRequest,filter:{...scope,status:'open'},path:'requests',order:{createdAt:1,_id:1}},
   {kind:'assignment',Model:Assignment,filter:{...scope,status:'blocked'},path:'assignments',order:{dueDate:1,_id:1}},
   {kind:'project',Model:Project,filter:risk,path:'projects',order:{dueDate:1,_id:1}},
-  {kind:'activity',Model:Activity,filter:{...scope,status:{$ne:'completed'},$and:[{project:{$in:openIds}},{project:{$nin:riskIds}}],$or:[{status:'blocked'},{dueDate:{$lt:today}}]},path:'activities',order:{dueDate:1,_id:1}}
+  {kind:'activity',Model:Activity,filter:{...scope,status:{$ne:'completed'},$and:[{project:{$in:openIds}},{project:{$nin:riskIds}}],$or:[{status:'blocked'},{dueDate:{$lt:today}}]},path:'activities',order:{dueDate:1,_id:1}},
+  {kind:'idea',Model:Idea,filter:{...scope,status:'forwarded'},path:'ideas',order:{forwardedAt:1,createdAt:1,_id:1}}
  ];
 }
 async function attentionFrom(groups,query={},now=new Date()){
@@ -32,7 +33,7 @@ async function attentionFrom(groups,query={},now=new Date()){
   selected.push(group.Model.find(group.filter).select('title description blockers type status dueDate sector').populate('sector','name').sort(group.order).skip(offset).limit(take).lean().then(rows=>rows.map(row=>({
    key:group.kind+':'+ref(row),id:row._id,kind:group.kind,title:row.title,sectorId:row.sector?._id||row.sector,sectorName:row.sector?.name||'Sektor nije dostupan',status:row.status,dueDate:row.dueDate,
    description:(row.blockers||row.description||(group.kind==='project'?'Proverite ugrožen rok i napredak projekta.':'Potreban je pregled predsednika.')).slice(0,180),
-   label:group.kind==='request'?({question:'Pitanje',approval:'Odobrenje',problem:'Problem'})[row.type]||'Zahtev':group.kind==='assignment'?'Blokirano':group.kind==='activity'?'Aktivnost':'Rok',link:'/'+group.path+'/'+row._id
+   label:group.kind==='request'?({question:'Pitanje',approval:'Odobrenje',problem:'Problem'})[row.type]||'Zahtev':group.kind==='assignment'?'Blokirano':group.kind==='activity'?'Aktivnost':group.kind==='idea'?'Ideja':'Rok',link:'/'+group.path+'/'+row._id
   }))));
   remaining-=take;offset=0;
  }

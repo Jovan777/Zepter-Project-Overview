@@ -15,5 +15,5 @@ test('Invalid credentials are stripped and never accepted; unrelated fragments a
  assert.equal(bad.invalid,true);assert.equal(bad.takeKey(),null);assert.equal(calls,1);
  assert.equal(capturePresidentEntry({pathname:'/projects',hash:'#comments'},history),null);assert.equal(calls,1);
  assert.equal(isPresidentEntryPath('/predsednik/guess'),false);
- assert.deepEqual(workspaceLinks.president.map(([path])=>path),['/','/sectors','/my-comments']);
+ assert.deepEqual(workspaceLinks.president.map(([path])=>path),['/','/sectors','/ideas','/my-comments']);
 });

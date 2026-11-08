@@ -6,7 +6,7 @@ import {Badge, EmptyState, Metric, Pagination, ProjectThumbnail, ResourceState} 
 import {formatDeadline} from './presentation.js';
 
 const tabs = [['all', 'Sve'], ['review', 'Na razmatranju'], ['revision', 'Na doradi'], ['forwarded', 'Prosleđene predsedniku']];
-const statuses = {submitted: ['Na razmatranju', 'gold'], in_review: ['Na razmatranju', 'gold'], revision_requested: ['Na doradi', 'warning'], forwarded: ['Prosleđeno predsedniku', 'success']};
+const statuses = {submitted: ['Na razmatranju', 'gold'], in_review: ['Na razmatranju', 'gold'], revision_requested: ['Na doradi', 'warning'], forwarded: ['Prosleđeno predsedniku', 'success'], approved: ['Predsednik odobrio', 'success'], rejected: ['Predsednik odbio', 'warning']};
 export default function EmployeeIdeas() {
   const [search, setSearch] = useSearchParams();
   const tab = tabs.some(([key]) => key === search.get('tab')) ? search.get('tab') : 'all';

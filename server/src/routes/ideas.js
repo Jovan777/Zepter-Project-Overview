@@ -6,25 +6,31 @@ import {safePage,requireId,same} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {audit,notify,notifyManagers} from '../services/events.js';
 import {allow} from '../lib/auth.js';
+import {presidentIdeas,markPresidentIdeaRead} from '../services/president-ideas.js';
+import {decideIdea,retryIdeaDecisionDelivery} from '../services/idea-decisions.js';
 const r=Router();
+r.get('/president',allow('president'),async(req,res)=>res.json(await presidentIdeas(req.user,req.query)));
+r.post('/:id/read',allow('president'),async(req,res)=>res.json(await markPresidentIdeaRead(req.user,req.params.id,req.get('If-Match'))));
+r.post('/:id/decision',allow('president'),async(req,res)=>{const result=await decideIdea(req.user,req.params.id,req.body,req.get('If-Match'));res.status(result.pending?202:200).json(result);});
+r.post('/:id/decision/deliver',allow('president'),async(req,res)=>{const result=await retryIdeaDecisionDelivery(req.user,req.params.id);res.status(result.pending?202:200).json(result);});
 // Manager feed: every list and global count derives its sector from the session.
 r.get('/sector',allow('manager'),async(req,res)=>{
  if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');
- const tabs={all:null,review:['submitted','in_review'],revision:['revision_requested'],forwarded:['forwarded']};
+ const tabs={all:null,review:['submitted','in_review'],revision:['revision_requested'],forwarded:['forwarded','approved','rejected']};
  const tab=req.query.tab||'all';if(!Object.hasOwn(tabs,tab))fail(422,'Nepoznat filter ideja.');
  const own={sector:req.user.sector},filter={...own,...(tabs[tab]?{status:{$in:tabs[tab]}}:{})};
  const {page:rawPage,limit:rawLimit}=safePage(req.query),page=Math.floor(rawPage),limit=Math.floor(rawLimit);
  const [items,total,all,review,revision,forwarded]=await Promise.all([
   Idea.find(filter).select('title description author createdAt status').sort({createdAt:-1,_id:-1}).skip((page-1)*limit).limit(limit).populate('author','firstName lastName').lean(),
   Idea.countDocuments(filter),Idea.countDocuments(own),Idea.countDocuments({...own,status:{$in:tabs.review}}),
-  Idea.countDocuments({...own,status:'revision_requested'}),Idea.countDocuments({...own,status:'forwarded'})
+  Idea.countDocuments({...own,status:'revision_requested'}),Idea.countDocuments({...own,status:{$in:tabs.forwarded}})
  ]);
  res.set('Cache-Control','no-store').json({items,total,page,limit,stats:{total:all,review,revision,forwarded}});
 });
 // Separate employee feed: totals cover all the author's ideas, independent of pagination/filter.
 r.get('/mine',async(req,res)=>{
  if(req.user.role!=='employee')fail(403,'Pregled je namenjen zaposlenom.');
- const statuses={all:null,review:['submitted','in_review'],revision:['revision_requested'],forwarded:['forwarded']};
+ const statuses={all:null,review:['submitted','in_review'],revision:['revision_requested'],forwarded:['forwarded','approved','rejected']};
  const tab=req.query.tab||'all';
  if(!Object.hasOwn(statuses,tab))fail(422,'Nepoznat filter ideja.');
  const own={author:req.user._id};
@@ -41,12 +47,12 @@ r.get('/mine',async(req,res)=>{
 });
 r.get('/',async(req,res)=>{
  const filter={};
- if(req.user.role==='president')filter.status='forwarded';
+ if(req.user.role==='president')filter.status={$in:['forwarded','approved','rejected']};
  else if(req.user.role==='manager'){if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');filter.sector=req.user.sector;}
  else if(req.user.role==='employee')filter.author=req.user._id;
  if(req.query.status){
-  if(!['submitted','in_review','revision_requested','forwarded'].includes(req.query.status))fail(422,'Nepoznat status ideje.');
-  if(req.user.role==='president'&&req.query.status!=='forwarded')fail(403,'Predsedniku su dostupne samo prosleđene ideje.');
+  if(!['submitted','in_review','revision_requested','forwarded','approved','rejected'].includes(req.query.status))fail(422,'Nepoznat status ideje.');
+  if(req.user.role==='president'&&!['forwarded','approved','rejected'].includes(req.query.status))fail(403,'Predsedniku su dostupne samo prosleđene ideje.');
   filter.status=req.query.status;
  }
  const {limit,skip,page}=safePage(req.query);

@@ -24,6 +24,7 @@ export const schemas={
  idea:z.strictObject({title:str(220),description:str(7000),benefit:maybe(4000)}),
  ideaPatch:z.strictObject({title:str(220).optional(),description:str(7000).optional(),benefit:maybe(4000)}),
  review:z.strictObject({action:z.enum(['forward','request_revision']),note:maybe(3000)}),
+ presidentIdeaDecision:z.strictObject({action:z.enum(['approve','reject']),comment:z.string().trim().max(4000).default(''),requestId:z.uuid()}).refine(d=>d.action!=='approve'||d.comment.length>0,{message:'Za odobrenje unesite komentar sa narednim koracima.',path:['comment']}),
  report:z.strictObject({sectorId:id,type:z.enum(['daily','weekly']),day,results:maybe(8000),problems:maybe(8000),nextSteps:maybe(8000)}),
  reportPatch:z.strictObject({results:maybe(8000),problems:maybe(8000),nextSteps:maybe(8000)}),
  assignment:z.strictObject({sectorId:id,assignedTo:id,title:str(220),description:maybe(4000),dueDate:day.optional()}),

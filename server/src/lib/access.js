@@ -29,7 +29,7 @@ export async function activityAccess(u,id,write=false){
 }
 export async function ideaAccess(u,id,write=false){
  requireId(id);const idea=await Idea.findById(id);if(!idea)fail(404,'Ideja nije pronađena.');
- const allowed=omniscient(u) ? (u.role!=='president'||idea.status==='forwarded') :
+ const allowed=omniscient(u) ? (u.role!=='president'||['forwarded','approved','rejected'].includes(idea.status)) :
   same(idea.author,u._id)||(u.role==='manager'&&same(idea.sector,u.sector));
  if(!allowed)fail(403,'Nemate pristup ideji.');
  if(write && !same(idea.author,u._id))fail(403,'Samo autor uređuje ideju.');
