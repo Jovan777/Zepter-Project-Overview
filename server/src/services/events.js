@@ -4,10 +4,12 @@ import {managerRecipients} from '../lib/access.js';
 import {emitAuthorized} from '../lib/president-socket.js';
 let io;
 export function attachSocket(serverIO){io=serverIO;}
+export function disconnectUserSockets(userId){io?.in('user:'+userId).disconnectSockets(true);}
 export async function userDataChanged(userId,entity){await emitAuthorized(io,'user:'+userId,'data:changed',{entity});}
 export async function audit(req,action,entity,entityId,details={}){
  await Audit.create({actor:req?.user?._id,action,entity,entityId,details,ip:req?.ip});
  if(io){
+  await emitAuthorized(io,'admins','data:changed',{entity,action});
   await emitAuthorized(io,'presidents','data:changed',{entity,action});
   if(req?.user?.sector)await emitAuthorized(io,'sector:'+req.user.sector,'data:changed',{entity,action});
  }

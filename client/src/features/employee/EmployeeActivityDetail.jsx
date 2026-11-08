@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Link, useBlocker, useParams} from 'react-router-dom';
+import {useBlocker, useParams} from 'react-router-dom';
+import {Link} from '../workspace/MotionNavigation.jsx';
 import Icon from '../../components/Icon.jsx';
 import {api} from '../../api.js';
 import useEmployeeResource from './useEmployeeResource.js';

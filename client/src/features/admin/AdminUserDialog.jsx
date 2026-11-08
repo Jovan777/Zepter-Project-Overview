@@ -1,0 +1,32 @@
+import React,{useState} from 'react';
+import {api} from '../../api.js';
+import {AdminDialog,AdminStatus,AdminWriteState,useAdminWrite} from './AdminComponents.jsx';
+import {roles,personName,protectedAccount,userDraft,refId,adminVersion,adminDate} from './adminPresentation.js';
+
+export default function AdminUserDialog({user,sectors,onClose,onSaved}){
+ const [current,setCurrent]=useState(user),[draft,setDraft]=useState(()=>userDraft(user)),[reason,setReason]=useState(''),[confirmation,setConfirmation]=useState(''),[notice,setNotice]=useState('');
+ const write=useAdminWrite(),protectedUser=protectedAccount(current),review=['pending','rejected'].includes(current.approval);
+ const dirty=JSON.stringify(draft)!==JSON.stringify(userDraft(current))||!!reason.trim(),disabled=write.busy||write.uncertain;
+ const field=(name,value)=>{setDraft(prev=>({...prev,[name]:value}));setNotice('');};
+ const selectedSector=sectors.find(s=>s._id===draft.sectorId),managerTaken=selectedSector?.manager&&refId(selectedSector.manager)!==current._id;
+ const verify=()=>write.check(async()=>{const result=await api('/admin/users/'+current._id);setCurrent(result.user);setDraft(userDraft(result.user));setReason('');setConfirmation('');setNotice('Prikazano je trenutno stanje naloga.');});
+ const save=action=>{
+  const body=action==='approve'?{role:draft.role,sectorId:draft.sectorId}:action==='reject'?{reason:reason.trim()}:action==='edit'?draft:undefined;
+  const endpoint='/admin/users/'+current._id+(action==='edit'?'':'/'+action);
+  void write.run(()=>api(endpoint,{method:'PATCH',body,headers:adminVersion(current),retry:false}),()=>onSaved(action));
+ };
+ return <AdminDialog title={review?'Pregled registracije':'Korisnički nalog'} dirty={dirty||write.uncertain} busy={write.busy} onClose={onClose}>
+  <div className="admin-person-summary"><span className="admin-avatar admin-avatar--large">{current.firstName?.[0]}{current.lastName?.[0]}</span><div><h3>{personName(current)}</h3><p>{current.email}</p><AdminStatus status={current.approval}/></div></div>
+  <dl className="admin-facts"><div><dt>Registrovan</dt><dd>{adminDate(current.createdAt)}</dd></div><div><dt>Poslednja prijava</dt><dd>{adminDate(current.lastLoginAt)}</dd></div></dl>
+  {protectedUser?<div className="admin-note"><strong>{roles[current.role]} · zaštićen nalog</strong><p>Uloga, pristup i sektor ovog naloga ne menjaju se u administraciji korisnika.</p></div>:<form onSubmit={e=>{e.preventDefault();save(review?'approve':'edit');}}>
+   {review?<div className="admin-note"><strong>Prijavljeno radno mesto: {current.jobTitle||'Nije navedeno'}</strong><p>Korisnik je zatražio ulogu: {current.requestedManager?'rukovodilac sektora':'zaposleni'}. Konačnu ulogu i sektor potvrđujete vi.</p></div>:<><div className="admin-form-pair"><label className="field">Ime<input required maxLength={80} value={draft.firstName} onChange={e=>field('firstName',e.target.value)} disabled={disabled}/></label><label className="field">Prezime<input required maxLength={80} value={draft.lastName} onChange={e=>field('lastName',e.target.value)} disabled={disabled}/></label></div><label className="field">Radno mesto<input maxLength={150} value={draft.jobTitle} onChange={e=>field('jobTitle',e.target.value)} disabled={disabled}/></label></>}
+   <div className="admin-form-pair"><label className="field">Konačna uloga<select value={draft.role} onChange={e=>field('role',e.target.value)} disabled={disabled}><option value="employee">Zaposleni</option><option value="manager">Rukovodilac sektora</option></select></label><label className="field">Sektor<select required value={draft.sectorId} onChange={e=>field('sectorId',e.target.value)} disabled={disabled}><option value="">Izaberite sektor</option>{sectors.map(s=><option key={s._id} value={s._id} disabled={!s.active&&s._id!==refId(current.sector)}>{s.name}{!s.active?' · neaktivan':''}</option>)}</select></label></div>
+   {draft.role==='manager'&&managerTaken&&(review||current.approval==='approved')&&<p className="admin-alert">Sektor već ima rukovodioca. Izaberite zaposlenog ili drugi sektor.</p>}
+   {!review&&(draft.role!==current.role||draft.sectorId!==refId(current.sector))&&<p className="admin-note">Promena ovlašćenja odjaviće korisnika. Promena sektora dostupna je kada su postojeće dodele razrešene.</p>}
+   {review&&current.approval==='pending'&&<label className="field">Razlog odbijanja <small>(opciono)</small><textarea rows={2} maxLength={400} value={reason} onChange={e=>setReason(e.target.value)} disabled={disabled}/></label>}
+   {notice&&<p className="admin-success" role="status">{notice}</p>}<AdminWriteState write={write} onVerify={verify}/>
+   {confirmation?<div className="admin-confirm"><strong>{confirmation==='disable'?'Deaktivirati nalog?':confirmation==='activate'?'Ponovo aktivirati nalog?':'Odbiti registraciju?'}</strong><p>{confirmation==='disable'?'Korisnik će biti odjavljen i neće moći da pristupa portalu. Njegov rad i istorija ostaju sačuvani.':confirmation==='activate'?'Korisnik će ponovo moći da se prijavi sa postojećom lozinkom i prikazanom ulogom.':'Korisnik neće imati pristup portalu. Odluku kasnije možete ponovo razmotriti.'}</p><div className="admin-actions"><button type="button" className="admin-button" disabled={disabled} onClick={()=>setConfirmation('')}>Odustani</button><button type="button" className={'admin-button '+(confirmation==='activate'?'admin-button--primary':'admin-button--danger')} disabled={disabled} onClick={()=>save(confirmation)}>{write.busy?'Čuvanje…':'Potvrdi'}</button></div></div>:<div className="admin-dialog-footer"><div className="admin-actions">{review?current.approval==='pending'&&<button type="button" className="admin-button" disabled={disabled} onClick={()=>setConfirmation('reject')}>Odbij prijavu</button>:<button type="button" className={'admin-button '+(current.approval==='approved'?'admin-button--danger':'')} disabled={disabled||dirty} title={dirty?'Prvo sačuvajte izmene':undefined} onClick={()=>setConfirmation(current.approval==='approved'?'disable':'activate')}>{current.approval==='approved'?'Deaktiviraj':'Aktiviraj nalog'}</button>}
+    <button className="admin-button admin-button--primary" disabled={disabled||(!review&&!dirty)||draft.role==='manager'&&!!managerTaken&&(review||current.approval==='approved')}>{write.busy?'Čuvanje…':review?'Odobri pristup':'Sačuvaj izmene'}</button></div></div>}
+  </form>}
+ </AdminDialog>;
+}

@@ -1,0 +1,68 @@
+// Explicit opt-in HTTP + MongoDB check, never the user's existing database.
+import 'dotenv/config';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import mongoose from 'mongoose';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import {once} from 'node:events';
+import * as models from '../../src/models/index.js';
+import adminRoutes from '../../src/routes/admin.js';
+import authRoutes from '../../src/routes/auth.js';
+import {requireAuth,accessToken,createSession,tokenDigest} from '../../src/lib/auth.js';
+import {errorHandler} from '../../src/lib/errors.js';
+if(process.env.ZEPTER_ADMIN_DB_TEST!=='1')throw Error('Enable ZEPTER_ADMIN_DB_TEST=1 explicitly.');
+const uri=new URL(process.env.MONGODB_URI||'');
+if(uri.protocol!=='mongodb:'||!['localhost','127.0.0.1'].includes(uri.hostname)||uri.username||uri.password)throw Error('Only the local MongoDB server is permitted.');
+const name='zepter_admin_test_'+crypto.randomBytes(8).toString('hex');uri.pathname='/'+name;uri.search='';
+process.env.JWT_SECRET=crypto.randomBytes(64).toString('hex');
+let server,checks=0;const check=(condition,message)=>{assert.ok(condition,message);checks++;};
+try{
+ await mongoose.connect(uri.href,{serverSelectionTimeoutMS:10000});
+ const [first,second]=await models.Sector.create([{name:'Izolovani sektor A',code:'TEST_A'},{name:'Izolovani sektor B',code:'TEST_B'}]);
+ const create=(tag,role='employee',approval='approved')=>models.User.create({firstName:'Test',lastName:tag,email:tag+'@isolated.test',passwordHash:'not-a-login-password',role,approval,sector:first._id,requestedManager:true});
+ const [admin,president,employee,pending,pending2]=await Promise.all([create('admin','admin'),create('president','president'),create('employee'),create('pending','employee','pending'),create('pending2','employee','pending')]);
+ const app=express();app.use(express.json(),cookieParser());app.use('/api/auth',authRoutes);app.use('/api',requireAuth);app.use('/api/admin',adminRoutes);app.use(errorHandler);server=app.listen(0,'127.0.0.1');await once(server,'listening');
+ const base='http://127.0.0.1:'+server.address().port+'/api';
+ const call=async(path,body,token=accessToken(admin),headers={})=>{const response=await fetch(base+path,{method:body===undefined?'GET':'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...headers},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});return {status:response.status,data:await response.json()};};
+ const oldToken=accessToken(employee),oldSession=await createSession({ip:'127.0.0.1',headers:{}},employee);
+ let result=await call('/admin/overview');check(result.status===200&&result.data.users===5&&result.data.pending===2,'Overview counts come from the isolated database.');
+ for(const user of [employee,president])check((await call('/admin/overview',undefined,accessToken(user))).status===403,'Other roles cannot open administration.');
+ result=await call('/admin/users/'+pending._id+'/approve',{role:'employee',sectorId:String(first._id)});check(result.status===200&&result.data.user.role==='employee','Requested manager does not assign manager privileges.');
+ check(!(await models.Sector.findById(first._id)).manager,'Approval as employee does not claim leadership.');
+ result=await call('/admin/users/'+employee._id,{role:'manager'});check(result.status===200&&result.data.user.sessionVersion===1,'Promotion updates rights and account version.');
+ check(String((await models.Sector.findById(first._id)).manager)===String(employee._id),'Sector points at the promoted manager.');
+ check((await call('/admin/users',undefined,oldToken)).status===401,'Old access token is invalid after a privilege change.');
+ result=await call('/admin/users/'+pending2._id+'/approve',{role:'manager',sectorId:String(first._id)});check(result.status===409,'A second manager is refused.');
+ result=await call('/admin/users/'+employee._id+'/disable',{});check(result.status===200&&result.data.user.approval==='disabled','An account can be deactivated.');
+ check(!(await models.Sector.findById(first._id)).manager,'Deactivation releases the manager slot.');
+ result=await call('/admin/users/'+employee._id+'/activate',{});check(result.status===200&&result.data.user.approval==='approved','The account can be reactivated.');
+ const refresh=await fetch(base+'/auth/refresh',{method:'POST',headers:{Cookie:'zepter_refresh='+oldSession.refresh},signal:AbortSignal.timeout(10000)});check(refresh.status===401,'The old refresh cookie stays revoked after reactivation.');
+ const race=crypto.randomBytes(48).toString('base64url');await models.Session.create({user:employee._id,tokenHash:tokenDigest(race),sessionVersion:0,expiresAt:new Date(Date.now()+60000)});
+ const raced=await fetch(base+'/auth/refresh',{method:'POST',headers:{Cookie:'zepter_refresh='+race},signal:AbortSignal.timeout(10000)});check(raced.status===401,'A refresh persisted after revocation cannot restore an old account version.');
+ const legacy=crypto.randomBytes(48).toString('base64url');await models.Session.create({user:admin._id,tokenHash:tokenDigest(legacy),expiresAt:new Date(Date.now()+60000)});
+ const compatible=await fetch(base+'/auth/refresh',{method:'POST',headers:{Cookie:'zepter_refresh='+legacy},signal:AbortSignal.timeout(10000)});check(compatible.status===200,'Legacy version-zero sessions remain compatible.');
+ const project=await models.Project.create({title:'Izolovan projekat',sector:first._id,members:[pending._id]});
+ check((await call('/admin/users/'+pending._id,{sectorId:String(second._id)})).status===409,'Project membership blocks an inconsistent transfer.');
+ check(String((await models.Project.findById(project._id)).members[0])===String(pending._id),'Blocked transfer preserves assignments.');
+ const empty=await models.Sector.create({name:'Slobodan sektor',code:'FREE'});
+ result=await call('/admin/sectors/'+empty._id,{name:'Novi naziv',active:false});check(result.status===200&&result.data.sector.active===false,'An empty sector can be edited and deactivated.');
+ check((await call('/admin/sectors/'+first._id,{active:false})).status===409,'A sector with active accounts cannot be deactivated.');
+ check((await call('/admin/sectors/'+empty._id,{name:first.name})).status===409,'Duplicate sector names are refused.');
+ check((await call('/admin/users/'+president._id+'/disable',{})).status===403,'The president is protected.');
+ check((await call('/admin/users/'+admin._id,{role:'employee'})).status===403,'The administrator cannot lose their own access.');
+ check((await call('/admin/users/'+pending._id,{role:'admin'})).status===422,'Privilege injection is rejected.');
+ result=await call('/admin/users?q=%5B.*%5D');check(result.status===200&&result.data.total===0,'Search uses literal text rather than arbitrary regex.');
+ result=await call('/admin/audit?administrative=true');check(result.status===200&&result.data.total>=5&&result.data.items.every(row=>row.action.startsWith('admin.')),'Administrative changes are audited and filterable.');
+ const user=await models.User.findById(pending._id);check((await call('/admin/users/'+user._id,{jobTitle:'Zastarela promena'},accessToken(admin),{'If-Match':'"2000-01-01T00:00:00.000Z"'})).status===409,'Stale user edits do not overwrite newer state.');
+ const [raceA,raceB]=await Promise.all([create('race-a','employee','pending'),create('race-b','employee','pending')]);
+ const competing=await Promise.all([raceA,raceB].map(user=>call('/admin/users/'+user._id+'/approve',{role:'manager',sectorId:String(second._id)})));
+ check(competing.map(row=>row.status).sort().join(',')==='200,409','Only one competing manager approval can succeed.');
+ check(await models.User.countDocuments({sector:second._id,role:'manager',approval:'approved'})===1,'Concurrent approvals leave a single sector manager.');
+ check(await models.User.countDocuments()===7&&await models.Project.countDocuments()===1,'No account or business history is deleted.');
+ console.log('PASS '+checks+' isolated admin HTTP/MongoDB checks.');
+}finally{
+ if(server)await new Promise(resolve=>server.close(resolve));
+ if(mongoose.connection.readyState){if(mongoose.connection.name!==name||!/^zepter_admin_test_[a-f0-9]{16}$/.test(name))throw Error('Unexpected database; refusing cleanup.');await mongoose.connection.dropDatabase();}
+ await mongoose.disconnect();
+}

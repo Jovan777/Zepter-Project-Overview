@@ -5,7 +5,9 @@ import {schemas} from '../lib/validation.js';
 import {safePage,requireId,same} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {audit,notify} from '../services/events.js';
+import {presidentComments} from '../services/president-comments.js';
 const r=Router();
+r.get('/mine/president',async(req,res)=>res.json(await presidentComments(req.user,req.query)));
 r.get('/',async(req,res)=>{
  const {targetType,targetId}=req.query;
  if(!targetType||!targetId)fail(422,'Nedostaje cilj komentara.');

@@ -1,5 +1,9 @@
 # Analiza postojećeg projekta
 
+Naknadno su dopunjeni [admin panel i upravljanje nalozima](ADMIN_PANEL.md): reaktiviranje, promena uloge/sektora uz zaštitu dodela, filteri i istorija. Time su rešeni raniji nalazi o nedostajućoj administraciji i revalidaciji običnih socket konekcija. Broj provera i preostala vizuelna ograničenja opisani su u tom dokumentu; istorijska tabela ispod nije aktuelna potvrda tih nedostataka.
+
+Aktuelna dopuna podataka i administracije: [COMPANY_SEED.md](COMPANY_SEED.md). Postojeća lokalna baza ima 12 korisnikovih sektora, očuvane naloge i istoriju, nove nedodeljene planove i admin obrazac za dodavanje sektora. Live smoke je prilagođen aktuelnom katalogu, odobrenjima i datumima; prolazi 19/19 bez izmene poslovnih podataka radi testa. Istorijski demo rezultati ispod ostaju zapis tadašnje provere.
+
 Aktuelni horizontalni pregled nakon svih zaposlenih/rukovodiočevih ekrana je u [REVIEW_EMPLOYEE_MANAGER.md](REVIEW_EMPLOYEE_MANAGER.md). Obuhvata ispravljene greške i nove regresije, povezani tok do predsednika, kompatibilnost i naknadno izvedene browser provere. Raniji rezultati i početni nalazi ispod predstavljaju istoriju projekta, ne automatsku potvrdu sadašnjih provera.
 
 Peti rukovodiočev talas završava [odluku o ideji i obaveštenja](MANAGER_WAVE_05.md). Odluka ima potvrdu, opcioni API uslov verzije i obavezni atomski prelaz statusa; UI čuva unos kod konflikta/nejasnog ishoda. Obaveštenja koriste stvarnog primaoca i ulogu aktera. Sačuvana je autorska dopuna sopstvene ideje rukovodioca. Prolaze 73 serverska, 26 klijentskih i 40 live RBAC podprovera, sintaksa i build; smoke je 15/19 zbog poznatih demo pretpostavki. Mobilni/tablet/desktop pregled i preostale granice navedeni su u dokumentaciji talasa. Notification nema istorijsku ulogu aktera/roditeljski komentar; filter zaposlenih obuhvata komentare i odgovore, a automatski scheduler kašnjenja ostaje poseban zadatak.

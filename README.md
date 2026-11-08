@@ -1,5 +1,15 @@
 # ZEPTER | Management Overview
 
+**Administracija:** [pregled, korisnici, sektori i istorija promena](docs/ADMIN_PANEL.md) sada su na `/admin`. Panel podržava pretragu/filtere, eksplicitno odobravanje uloge/sektora, uređivanje postojećih korisnika, deaktiviranje/reaktiviranje i uređivanje sektora, uz zaštitu dodela i privilegovanih naloga. Implementirani su telefon/desktop i zajednički prelazi; interaktivna browser provera ovog panela još nije potvrđena.
+
+**Sektori i podaci kompanije:** [inicijalizacija i očuvanje podataka](docs/COMPANY_SEED.md) uvodi 12 traženih sektora, uklanja prikazne demo oznake i čuva postojeće naloge, lozinke, istoriju i predsednikov URL. Administrator na `/admin` dodaje nove sektore. Lokalne adrese sada koriste `@zepter.test`; stare adrese rade kao alias van produkcije. Pregled bez upisa: `npm run seed:company`. Potvrđeno: 154 serverska, 75 klijentskih testova, 19 smoke i 40 RBAC podprovera. Novi admin obrazac još nema potvrđenu browser vizuelnu proveru.
+
+**Stalni predsednički URL:** `/president-zp-<nasumični-deo>` ostaje u adresnoj traci, radi na novom uređaju i čuva prefiks pri navigaciji i osvežavanju detalja. Tačan lokalni URL je u ignorisanom `server/private-access/predsednik-link.txt`. [Formatiranje postojećeg linka, kompatibilnost i provere](docs/PRESIDENT_PERSONAL_URL.md).
+
+**Vizuelni prelazi:** zajednički odlazni/dolazni prelazi ekrana, klizni indikator navigacije/tabova/filtera, postepeno pojavljivanje stvarno učitanih kartica i animacija panela/dijaloga za sve tri uloge. Telefon i desktop koriste isti sadržaj uz sistemsko smanjeno kretanje. [Ponašanje, provere i preostala vizuelna potvrda](docs/INTERFACE_MOTION.md).
+
+**Predsednik — peti talas:** [Moji komentari i instrukcije](docs/PRESIDENT_WAVE_05.md) objedinjuju sopstvene poruke sa svih nivoa, stvarne odgovore, filtere i direktan ulazak u konkretnu poruku razgovora. Implementirani su mobilni/tablet/desktop rasporedi; dokument razlikuje uspešne automatizovane/izolovane provere od još nepotvrđene browser vizuelne provere ovog ekrana.
+
 **Predsednik — četvrti talas:** [izveštaji i sva pitanja za pažnju](docs/PRESIDENT_WAVE_04.md) imaju mobilni/tablet/desktop prikaz. Zajednički čitač prati kompaniju, sektor, projekat ili zaposlenog i izabrani dnevni/nedeljni period; objavljeni snimci ostaju istorijski. Lista pažnje ima filtere, sektorske brojače i direktan ulazak u odgovor čak i na kasnijoj stranici razgovora. Dokument navodi izvršene testove i preostalu dopunsku browser proveru posle prekida alata.
 
 **Predsednik — treći talas:** [detalji ideje i aktivnosti](docs/PRESIDENT_WAVE_03.md) prate nove mobilne reference i imaju tablet/desktop raspored. Predsednik komentariše, šalje instrukcije i prilaže dokumente uz konkretnu poruku; zaposleni vidi prilog i odgovara u istom razgovoru. Sačuvane su odluke o idejama i zaštita od duplih komentara/priloga pri nejasnoj potvrdi.
@@ -193,6 +203,7 @@ Sve rute osim `/health`, `/api/public/sectors` i javnih auth akcija zahtevaju **
 | Komentari | `POST /api/comments` | Komentar ili instrukcija |
 | Komentari | `PATCH /api/comments/:id/resolve` | Označi instrukciju rešenom |
 | Komentari | `GET /api/comments/mine/instructions` | Predsednikove instrukcije |
+| Komentari | `GET /api/comments/mine/president` | Predsednikova istorija, stvarni odgovori, brojači i filteri |
 | Ideje | `GET /api/ideas`, `POST /api/ideas` | Lista / slanje ideje |
 | Ideje | `GET /api/ideas/:id`, `PATCH /api/ideas/:id` | Detalji / dorada |
 | Ideje | `POST /api/ideas/:id/resubmit` | Ponovno slanje |
@@ -271,10 +282,10 @@ npm run check:server
 npm run build:client
 ```
 
-Za integracione provere prvo pokrenuti backend sa postojećom lokalnom demo bazom. U lokalnom `server/.env` mora biti podešena `DEMO_SEED_PASSWORD` koja odgovara već postojećim nalozima. Ove komande ne seeduju i ne resetuju bazu:
+Za integracione provere prvo pokrenuti backend sa postojećom lokalnom bazom. U lokalnom `server/.env` mora biti podešena privatna testna lozinka koja odgovara postojećim nalozima: `LOCAL_TEST_PASSWORD` za smoke ili kompatibilni `DEMO_SEED_PASSWORD` (obavezan za RBAC). Ove komande ne seeduju i ne resetuju bazu:
 
 ```powershell
-npm run smoke:demo
+npm run smoke:company
 npm run test:rbac
 ```
 

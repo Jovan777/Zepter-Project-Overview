@@ -22,3 +22,17 @@ test('Expired and disabled personal socket sessions fail closed while ordinary c
  const io={in:()=>({fetchSockets:async()=>[socket({presidentAccess:binding}),socket({presidentAccess:{...binding,expiresAt:0}}),socket({})]})};
  await emitAuthorized(io,'presidents','data:changed',{});assert.equal(emitted,1);assert.equal(disconnected,2);
 });
+
+test('Administrative role, sector and account-version changes stop private events on ordinary user sockets',async t=>{
+ const user={_id:userId,role:'manager',approval:'approved',sector:'aa'.repeat(12),sessionVersion:0};
+ t.mock.method(User,'findById',async()=>user);
+ let sent=0,closed=0;const socket={data:{},emit:()=>sent++,disconnect:()=>closed++};
+ bindPresidentSocket(socket,jwt.sign({sub:userId,sv:0},'synthetic-only',{expiresIn:'15m'}),user);
+ const io={in:()=>({fetchSockets:async()=>[socket]})};
+ await emitAuthorized(io,'sector:'+user.sector,'data:changed',{});assert.equal(sent,1);
+ const original={...user};
+ for(const change of [{role:'employee'},{sector:'bb'.repeat(12)},{sessionVersion:1},{approval:'disabled'}]){
+  Object.assign(user,original,change);await emitAuthorized(io,'sector:'+original.sector,'notification:new',{title:'Private'});
+ }
+ assert.equal(sent,1);assert.equal(closed,4);
+});

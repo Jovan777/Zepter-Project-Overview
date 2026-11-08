@@ -1,5 +1,15 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+**Administracija naloga i sektora:** [ADMIN_PANEL.md](docs/ADMIN_PANEL.md) opisuje novi pregled, filtere/detalje naloga, PATCH postojećeg korisnika i reaktiviranje. Zaštićeni nalozi ostaju van tih izmena; poslovne dodele blokiraju nedosledan prenos sektora. Promene prava opozivaju sesije, a novo opciono polje Session.sessionVersion i socket revalidacija sprečavaju nastavak starog pristupa. Nije potrebna migracija poslovnih podataka.
+
+**Sektori i inicijalni planovi:** [katalog i lokalno usklađivanje](docs/COMPANY_SEED.md) čuvaju postojeće ID-jeve, uloge, lozinke, napredak i predsednički pristup; nije menjana šema. `POST /api/admin/sectors` ostaje samo za administratora, normalizuje naziv/šifru i vraća 409 za duplikate. Stare rezervisane lokalne mejl adrese imaju alias samo van produkcije, uz postojeću proveru lozinke i odobrenja. CLI podrazumevano samo prikazuje plan; `--apply` pravi privatnu kopiju pre upisa i proverava verziju postojećih zapisa.
+
+**Naknadna dopuna predsedničkog ulaza:** stalni `/president-zp-…` URL koristi isti postojeći auth ugovor i hash. CLI `format` preformatira samo privatni fajl bez MongoDB veze, promene ključa ili opoziva sesija. `issue` zapisuje novi format, a obični i legacy fragment pristup ostaju kompatibilni. [Provere i granice](docs/PRESIDENT_PERSONAL_URL.md).
+
+## Peti predsednički talas
+
+Read-only `GET /api/comments/mine/president` vraća paginiranu sopstvenu istoriju, javni kontekst, poslednji stvarni odgovor i globalne brojače/filtere. Autor se uzima isključivo iz sesije, druge uloge nemaju pristup, neprosleđene ideje su isključene. Sopstvena dopuna nije tuđi odgovor; resolved i nedostupan cilj su odvojena stanja. Deep link koristi postojeći fokus konkretne poruke. Stara ruta, šeme i statusi ostaju kompatibilni, bez migracije. [Ugovor, provere i ograničenja](docs/PRESIDENT_WAVE_05.md).
+
 ## Četvrti predsednički talas
 
 Read-only `/api/reports/president` i `/president/options` iza president ovlašćenja podržavaju objavljeni snimak ili automatsku evidenciju odgovarajućeg cilja/perioda. Generator aditivno čuva `activitySnapshot` i ID-jeve evidencije u postojećem Mixed polju, uz beogradski početak dana i isključivanje kašnjenja zatvorenih projekata. `/dashboard/president/attention` dodaje kategorije/statistiku i predsednikove answered instrukcije do resolved, a kompanija/sektori koriste iste izvore. Opcioni `focus` komentara računa stvarnu stranicu samo unutar autorizovanog razgovora. Nema izmene šema ni migracije. [Ugovori, provere i ograničenja](docs/PRESIDENT_WAVE_04.md).

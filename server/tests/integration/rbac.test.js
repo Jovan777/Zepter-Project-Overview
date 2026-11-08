@@ -65,6 +65,19 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
     await t.test('Administrator can list accounts', async () => {
       assert.equal((await call('/admin/users', admin)).status, 200);
     });
+    await t.test('Admin panel overview, account details and filters use current data without exposing credentials',async()=>{
+      const overview=await call('/admin/overview',admin),sectors=await call('/sectors',admin),profile=await call('/admin/users/'+employee.user._id,admin);
+      assert.equal(overview.status,200);assert.equal(overview.data.sectors,sectors.data.items.length);assert.equal(profile.status,200);assert.ok(!('passwordHash'in profile.data.user));
+      const filtered=await call('/admin/users?approval=approved&role=manager&sectorId='+manager.user.sector,admin);
+      assert.equal(filtered.status,200);assert.ok(filtered.data.items.every(row=>row.role==='manager'&&row.approval==='approved'&&row.sector?._id===manager.user.sector));
+      assert.equal((await call('/admin/users?q=%5B.*%5D',admin)).data.total,0);
+    });
+    await t.test('Other roles cannot read admin overview, private account detail or audit',async()=>{
+      for(const session of [employee,manager,president])for(const path of ['/admin/overview','/admin/users/'+employee.user._id,'/admin/audit'])assert.equal((await call(path,session)).status,403);
+    });
+    await t.test('Admin audit remains a read-only paginated feed with administrative filters',async()=>{
+      const result=await call('/admin/audit?administrative=true&limit=2',admin);assert.equal(result.status,200);assert.ok(result.data.items.length<=2);assert.ok(result.data.items.every(row=>row.action.startsWith('admin.')));
+    });
     await t.test('President can read another sector project', async () => {
       assert.equal((await call(`/projects/${foreign._id}`, president)).status, 200);
     });

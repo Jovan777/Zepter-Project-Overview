@@ -1,5 +1,6 @@
 import React, {createContext, useContext, useEffect, useRef, useState} from 'react';
-import {Link, useLocation, useSearchParams} from 'react-router-dom';
+import {useLocation, useSearchParams} from 'react-router-dom';
+import {Link} from '../workspace/MotionNavigation.jsx';
 import Icon from '../../components/Icon.jsx';
 import useEmployeeResource from './useEmployeeResource.js';
 import './employee.css';
@@ -7,6 +8,7 @@ import './employee-details.css';
 import './employee-ideas.css';
 import './employee-inbox.css';
 import WorkspaceNavigation from '../workspace/WorkspaceNavigation.jsx';
+import WorkspacePage from '../workspace/WorkspacePage.jsx';
 
 const DetailHeader = createContext(null);
 export function useEmployeeBackLink(to, label) {
@@ -54,7 +56,7 @@ export default function EmployeeShell({user, logout, newNotification, children})
     <header className={`employee-header ${isProjects || isIdeas ? 'employee-header--page' : ''} ${isDetail ? 'employee-header--detail' : ''}`}>
       {isIdeas ? <><Link className="employee-icon-button employee-back" to="/" aria-label="Nazad na moj pregled"><Icon name="back" size={25}/></Link><div className="employee-page-heading"><h1>Moje ideje</h1><p>Pregled ideja koje ste poslali</p></div></> : isProjects ? <><Link className="employee-icon-button employee-back" to="/" aria-label="Nazad na moj pregled"><Icon name="back" size={25}/></Link><div className="employee-page-heading"><h1>Moji projekti</h1><p>Projekti na kojima učestvujete</p></div><button className="employee-icon-button" onClick={toggleTools} aria-label="Pretraga i redosled projekata" aria-expanded={search.has('tools')} aria-controls="project-tools"><Icon name="more"/></button></> : <><div className="employee-detail-brand">{isDetail && <Link className="employee-icon-button employee-back" to={detailBack?.to || (isIdeaDetail ? '/ideas' : '/projects')} aria-label={detailBack?.label || (isIdeaDetail ? 'Nazad na moje ideje' : 'Nazad na moje projekte')}><Icon name="back" size={25}/></Link>}{isIdeaDetail ? <span className="employee-idea-header-title">Ideja</span> : <Link className="employee-brand" to="/" aria-label="Zepter — početna">ZEPTER</Link>}{!isIdeaDetail && <span className="workspace-header-context workspace-desktop-only">{desktopTitle}</span>}</div><div className="employee-header-actions">{!isDetail && <Link className="employee-icon-button" to="/projects?tools=1" aria-label="Pretraži moje projekte"><Icon name="search" size={25}/></Link>}<Link className="employee-icon-button employee-bell" to="/notifications" aria-label={unread ? `Obaveštenja, ${unread} nepročitanih` : 'Obaveštenja'}><Icon name="bell" size={25}/>{unread > 0 && <span className="employee-notification-count">{unread > 99 ? '99+' : unread}</span>}</Link><ProfileMenu user={user} logout={logout}/></div></>}
     </header>
-    <main className="employee-content" id="employee-main">{children}</main>
+    <WorkspacePage className="employee-content" id="employee-main">{children}</WorkspacePage>
     <WorkspaceNavigation user={user} logout={logout}/>
   </div></DetailHeader.Provider>;
 }

@@ -15,14 +15,15 @@
 - Instalacija iz root-a: `npm run install:all`. Zasebno: `npm ci` iz `server/` ili `client/`.
 - Razvoj u dva terminala: `npm run dev:server` i `npm run dev:client`.
 - Provere: `npm run test:server`, `npm run check:server`, `npm run build:client`.
-- Integracija sa već pokrenutim lokalnim demo API-jem: `npm run smoke:demo`, `npm run test:rbac`.
+- Integracija sa već pokrenutim lokalnim API-jem: `npm run smoke:company` (`smoke:demo` je alias), `npm run test:rbac`.
 - Node.js >=22; frontend i backend moraju raditi i bez root `node_modules`. Čuvaj lock fajlove u Gitu.
 - Nemoj automatski pokretati `npm audit fix` ili menjati verzije tokom nepovezanog zadatka.
 
 ## Podaci i tajne
 
 - Ne briši, resetuj, ponovo seeduj bazu niti menjaj demo naloge ili lozinke bez izričitog naloga korisnika.
-- `bootstrap`, `seed-demo.js` i `reset-demo-password.js` nisu deo instalacije, development starta ni automatskih testova.
+- `bootstrap`, `seed-company.js`, kompatibilni `seed-demo.js` i `reset-demo-password.js` nisu deo instalacije, development starta ni automatskih testova.
+- Usklađivanje podataka od 9. novembra 2026. korisnik je izričito odobrio i primenjeno je uz kopiju promenjenih polja: [docs/COMPANY_SEED.md](docs/COMPANY_SEED.md). Postoji 12 sektora, lokalne adrese koriste `@zepter.test`, a stare adrese rade kao alias samo van produkcije. Ne generiši ponovo stare demo korisnike i istoriju. Novi sektori/planovi ne dobijaju izmišljene zaposlene ili završen rad. `npm run seed:company` je samo pregled; novi upis i dalje traži izričit nalog. Ne menjaj sačuvani predsednikov URL. Admin dodaje nove sektore preko postojećeg autorizovanog API-ja i `/admin`.
 - Lokalna demo baza: `mongodb://127.0.0.1:27017/zepter_management_demo`; API: `http://localhost:4000`; frontend: `http://localhost:5173`.
 - Ne prikazuj sadržaj `.env`, tokene, hash lozinke, JWT/VAPID tajne, privatne priloge ili lične podatke u logu, izveštaju ili odgovoru.
 - Ne hardkoduj lozinke i tajne. `.env.example` sadrži samo netajne primere i prazna polja za tajne; lokalni `.env` ne prepisuj ako postoji.
@@ -33,6 +34,8 @@
 - Dopunska browser QA koristi opcioni `ZEPTER_UI_QA=1` samo u izolovanom fixture-u i `server/tests/fixtures/manager-ui-qa.mjs`. Podržani su employee/manager režimi i kontrole `comment-lost`, `worklog-lost`, `attachment-lost`; postupak je u `docs/REVIEW_EMPLOYEE_MANAGER.md` i `docs/MANAGER_WAVE_04.md`. Standardni `manager-wave04-check.mjs` pokreni na svežem fixture-u bez QA režima (početna četiri predloga); QA režim dodaje još 12 ideja.
 
 ## Ovlašćenja
+
+- Administracija je u `docs/ADMIN_PANEL.md` i `features/admin`. Ne vraćaj automatsko odobravanje requestedManager, ne dozvoli izmenu admin/president naloga niti prenos sektora preko postojećih dodela. Sačuvaj If-Match/CAS, atomsko zauzimanje rukovodećeg mesta, opoziv sesija i socket-a i proveru opcionog Session.sessionVersion pri refresh-u. Admin upise testiraj u zasebnoj bazi preko opt-in `admin-isolated.mjs`, nikada menjanjem postojećih naloga radi testa. Browser provere ostaju otvorene dok alat odbija pristup.
 
 - Backend je izvor autorizacije; UI ruta ili skriveno dugme nisu bezbednosna granica.
 - Administrator jedini odobrava registracije i konačnu ulogu. Javni unos `requestedManager` nije dodela ovlašćenja.
@@ -46,6 +49,11 @@
 
 ## Interfejs i izveštaji
 
+- Zajednički vizuelni prelazi su u `features/workspace/motion.css`, `WorkspacePage.jsx`, `pageMotion.js` i `MotionNavigation.jsx`; pravila/provere su u `docs/INTERFACE_MOTION.md`. Link/useNavigate delegiraju native prelaz postojećem React Router-u, bez zaobilaženja blocker-a. Pomeraj browser snimak, nikada glavni živi DOM kontejner; ne remount-uj forme ili odlaži poslovne potvrde radi efekta. Ulaz kartica prati stvarno montirane API podatke, ne samo loader. Sačuvaj glider tabova i native fallback, ne restartuj ulaz pri kucanju/običnom resize-u, čisti observer-e i uklonjene grupe. Poštuj živu promenu `prefers-reduced-motion`, zaštitu otvorenog dijaloga i neposredan pregled klizača. Browser potvrda ostaje otvorena dok alat odbija pristup.
+
+- Predsednički peti talas je u `docs/PRESIDENT_WAVE_05.md`: `/my-comments` koristi read-only `/comments/mine/president`, isključivo autora iz sesije. Brojači su globalni, status i nivo se kombinuju pre paginacije. Poslednji odgovor mora biti drugog autora, direktni parent iste poruke i isti cilj; sopstvena dopuna nije odgovor. Rešeno i nedostupno su posebne kategorije, a neprosleđena ideja ne ulazi ni u istoriju ni brojače. Deep link vodi do tačnog commentId/focus na stvarnoj stranici razgovora. Stara `/mine/instructions` ruta ostaje kompatibilna.
+- WAVE05 koristi samo izolovani predsednički QA fixture sa WAVE02, bez WAVE04; svež fixture je potreban za ponavljanje scenarija odgovora/rešavanja. Browser vizuelna provera petog talasa nije potvrđena jer je alat odbio pristup. Live read test koristi jedinstven device marker; rezervno čišćenje sme opozvati samo njegov tačan token hash, korisnika i marker u potvrđenoj lokalnoj demo bazi, nikada sve korisnikove sesije.
+
 - Predsednički četvrti talas je u `docs/PRESIDENT_WAVE_04.md`: zajednički read-only čitač izveštaja i cela lista pažnje. Objavljen izveštaj se čita iz sačuvanog `generated`, bez dopune današnjim stanjem; stari snimak bez spiska aktivnosti ostaje bez izmišljenog spiska. Evidencija je za izabrani period, dok su statusne liste jasno označene kao trenutno stanje/stanje pri objavi. Generator čuva aditivni activitySnapshot u postojećem Mixed polju i isključuje kašnjenja zatvorenih/arhiviranih projekata. Nepotvrđeni datum se primenjuje tek preko Prikaži, čitanjem vrednosti forme.
 - Pažnja uključuje samo predsednikove answered instrukcije sa postojećim dostupnim ciljem, do resolved, uz iste brojače kompanije i sektora. Fokus komentara ostaje ograničen na autorizovan cilj, računa stvarnu stranicu po createdAt+_id i otvara/označava komentar u razgovoru; ne ograničavati linkove na prvu stranicu. Obična obaveštenja nisu automatski pitanja za reakciju. Dopunska browser provera sporog odgovora ovog talasa ostaje otvorena posle ponovnog isključivanja browser alata; ne proglašavaj je završenom.
 
@@ -55,7 +63,7 @@
 - Odluka o ideji koristi obavezne If-Match i requestId. Sačuvana odluka i tekst su izvor istine; idempotentni komentar/obaveštenja mogu biti pending i nastavljaju se postojećim worker-om ili ovlašćenim deliver endpointom. Ne uvodi slepo novo odlučivanje posle nejasne potvrde. IdeaRead pripada korisniku iz sesije; status Nova nije vremenska pretpostavka ni odobrenje.
 - Testovi pisanja drugog predsedničkog talasa koriste WAVE02 fixture ili eksplicitnu president-isolated-db.mjs privremenu bazu. Pre brisanja proveriti tačno ime, prefiks i aktivnu konekciju samo te testne baze. Nikada ne preusmeravati čišćenje na demo bazu.
 
-- Predsednički prvi talas je u docs/PRESIDENT_WAVE_01.md: kompanija i sektor, mobilni/tablet/desktop. Predsednik nema login formular, meni naloga ni odjavu. Isti lični link otvara početni pregled i radi na novom uređaju; ne uvodi jednokratno vezivanje ili dodatne korisničke korake bez naloga korisnika. Autentifikacija je u pozadini; sama ruta nije ovlašćenje. Ključ izdaje eksplicitni CLI, čuva se hash i skida fragment pre router-a. Privatni izlaz je u ignorisanom server/private-access; ne ispisuj ceo link. Opoziv/zamena proveravaju se i pri socket dostavi. Standardne sesije ostaju kompatibilne.
+- Predsednički prvi talas je u docs/PRESIDENT_WAVE_01.md; naknadni stalni URL je u `docs/PRESIDENT_PERSONAL_URL.md`. `/president-zp-<nasumični-deo>` ostaje u adresnoj traci i služi kao router basename za sve predsedničke rute, reload i duboke linkove. Stari fragment ulaz ostaje kompatibilan. Predsednik nema login formular, meni naloga ni odjavu, isti link radi na novom uređaju. Autentifikacija je u pozadini; sama ruta nije ovlašćenje. CLI `format` menja samo URL fajl bez baze, promene ključa ili opoziva; issue/revoke su odvojene eksplicitne akcije. Privatni izlaz je u ignorisanom server/private-access; ne ispisuj ceo link. Ne ugrađuj ključ u manifest, cache, analytics ili javni kod; sačuvaj no-referrer. Opoziv/zamena proveravaju se i pri socket dostavi. Standardne sesije ostaju kompatibilne.
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.
 - Implementirano je svih osam ekrana zaposlenog i svih deset rukovodiočevih ekrana. Zaposleni i prva dva rukovodiočeva ekrana prošli su prilagođavanje opisano u `docs/RESPONSIVE_LAYOUTS.md`; naredni talasi su u `docs/MANAGER_WAVE_02.md`, `docs/MANAGER_WAVE_03.md`, `docs/MANAGER_WAVE_04.md` i `docs/MANAGER_WAVE_05.md`, sa zasebno navedenim granicama vizuelne provere. Dostavljene slike određuju mobilni raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.

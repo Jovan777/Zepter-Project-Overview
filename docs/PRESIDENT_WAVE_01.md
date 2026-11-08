@@ -42,6 +42,8 @@ Rokovi koriste početak dana Europe/Belgrade. Pretraga je do 160 znakova i treti
 
 ## Lični link — operatersko podešavanje
 
+**Naknadno ažuriranje:** novi stalni URL je `/president-zp-<nasumični-deo>` i ostaje basename tokom navigacije. Postojeći lokalni fajl preformatiran je bez promene ključa/sesija; [aktuelni postupak i provere](PRESIDENT_PERSONAL_URL.md). Opis fragmenta ispod ostaje dokumentacija kompatibilnog ranijeg ulaza.
+
 Link ima 32 nasumična base64url znaka iz 24 kriptografski nasumična bajta. Ključ je u fragmentu, a ne u putanji ili query parametrima. Frontend ga skida pre router-a i šalje u telu POST /api/auth/president-link. Ponovljena fragment navigacija ponovo pokreće isti postupak.
 
 Server proverava hash, generaciju, opoziv i postojeći odobreni predsednički nalog, pa u pozadini uspostavlja sesiju. Access token ostaje u memoriji; refresh u HttpOnly cookie-u. Ključ/token ne ide u localStorage, kod ili log.

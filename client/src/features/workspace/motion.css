@@ -1,0 +1,101 @@
+/* Visible page transitions, shared selection gliders and entrances after real data mounts. */
+.workspace-shell {
+  --motion-fast: 180ms;
+  --motion-enter: 420ms;
+  --motion-ease: cubic-bezier(.22,1,.36,1);
+}
+
+/* Only browser snapshots move; the live main element keeps its containing block. */
+:root {--workspace-enter-x: 36px; --workspace-exit-x: -24px;}
+:root[data-workspace-direction="back"] {--workspace-enter-x: -36px; --workspace-exit-x: 24px;}
+:root:has(.workspace-shell) {view-transition-name: none;}
+.workspace-page {view-transition-name: workspace-page;}
+::view-transition {pointer-events: none;}
+::view-transition-group(workspace-page) {animation-duration: 420ms; animation-timing-function: cubic-bezier(.22,1,.36,1);}
+::view-transition-old(workspace-page) {animation: workspace-page-out 260ms ease both; mix-blend-mode: normal;}
+::view-transition-new(workspace-page) {animation: workspace-page-in 420ms cubic-bezier(.22,1,.36,1) both; mix-blend-mode: normal;}
+
+.workspace-shell :where(button, a[href], summary) {
+  transition: color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    opacity var(--motion-fast) ease,
+    transform var(--motion-fast) var(--motion-ease);
+}
+.workspace-shell :where(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select) {
+  transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+.workspace-shell :where(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select):focus {
+  border-color: #c49b55;
+  box-shadow: 0 0 0 3px #b37b2014;
+}
+.workspace-shell :where(button, a[href], summary):focus-visible {
+  outline: 2px solid #b37b20;
+  outline-offset: 3px;
+}
+
+/* One real selection background moves between existing buttons, including wrapped rows. */
+.workspace-shell [data-motion-tabs] {position: relative; isolation: isolate;}
+.workspace-shell [data-motion-tabs]::before {
+  content: ''; position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none;
+  width: var(--motion-pill-width); height: var(--motion-pill-height);
+  transform: translate(var(--motion-pill-x), var(--motion-pill-y));
+  border-radius: 22px; background-color: var(--motion-pill-color);
+  background-image: var(--motion-pill-image);
+  box-shadow: 0 2px 6px #9b6a1510;
+  transition: transform 380ms var(--motion-ease), width 380ms var(--motion-ease), height 380ms var(--motion-ease);
+}
+.workspace-shell [data-motion-tabs] > :is(button, a) {position: relative; z-index: 1; background: transparent !important;}
+.workspace-shell :is(.manager-project-tabs, .manager-report-tabs, .president-segmented)[data-motion-tabs]::before {border-radius: 9px;}
+.workspace-shell .workspace-navigation nav[data-motion-tabs]::before {border-radius: 12px;}
+.workspace-shell details[open] > :not(summary) {animation: workspace-content-in 320ms var(--motion-ease);}
+.workspace-shell dialog[open] {animation: workspace-dialog-in var(--motion-enter) var(--motion-ease);}
+.workspace-shell dialog[open]::backdrop {animation: workspace-backdrop-in 260ms ease-out;}
+
+/* Animate changes to saved progress; the activity editor's live slider preview stays immediate. */
+.workspace-shell .employee-progress > span {transition: width 480ms var(--motion-ease); animation: workspace-progress-in 650ms var(--motion-ease); transform-origin: left center;}
+.workspace-shell .employee-activity-summary .employee-progress > span {transition: none; animation: none;}
+.workspace-shell .workspace-navigation nav a > svg {transition: transform var(--motion-fast) var(--motion-ease), color var(--motion-fast) ease;}
+.workspace-shell .workspace-navigation nav a.is-active > svg {animation: workspace-nav-in 360ms var(--motion-ease);}
+
+/* Hover lift belongs only to precise pointing devices; touch gets a short press response. */
+@media (hover: hover) and (pointer: fine) {
+  .workspace-shell :where(a[class*="-card"], a[class*="-row"], a[class*="-item"],
+    a.employee-metric, button.employee-metric, .manager-metric,
+    a.employee-shortcut, .manager-report-shortcuts > a,
+    .president-reports > a):not(:disabled):not([aria-disabled="true"]):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 24px #37281212;
+    border-color: #d9bd8c;
+  }
+  .workspace-shell .workspace-navigation nav a:hover > svg {transform: translateY(-1px);}
+}
+.workspace-shell :where(button:not(:disabled):not([aria-disabled="true"]),
+  a[class*="-card"], a[class*="-row"], a[class*="-item"],
+  a.employee-metric, a.employee-shortcut):active {transform: translateY(1px);}
+.workspace-shell .workspace-navigation nav a:active > svg {transform: scale(.94);}
+
+@keyframes workspace-page-in {from {opacity: 0; transform: translateX(var(--workspace-enter-x));} to {opacity: 1; transform: none;}}
+@keyframes workspace-page-out {from {opacity: 1; transform: none;} to {opacity: 0; transform: translateX(var(--workspace-exit-x));}}
+@keyframes workspace-content-in {from {opacity: 0;} to {opacity: 1;}}
+@keyframes workspace-dialog-in {from {opacity: 0; transform: translateY(20px) scale(.97);} to {opacity: 1; transform: none;}}
+@keyframes workspace-backdrop-in {from {opacity: 0;} to {opacity: 1;}}
+@keyframes workspace-nav-in {from {transform: translateY(3px) scale(.88);} to {transform: none;}}
+@keyframes workspace-progress-in {from {transform: scaleX(0);} to {transform: scaleX(1);}}
+
+/* Also covers existing loading/disclosure effects and a preference changed while the app is open. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {animation: none !important;}
+  .workspace-shell, .workspace-shell *, .workspace-shell *::before,
+  .workspace-shell *::after, .workspace-shell dialog::backdrop {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .workspace-shell :where(button, a[href]):active,
+  .workspace-shell :where(a[class*="-card"], a[class*="-row"], a[class*="-item"],
+    a.employee-metric, button.employee-metric, .manager-metric,
+    a.employee-shortcut, .manager-report-shortcuts > a, .president-reports > a):hover,
+  .workspace-shell .workspace-navigation nav a > svg {transform: none !important;}
+}

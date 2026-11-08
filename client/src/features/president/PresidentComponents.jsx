@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link} from '../workspace/MotionNavigation.jsx';
 import Icon from '../../components/Icon.jsx';
 import {Badge,IconDisc,ProjectThumbnail} from '../employee/EmployeeComponents.jsx';
 import {belgradeDate} from '../employee/presentation.js';

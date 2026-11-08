@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link} from '../workspace/MotionNavigation.jsx';
 import Icon from '../../components/Icon.jsx';
 import {attachmentImageUrl} from '../../api.js';
 import {formatDeadline, projectStatus} from './presentation.js';

@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Link, useLocation} from 'react-router-dom';
+import {useLocation} from 'react-router-dom';
+import {Link} from '../workspace/MotionNavigation.jsx';
 import {api} from '../../api.js';
 import useEmployeeResource from './useEmployeeResource.js';
 import {belgradeDate} from './presentation.js';

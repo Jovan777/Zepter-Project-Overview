@@ -8,6 +8,7 @@ import router from '../src/routes/auth.js';
 import {User,Session,PresidentAccessLink} from '../src/models/index.js';
 import {tokenDigest,verifyAccess,accessToken} from '../src/lib/auth.js';
 import {errorHandler} from '../src/lib/errors.js';
+import {presidentAccessUrl,presidentUrlKey} from '../src/lib/president-link-url.js';
 
 const userId='77'.repeat(12),linkId='ec'.repeat(12);
 let address=0;
@@ -35,6 +36,16 @@ async function fixture(t,run){
  try{await run({user,key,link,sessions,post,enter});}finally{await new Promise(resolve=>server.close(resolve));}
 }
 const cookie=response=>response.headers.get('set-cookie')?.split(';')[0];
+
+test('The same permanent URL authenticates independent devices and still fails after revocation',async t=>fixture(t,async({key,post,link,sessions})=>{
+ const url=presidentAccessUrl(process.env.CLIENT_ORIGIN,key);
+ const first=await post('president-link',{key:presidentUrlKey(url,process.env.CLIENT_ORIGIN)});
+ const second=await post('president-link',{key:presidentUrlKey(url,process.env.CLIENT_ORIGIN)});
+ assert.equal(first.status,200);assert.equal(second.status,200);assert.notEqual(cookie(first),cookie(second));
+ assert.equal(sessions.length,2);
+ link.revokedAt=new Date();assert.equal((await post('president-link',{key:presidentUrlKey(url,process.env.CLIENT_ORIGIN)})).status,401);
+ assert.equal(sessions.length,2);
+}));
 
 test('A reusable personal link opens two independent president sessions with a private rotating cookie',async t=>fixture(t,async({enter,sessions,user,link})=>{
  const first=await enter(),second=await enter();assert.equal(first.status,200);assert.equal(second.status,200);

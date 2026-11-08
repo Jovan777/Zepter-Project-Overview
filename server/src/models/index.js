@@ -126,6 +126,7 @@ export const Audit=models.Audit || model('Audit',auditSchema);
 
 const sessionSchema=new Schema({
  user:{...ref('User',true),index:true},tokenHash:{type:String,required:true,unique:true},
+ sessionVersion:{type:Number},
  presidentLink:ref('PresidentAccessLink'),presidentLinkGeneration:Number,
  expiresAt:{type:Date,required:true},revokedAt:Date,createdIp:txt(100),device:txt(240)
 },opts);

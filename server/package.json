@@ -11,9 +11,11 @@
     "start": "node src/index.js",
     "bootstrap": "node src/scripts/bootstrap.js",
     "president:link": "node src/scripts/president-link.js",
+    "seed:company": "node src/scripts/seed-company.js",
     "test": "node --test tests/*.test.js",
     "check": "node scripts/check.mjs",
     "smoke:demo": "node src/scripts/smoke-demo.js",
+    "smoke:company": "node src/scripts/smoke-demo.js",
     "test:rbac": "node --test tests/integration/*.test.js"
   },
   "dependencies": {

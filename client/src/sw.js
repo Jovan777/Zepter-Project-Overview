@@ -1,5 +1,6 @@
 /// <reference lib="WebWorker" />
 import {precacheAndRoute,cleanupOutdatedCaches} from 'workbox-precaching';
+import {presidentScopedPath} from './features/president/presidentEntry.js';
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 // SECURITY: No network/API data caching. Private project information is online-only.
@@ -15,7 +16,7 @@ self.addEventListener('notificationclick',event=>{
  const url=event.notification.data?.url||'/';
  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{
   const client=clients.find(c=>new URL(c.url).origin===self.location.origin);
-  if(client){client.focus();client.navigate(url);return;}
+  if(client){client.focus();client.navigate(presidentScopedPath(new URL(client.url).pathname,url));return;}
   return self.clients.openWindow(url);
  }));
 });

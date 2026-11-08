@@ -36,7 +36,7 @@ export async function requireAuth(req,_res,next){
 export function allow(...roles){return (req,_res,next)=>roles.includes(req.user.role)?next():next(Object.assign(new Error('Nemate ovlašćenje.'),{status:403}));}
 export async function createSession(req,user,link){
  const refresh=crypto.randomBytes(48).toString('base64url');
- await Session.create({user:user._id,tokenHash:tokenDigest(refresh),expiresAt:new Date(Date.now()+days*86400000),createdIp:req.ip,device:(req.headers['user-agent']||'').slice(0,240),...(link?{presidentLink:link._id,presidentLinkGeneration:link.generation}:{})});
+ await Session.create({user:user._id,sessionVersion:user.sessionVersion||0,tokenHash:tokenDigest(refresh),expiresAt:new Date(Date.now()+days*86400000),createdIp:req.ip,device:(req.headers['user-agent']||'').slice(0,240),...(link?{presidentLink:link._id,presidentLinkGeneration:link.generation}:{})});
  return {accessToken:accessToken(user,link),refresh};
 }
 export function setRefreshCookie(res,refresh){

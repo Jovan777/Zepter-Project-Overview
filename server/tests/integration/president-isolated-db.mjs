@@ -20,6 +20,7 @@ try{
  const {generateReport}=await import('../../src/services/reports.js');
  const {presidentReport}=await import('../../src/services/president-reports.js');
  const {presidentAttention,presidentOverview}=await import('../../src/services/president.js');
+ const {presidentComments}=await import('../../src/services/president-comments.js');
  await Promise.all([User.init(),Sector.init(),Idea.init(),IdeaRead.init(),Comment.init(),Notification.init(),Attachment.init(),Project.init(),Activity.init(),WorkLog.init(),Report.init()]);
  const sector=await Sector.create({name:'Isolated test sector',code:'ISOLATED_W02'});
  const makeUser=(role,index)=>User.create({firstName:'Test',lastName:role,email:'isolated-'+index+'@fixture.zepter.test',passwordHash:'synthetic-not-for-login',role,approval:'approved',...(role==='president'?{}:{sector:sector._id})});
@@ -89,6 +90,20 @@ try{
   check(response.ok&&body.page===2&&body.items.some(row=>row._id===String(instruction2._id)),'Real focused pagination finds the authorized comment on a later page.');
   check((await fetch(base+'/comments?'+new URLSearchParams({targetType:'project',targetId:String(project._id),focus:String(instruction1._id)}))).status===404,'Real focus query cannot use another conversation.');
  });
+ const historical=await Comment.create({targetType:'activity',targetId:finished._id,author:president._id,kind:'comment',body:'Real history comment.',responseStatus:'open'});
+ await Comment.create({targetType:'activity',targetId:finished._id,parent:historical._id,author:manager._id,kind:'comment',body:'First real answer.',createdAt:new Date(Date.now()+1000)});
+ const latestReply=await Comment.create({targetType:'activity',targetId:finished._id,parent:historical._id,author:author._id,kind:'comment',body:'Latest real answer.',createdAt:new Date(Date.now()+2000)});
+ await Comment.create({targetType:'activity',targetId:finished._id,parent:historical._id,author:president._id,kind:'comment',body:'President self followup.',createdAt:new Date(Date.now()+3000)});
+ const history=await presidentComments(president,{targetType:'activity'}),historicalCard=history.items.find(row=>String(row._id)===String(historical._id));
+ check(historicalCard.status==='answered'&&String(historicalCard.reply._id)===String(latestReply._id),'Real history derives a genuine latest answer from legacy-open metadata.');
+ check(historicalCard.reply.author.firstName==='Test'&&!JSON.stringify(historicalCard).includes('passwordHash'),'Reply author is populated and sanitized.');
+ check(historicalCard.target.projectTitle===project.title&&historicalCard.link.includes('?commentId='+historical._id),'Actual activity context and focused link are preserved.');
+ check(history.stats.total===history.stats.open+history.stats.answered+history.stats.resolved+history.stats.unavailable,'All MongoDB history counters partition the same authored records.');
+ const hiddenIdea=await Idea.create({title:'Unforwarded history',description:'Private synthetic idea.',sector:sector._id,author:author._id,status:'submitted'});
+ await Comment.create({targetType:'idea',targetId:hiddenIdea._id,author:president._id,body:'HIDDEN_HISTORY_BODY'});
+ const visible=await presidentComments(president,{targetType:'idea'});check(!JSON.stringify(visible).includes('HIDDEN_HISTORY_BODY'),'A former idea comment cannot bypass its present visibility.');
+ const missing=await Comment.create({targetType:'project',targetId:new mongoose.Types.ObjectId(),author:president._id,body:'Own missing-target history.'});
+ const unavailable=await presidentComments(president,{status:'unavailable'});check(unavailable.items.some(row=>String(row._id)===String(missing._id)&&row.link===null),'Deleted target retains own history with no broken navigation.');
  console.log('PASS '+checks+' real MongoDB checks in a temporary isolated database. Demo data unchanged.');
 }catch(error){
  console.error(error.message?.startsWith('Check failed:')?error.message:'Isolated MongoDB check failed ('+error.name+'). No configuration values printed.');process.exitCode=1;

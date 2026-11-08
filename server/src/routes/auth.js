@@ -7,6 +7,7 @@ import {schemas} from '../lib/validation.js';
 import {requireAuth,createSession,setRefreshCookie,clearRefreshCookie,refreshCookieName,tokenDigest,originGuard,validPresidentLink} from '../lib/auth.js';
 import {fail} from '../lib/errors.js';
 import {audit} from '../services/events.js';
+import {legacyLocalLogin} from '../lib/account-email.js';
 const r=Router();
 const limit=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja. Pokušajte kasnije.'}});
 const linkLimit=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja otvaranja linka. Pokušajte kasnije.'}});
@@ -16,7 +17,7 @@ r.post('/president-link',linkLimit,originGuard,async(req,res)=>{
  const tokenHash=tokenDigest(key),link=await PresidentAccessLink.findOne({tokenHash,revokedAt:null});
  const user=link?await User.findById(link.user):null;
  if(!link||!await validPresidentLink(link._id,link.generation,user))fail(401,'Lični link nije važeći ili je opozvan.');
- const active=await PresidentAccessLink.findOneAndUpdate({_id:link._id,tokenHash,generation:link.generation,revokedAt:null},{$set:{lastUsedAt:new Date()}},{new:true});
+ const active=await PresidentAccessLink.findOneAndUpdate({_id:link._id,tokenHash,generation:link.generation,revokedAt:null},{$set:{lastUsedAt:new Date()}},{returnDocument:'after'});
  if(!active)fail(401,'Lični link nije važeći ili je opozvan.');
  const session=await createSession(req,user,active);setRefreshCookie(res,session.refresh);
  user.lastLoginAt=new Date();await user.save();
@@ -33,7 +34,8 @@ r.post('/register',limit,async(req,res)=>{
 });
 r.post('/login',limit,async(req,res)=>{
  const d=schemas.login.parse(req.body);
- const user=await User.findOne({email:d.email.toLowerCase()}).select('+passwordHash');
+ const email=d.email.toLowerCase();let user=await User.findOne({email}).select('+passwordHash');
+ const legacy=legacyLocalLogin(email);if(!user&&legacy)user=await User.findOne({email:legacy}).select('+passwordHash');
  const good=user?await bcrypt.compare(d.password,user.passwordHash):await bcrypt.compare(d.password,'$2a$12$GNVQvzKQhFnVHMptSYs3g.4maUHedvuXe0UqSqKw.lpwDrlo5p/Iu');
  if(!good)fail(401,'Pogrešan mejl ili lozinka.');
  if(user.approval!=='approved')fail(403,'Nalog nije odobren ili je deaktiviran.');
@@ -48,9 +50,10 @@ r.post('/refresh',originGuard,async(req,res)=>{
  if(!s||s.revokedAt||s.expiresAt<new Date()){clearRefreshCookie(res);fail(401,'Prijavite se ponovo.');}
  const user=await User.findById(s.user);
  if(!user||user.approval!=='approved'){await s.deleteOne();clearRefreshCookie(res);fail(401,'Nalog nije aktivan.');}
+ if((s.sessionVersion||0)!==(user.sessionVersion||0)){clearRefreshCookie(res);fail(401,'Pristup nalogu je promenjen. Prijavite se ponovo.');}
  if(s.presidentLink&&!await validPresidentLink(s.presidentLink,s.presidentLinkGeneration,user)){await s.deleteOne();clearRefreshCookie(res);fail(401,'Lični pristup je opozvan. Otvorite novi lični link.');}
  // Atomic rotation: an old refresh token cannot be used twice.
- const updated=await Session.findOneAndUpdate({_id:s._id,revokedAt:null},{$set:{revokedAt:new Date()}},{new:true});
+ const updated=await Session.findOneAndUpdate({_id:s._id,revokedAt:null},{$set:{revokedAt:new Date()}},{returnDocument:'after'});
  if(!updated){clearRefreshCookie(res);fail(401,'Sesija je već obnovljena.');}
  const {accessToken,refresh}=await createSession(req,user,s.presidentLink?{_id:s.presidentLink,generation:s.presidentLinkGeneration}:undefined);setRefreshCookie(res,refresh);
  res.json({accessToken,user:user.toJSON()});

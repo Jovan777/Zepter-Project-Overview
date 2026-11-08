@@ -13,6 +13,7 @@ export const schemas={
  sector:z.strictObject({name:str(120),code:z.string().regex(/^[A-Za-z0-9_-]{2,20}$/),description:maybe(1500)}),
  sectorPatch:z.strictObject({name:str(120).optional(),description:maybe(1500),active:z.boolean().optional()}),
  approval:z.strictObject({role:z.enum(['employee','manager']),sectorId:id.optional()}),
+ adminUserPatch:z.strictObject({firstName:str(80).optional(),lastName:str(80).optional(),jobTitle:maybe(150),role:z.enum(['employee','manager']).optional(),sectorId:id.optional()}).refine(value=>Object.keys(value).length>0),
  rejection:z.strictObject({reason:maybe(400)}),
  project:z.strictObject({sectorId:id,title:str(220),description:maybe(5000),status:projectStatus.default('planned'),priority:z.enum(['low','medium','high','urgent']).default('medium'),dueDate:day.optional(),startDate:day.optional(),ownerId:id.optional(),memberIds:z.array(id).max(80).default([])}),
  projectPatch:z.strictObject({title:str(220).optional(),description:maybe(5000),status:projectStatus.optional(),priority:z.enum(['low','medium','high','urgent']).optional(),dueDate:day.nullable().optional(),startDate:day.nullable().optional(),ownerId:id.nullable().optional(),memberIds:z.array(id).max(80).optional(),archived:z.boolean().optional()}),

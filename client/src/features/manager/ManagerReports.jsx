@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {Link, useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router-dom';
+import {Link} from '../workspace/MotionNavigation.jsx';
 import Icon from '../../components/Icon.jsx';
 import {api} from '../../api.js';
 import {Badge, EmptyState, IconDisc, Pagination, ResourceState} from '../employee/EmployeeComponents.jsx';

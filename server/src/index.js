@@ -67,10 +67,10 @@ io.use(async(socket,next)=>{
  const token=socket.handshake.auth?.token;
  const user=token?await verifyAccess(token):null;
  if(!user)return next(new Error('Unauthorized'));
- bindPresidentSocket(socket,token);
+ bindPresidentSocket(socket,token,user);
  socket.data.userId=String(user._id);socket.data.sectorId=user.sector?String(user.sector):null;socket.data.role=user.role;next();
 });
-io.on('connection',socket=>{socket.join('user:'+socket.data.userId);if(socket.data.sectorId)socket.join('sector:'+socket.data.sectorId);if(socket.data.role==='president')socket.join('presidents');});
+io.on('connection',socket=>{socket.join('user:'+socket.data.userId);if(socket.data.sectorId)socket.join('sector:'+socket.data.sectorId);if(socket.data.role==='president')socket.join('presidents');if(socket.data.role==='admin')socket.join('admins');});
 attachSocket(io);
 await fs.mkdir(path.resolve(process.env.UPLOAD_DIR||'./private-uploads'),{recursive:true});
 await mongoose.connect(process.env.MONGODB_URI);

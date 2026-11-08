@@ -1,5 +1,9 @@
 # Predlog faznog razvoja React frontend-a
 
+**Administracija sektora:** implementirani su pregled/pretraga i dodavanje novog sektora na `/admin`, sa predlogom šifre, proverom duplikata, stanjima greške i zaštitom od ponavljanja upisa nepoznatog ishoda. Novi sektori dolaze iz API-ja u registraciju i predsednički pregled. [Podaci, ugovor i provere](COMPANY_SEED.md). Zasebna vizuelna/browser provera novog admin obrasca ostaje otvorena zbog nedostupnog browser alata.
+
+**Predsednik — peti talas:** implementiran je ekran 9, [Moji komentari i instrukcije](PRESIDENT_WAVE_05.md), sa stvarnim odgovorima, globalnim brojačima, kombinovanim filterima i fokusom konkretne poruke. Mobilni/tablet/desktop rasporedi su implementirani; browser vizuelna provera novog ekrana još nije potvrđena. Time je implementirano svih devet planiranih predsedničkih ekrana, uz dokumentovane preostale provere. Sledeći razvoj određuje korisnik.
+
 **Predsednik — četvrti talas:** implementirani su zajednički čitač dnevnih/nedeljnih izveštaja i pregled svih pitanja za pažnju, prvo mobilno, zatim tablet/desktop. Objavljeni sadržaj se odvaja od aktuelnog stanja, a odgovori vode do tačne instrukcije i njene stranice. [Obuhvat, potvrđene provere i preostalo](PRESIDENT_WAVE_04.md). Sledeći ekran i dalje određuje korisnik; dopunska provera sporog browser odgovora nije zatvorena.
 
 **Predsednik — treći talas:** završeni su posebni detalji ideje i aktivnosti prema sledećim referencama, za mobilni/tablet/desktop. Razgovor podržava priloge uz konkretan komentar i oporavak slanja, uz očuvane odluke o idejama. [Obuhvat, stvarne provere i granice](PRESIDENT_WAVE_03.md). Sledeći talas i dalje određuje korisnik.
@@ -51,7 +55,7 @@ Kriterijum: na telefonu predsednik dolazi od kompanije do aktivnosti jasnom hije
 | 5. Detalji ideje | `/ideas/:id`, komentari i privatni prilozi; bez promene toka odobravanja |
 | 7. Dnevni/nedeljni izveštaji | `/reports/preview` + `/reports`; company/sector/project/employee, URL filteri, prikaz konsolidovanih podataka |
 | 8. Potrebna moja pažnja | `/dashboard/attention`, `/requests`, `/assignments`; uskladiti brojač/listu i uključiti otvorene instrukcije |
-| 9. Moji komentari i instrukcije | `/comments/mine/instructions`; status, odgovor i ispravan link ka svim tipovima sadržaja |
+| 9. Moji komentari i instrukcije | `/comments/mine/president`; paginacija, brojači, poslednji odgovor i fokus poruke na svim nivoima; stara ruta ostaje kompatibilna |
 
 Podržati postojeće detalje zahteva, odgovor predsednika i kreiranje zaduženja rukovodiocu kao povezane tokove. Ne uvoditi novi sistem komentara. Izveštaj ne traži ponovno unošenje dnevnih rezultata; rukovodiočev objavljeni tekst dopunjuje agregat evidencije.
 

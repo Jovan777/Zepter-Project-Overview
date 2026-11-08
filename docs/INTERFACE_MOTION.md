@@ -1,0 +1,24 @@
+# Vizuelni prelazi interfejsa
+
+Zajednički sloj `client/src/features/workspace/motion.css`, `WorkspacePage`, `MotionNavigation` i `pageMotion.js` primenjen je na završene ekrane zaposlenog, rukovodioca i predsednika. Koristi postojeće belo/zlatne komponente i iste mobilne, tablet i desktop rasporede, bez novih zavisnosti, API promena ili poslovnih upisa. Naknadna dorada zamenjuje presuptilni ulaz koji se ranije završavao pre dolaska stvarnih API podataka.
+
+## Ponašanje
+
+- Prelazak na drugu putanju: podržani browser koristi stvarni odlazni/dolazni View Transition, sa pomeranjem snimaka od 24/36 px, nestajanjem starog i pojavljivanjem novog prikaza do 420 ms. Browser Back obrće smer. Zaglavlje i navigacija ostaju uživo. Zajednički Link/useNavigate delegiraju postojeće događaje, opcije i zaštite React Router-u; numerička navigacija ostaje njegova. [Dokumentacija mehanizma u React Router 7](https://reactrouter.com/7.9.6/how-to/view-transitions).
+- Učitani sadržaj: MutationObserver prati stvarno dodate kartice/panele, uključujući podatke pristigle posle loader-a. Pojavljivanje koristi opacity 0→1 i pomak 18 px tokom 420 ms, uz razmak 35 ms i najviše 175 ms čekanja. Browser bez native prelaza zadržava ovaj efekat. Sadržaj pristigao tokom native snimka otkriva se kada se taj prelaz završi.
+- Tabovi, filteri i obe navigacije: jedna pozadina klizi do izabranog dugmeta/linka tokom 380 ms. Položaj i dimenzije računaju se iz stvarnih elemenata, uključujući prelom u redove, horizontalni scroll i desktop kolonu. Dugmad i njihova semantika/fokus ostaju isti.
+- Raspored: postojeće kartice koje promene položaj dobijaju ograničeno pomeranje iz prethodnog položaja tokom 340 ms. Kartica koja se već animira ne dobija nove transformacije pri svakom ResizeObserver događaju. Kucanje i običan ponovljen render ne ponavljaju njen ulaz.
+- Paneli i details: izabrani projektni panel se pojavljuje uz pomak 12 px; details koji menja visinu pri kliku animira stvarnu početnu/završnu visinu tokom 320 ms. Brzo otvaranje/zatvaranje prekida prethodni efekat bez ostavljenog inline overflow-a. Dijalog ulazi od 20 px i scale .97 tokom 420 ms; zatvaranje i potvrđivanje nisu odloženi.
+- Dugmad i napredak: prelazi boje/ivice/senke traju 180 ms, desktop hover podiže karticu 3 px; touch dobija kratki press. Traka napretka se pojavljuje tokom 650 ms, a sačuvani procenat menja širinu tokom 480 ms. Pregled klizača zaposlenog ostaje neposredan.
+- `prefers-reduced-motion: reduce`: novi i postojeći efekti radnog prostora su isključeni, uključujući puls učitavanja, hover/press pomeranje i tranzicije. Promena podešavanja tokom aktivne JS animacije odmah je otkazuje. Statične boje, statusi i fokus ostaju dostupni.
+
+Glavni živi DOM kontejner se ne transformiše; kod native prelaza pomeraju se browser snimci. Ne dodaju se kopije formi, novi route ključevi, remount na resize ili čekanje na animaciju pre poslovne akcije. Paneli, forme i zaštite unosa ostaju postojeći; ne ponavlja se API upis radi animacije. Otvoren dijalog sprečava pomeranje sadržaja u pozadini. Efekti, listener-i, observer-i i reference na uklonjene tabove čiste se. Nema novih beskonačnih animacija. Programatsko otvaranje details i dalje ima opacity efekat; visina se animira u postojećem click toku.
+
+## Provere i granice
+
+- `npm run test:client`: **70/70**. Grupa kretanja ima 13 provera: stvarni podaci posle loader-a, ponovljeni mutation/resize događaji, native odlaganje ulaza kartica, smanjeno kretanje, skriveni paneli, cleanup, preraspored, otvoren dijalog, geometrija i pomeranje indikatora, nedostupan animation engine, brzo otvaranje/zatvaranje details, native feature detection i stari media-query listener. Postojeće SSR, forme, pristup i navigacija i dalje prolaze.
+- `npm run test:server`: **138/138**; serverska sintaksa **85 JS fajlova**. Backend nije menjan ovim prolazom.
+- `npm run build:client`: production build, manifest i service worker prolaze. `git diff --check` prolazi. Postojeći localhost:5173 vraća HTTP 200 za stranicu i sva tri nova motion/navigation/CSS modula, sa potvrđenim markerima aktuelnog koda. Nije pokretan privremeni server, seed/reset ili live prijava radi ove dorade.
+- Browser je pri novom pokušaju vratio `Local browser use is disabled in Work settings`. Zato vizuelna glatkoća, dodir/hover, tastatura, dijalozi i očuvanje unosa pri resize-u **nisu potvrđeni browser proverom ovog prolaza**. Ranije otvorene provere ostaju otvorene; testovi i build ih ne zatvaraju.
+
+Kada browser kontrola bude dostupna, proveriti sve tri uloge na 320/390/820/1440 px: promenu stranice i filtera, dugačke liste, dijalog za nesačuvani unos, draft koji ostaje pri resize-u, fokus konkretnog komentara, tastaturni fokus i uključenje smanjenog kretanja dok je stranica otvorena. Posebno proveriti stvarni telefon/PWA; ovaj prolaz ne predstavlja potvrdu fizičkog uređaja.
