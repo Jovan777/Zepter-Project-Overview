@@ -1,6 +1,8 @@
 # Predlog faznog razvoja React frontend-a
 
-**Naknadno usvojen redosled:** korisnik je odredio razvoj zaposlenih ekrana pre predsedničkog dela, na `develop`, u talasima po dve reference. Implementirana su prva četiri ekrana: [prvi talas](EMPLOYEE_WAVE_01.md) i [detalji projekta/aktivnosti](EMPLOYEE_WAVE_02.md). Plan ispod čuva prvobitni predlog i preostale oblasti, a aktuelni redosled prati najnovije korisničke instrukcije.
+**Aktuelni nastavak:** nakon osam ekrana zaposlenog korisnik je dostavio prva dva rukovodiočeva ekrana. Implementirani su pregled sektora i projekti sektora; [detalji i preostala vizuelna provera](MANAGER_WAVE_01.md). Sledeća dva ekrana čekaju korisnikove reference.
+
+**Naknadno usvojen redosled:** korisnik je odredio razvoj zaposlenih ekrana pre predsedničkog dela, na `develop`, u talasima po dve reference. Implementirano je svih osam ekrana zaposlenog; [četvrti talas](EMPLOYEE_WAVE_04.md) donosi detalje/doradu ideje i obaveštenja, uz preostalu vizuelnu browser proveru. [treći talas](EMPLOYEE_WAVE_03.md) donosi moje ideje i slanje nove ideje. Prethodni talasi: [prvi talas](EMPLOYEE_WAVE_01.md) i [detalji projekta/aktivnosti](EMPLOYEE_WAVE_02.md). Plan ispod čuva prvobitni predlog i preostale oblasti, a aktuelni redosled prati najnovije korisničke instrukcije.
 
 Ovo je plan narednih zadataka; novi ekrani nisu implementirani u početnoj analizi. Postojeća povezana aplikacija ostaje osnova. Redosled počinje predsedničkim interfejsom. Usvojene slike svih ekrana treba prikupiti pre precizne vizuelne implementacije; u repozitorijumu trenutno nisu dostupne.
 

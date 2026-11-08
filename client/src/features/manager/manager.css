@@ -1,0 +1,118 @@
+.manager-shell {--manager-gold: #b77916; --employee-gold: #b77916; max-width: 600px; border-color: #edd8b7; font-family: Inter, "Segoe UI", system-ui, sans-serif; color: #111a34;}
+.manager-shell h1, .manager-shell h2, .manager-shell h3 {color: #101932; letter-spacing: -.025em;}
+.manager-header {display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 64px; padding: 10px 18px; background: white; border-bottom: 1px solid #dfbd80; position: sticky; top: 0; z-index: 15;}
+.manager-header > div {display: flex; align-items: center; gap: 3px;}
+.manager-brand {font-size: 24px; line-height: 1; font-weight: 800; color: #b47c28; letter-spacing: -.03em;}
+.manager-header-actions .employee-icon-button {width: 34px; height: 40px; padding: 6px;}
+.manager-header-actions .employee-profile summary svg {width: 23px; height: 23px;}
+.manager-bell {position: relative;}
+.manager-bell > span {position: absolute; width: 9px; height: 9px; top: 2px; right: 4px; background: #c28c20; border: 1px solid white; border-radius: 50%;}
+.manager-content {padding: 14px 15px calc(97px + env(safe-area-inset-bottom)); flex: 1; min-width: 0;}
+.manager-heading {margin-bottom: 13px;}
+.manager-heading h1 {font-size: 27px; font-weight: 750; line-height: 1.15; margin: 0 0 4px; overflow-wrap: anywhere;}
+.manager-heading p {color: #626a81; font-size: 15px; line-height: 1.4; margin: 0;}
+.manager-metrics {display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;}
+.manager-metric {display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 77px; padding: 10px; border: 1px solid #efd8b2; border-radius: 11px; background: linear-gradient(120deg,#fff,#fdfaf6); text-align: left; color: #1c253d;}
+.manager-metric > .employee-icon-disc {width: 38px; height: 38px;}
+.manager-metric > .employee-icon-disc svg {width: 23px; height: 23px;}
+.manager-metric > span:nth-child(2) {min-width: 0; display: flex; flex-direction: column; gap: 2px; flex: 1;}
+.manager-metric strong {font-size: 25px; line-height: 1.1; font-weight: 750;}
+.manager-metric > span:nth-child(2) > span {color: #4c5670; font-size: 12px; line-height: 1.25;}
+.manager-metric > svg {color: #64708a;}
+.manager-metric:nth-child(even) strong {color: var(--manager-gold);}
+.manager-status-summary {margin: -2px 0 11px; font-size: 12px; color: #6d7386;}
+.manager-status-summary summary {cursor: pointer; padding-block: 5px;}
+.manager-status-summary > div {display: flex; flex-wrap: wrap; gap: 7px; margin-block: 8px;}
+.manager-status-summary .employee-badge {font-size: 11px;}
+.manager-report-shortcuts {display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 13px 0 17px;}
+.manager-report-shortcuts > a {display: flex; align-items: start; gap: 8px; padding: 12px 10px; min-height: 80px; border: 1px solid #e8e2d8; border-radius: 11px; box-shadow: 0 4px 7px #27211409; color: #1b243d; position: relative;}
+.manager-report-shortcuts .employee-icon-disc {width: 35px; height: 35px;}
+.manager-report-shortcuts .employee-icon-disc svg {width: 22px; height: 22px;}
+.manager-report-shortcuts > a > span:nth-child(2) {min-width: 0; flex: 1;}
+.manager-report-shortcuts strong {display: block; font-size: 13px; line-height: 1.3; font-weight: 750;}
+.manager-report-shortcuts small {display: block; color: #626c82; font-size: 11px; line-height: 1.35; margin-top: 4px; padding-right: 8px; overflow-wrap: anywhere;}
+.manager-report-shortcuts > a > svg {position: absolute; bottom: 7px; right: 7px; width: 24px; height: 24px; padding: 4px; border-radius: 50%; background: #fff0d7; color: #b67b19;}
+.manager-section {margin-top: 17px;}
+.manager-shell .manager-section h2, .manager-expansion h2 {font-size: 20px; line-height: 1.25; margin: 0 0 11px; font-weight: 750;}
+.manager-section-heading {display: flex; justify-content: space-between; align-items: baseline; gap: 9px; margin-bottom: 10px;}
+.manager-shell .manager-section-heading h2 {margin: 0;}
+.manager-section-heading > a {display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #ad7218; white-space: nowrap;}
+.manager-president-card {display: flex; align-items: start; gap: 10px; padding: 13px; border: 1px solid #eddbbd; border-radius: 12px; box-shadow: 0 4px 8px #2520270a;}
+.manager-president-card > .employee-icon-disc {width: 39px; height: 39px;}
+.manager-president-card > .employee-icon-disc svg {width: 25px; height: 25px;}
+.manager-president-card > div {flex: 1; min-width: 0;}
+.manager-president-card-heading {display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 5px;}
+.manager-president-card-heading strong {font-size: 14px; line-height: 1.2; display: block;}
+.manager-president-card-heading small {font-size: 11px; color: #626d85; display: block; margin-top: 2px;}
+.manager-president-card-heading time {font-size: 10px; border-radius: 20px; background: #f3f3f5; padding: 3px 7px; color: #687287;}
+.manager-president-card p {color: #4c5671; font-size: 13px; line-height: 1.5; margin: 9px 0 2px; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;}
+.manager-president-card .employee-text-button {display: flex; gap: 5px; align-items: center; justify-content: flex-end; margin-left: auto; font-size: 13px; min-height: 32px; padding: 5px 0 0;}
+.manager-open-conversation {font-size: 11px; margin-top: 4px; min-height: 30px;}
+.manager-shell .employee-discussion h2 {font-size: 18px;}
+.manager-shell .employee-discussion {margin-top: 11px;}
+.manager-shell .employee-discussion-heading h3 {font-size: 14px;}
+.manager-shell .employee-discussion-body > p {font-size: 13px;}
+.manager-shell .employee-discussion-heading time {font-size: 10px;}
+.manager-project-card {display: grid; grid-template-columns: 68px minmax(0,1fr); gap: 10px; padding: 11px; border: 1px solid #e0e1e8; border-radius: 12px; color: #1b253e; margin-bottom: 10px; box-shadow: 0 3px 7px #16203d07; background: white;}
+.manager-project-card > .employee-project-thumbnail {width: 68px; height: 66px; border-radius: 7px;}
+.manager-project-card-content {min-width: 0;}
+.manager-project-card-heading {display: flex; align-items: start; justify-content: space-between; gap: 8px;}
+.manager-project-card h3 {font-size: 15px; line-height: 1.25; margin: 0; font-weight: 750; overflow-wrap: anywhere;}
+.manager-project-card .employee-badge {font-size: 10px; min-width: 0; padding: 3px 8px; flex-shrink: 0;}
+.manager-project-team {font-size: 11px; line-height: 1.4; color: #68718a; margin: 4px 0 8px; overflow-wrap: anywhere;}
+.manager-progress-row {display: flex; align-items: center; gap: 8px;}
+.manager-progress-row .employee-progress {height: 7px;}
+.manager-progress-row strong {font-size: 12px; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums;}
+.manager-project-card-footer {display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px; align-items: center; border-top: 1px solid #eeedf1; padding-top: 7px; margin-top: 7px;}
+.manager-project-card-footer > span {display: inline-flex; gap: 4px; align-items: center; font-size: 10px; line-height: 1.35; color: #697188;}
+.manager-project-card-footer > span:last-child {margin-left: auto; color: #b17715; font-weight: 650;}
+.manager-project-card--attention {border-color: #eddbbc;}
+.manager-idea-row {display: flex; align-items: center; gap: 9px; padding: 11px; border: 1px solid #e5e2df; border-radius: 11px; margin-bottom: 8px; color: #17213b; box-shadow: 0 3px 7px #27201b05;}
+.manager-idea-row > .employee-icon-disc {width: 33px; height: 33px;}
+.manager-idea-row > .employee-icon-disc svg {width: 22px; height: 22px;}
+.manager-idea-row > div {min-width: 0; flex: 1;}
+.manager-idea-row strong {font-size: 13px; line-height: 1.3; display: block; overflow-wrap: anywhere;}
+.manager-idea-row small {display: flex; gap: 3px; align-items: center; font-size: 11px; line-height: 1.4; color: #727a90; margin-top: 3px;}
+.manager-idea-row .employee-badge {font-size: 10px; padding: 3px 7px; min-width: 0;}
+.manager-secondary-links {display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 22px; border-top: 1px solid #f0e5d3; padding-top: 12px;}
+.manager-secondary-links a {display: inline-flex; align-items: center; gap: 4px; font-size: 12px; min-height: 36px;}
+.manager-create-project {display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 43px; border-radius: 10px; background: linear-gradient(110deg,#d7ac53,#b17b0a); color: white; font-size: 15px; font-weight: 650; box-shadow: 0 3px 5px #9a6c1614;}
+.manager-tabs {display: flex; gap: 8px; margin: 14px 0 17px;}
+.manager-tabs button {flex: 1; min-width: 0; border: 1px solid #e8e6eb; border-radius: 30px; padding: 8px 9px; min-height: 37px; background: white; color: #596079; font-size: 12px; line-height: 1.2;}
+.manager-tabs button.is-active {background: linear-gradient(110deg,#fff0ce,#f9dfaa); color: #a77317; border-color: transparent; font-weight: 650;}
+.manager-filter-note {font-size: 12px; line-height: 1.5; color: #697289; margin-block: 8px;}
+.manager-applied-filter {display: flex; align-items: center; justify-content: space-between; gap: 7px; font-size: 12px; color: #79602b; background: #fff8e8; border-radius: 8px; padding-inline: 10px;}
+.manager-project-tools {margin-block: 13px; padding: 13px; border: 1px solid #ebdfcc; border-radius: 12px; background: #fffdf8;}
+.manager-project-tools label {display: block; font-size: 12px; color: #5d647b; margin-block: 5px;}
+.manager-project-tools form > div {display: flex; gap: 6px; align-items: stretch;}
+.manager-project-tools input, .manager-project-tools select {width: 100%; min-width: 0; border: 1px solid #dcd6cb; background: white; padding: 9px; border-radius: 7px; font-size: 16px; min-height: 42px; color: #29314b;}
+.manager-project-tools form button {border: 1px solid #dcd6cb; background: #fff5dd; color: #9b6b1f; border-radius: 8px; width: 43px; flex-shrink: 0;}
+.manager-expansion {padding: 13px; border: 1px solid #e5dccd; border-radius: 12px; margin: 15px 0; background: #fffdf8;}
+.manager-delayed-item {display: flex; gap: 9px; align-items: center; padding-block: 10px; border-top: 1px solid #eee7dc; color: #253049;}
+.manager-delayed-item .employee-icon-disc {width: 32px; height: 32px;}
+.manager-delayed-item .employee-icon-disc svg {width: 20px; height: 20px;}
+.manager-delayed-item > div {flex: 1; min-width: 0;}
+.manager-delayed-item strong {font-size: 13px; display: block; overflow-wrap: anywhere;}
+.manager-delayed-item span:not(.employee-icon-disc) {font-size: 11px; color: #72788c; line-height: 1.5;}
+.manager-history-item {position: relative; display: block; border-top: 1px solid #eee7dc; padding: 10px 22px 10px 0; color: #253049;}
+.manager-history-item > span, .manager-history-item time {font-size: 10px; color: #7b6c4a;}
+.manager-history-item p {font-size: 13px; line-height: 1.5; color: #4c5671; overflow-wrap: anywhere;}
+.manager-history-item > svg {position: absolute; right: 0; top: 40%;}
+.manager-bottom {position: fixed; bottom: 0; width: min(600px,100%); background: #fffffffa; border-top: 1px solid #edd4aa; z-index: 12; padding-bottom: env(safe-area-inset-bottom);}
+.manager-bottom nav {display: grid; grid-template-columns: repeat(4,minmax(0,1fr));}
+.manager-bottom a {position: relative; min-height: 68px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; padding: 8px 1px 13px; color: #647089; font-size: 11px;}
+.manager-bottom a.is-active {color: #b17916; font-weight: 650;}
+.manager-bottom .is-active svg {fill: #d1a03e; color: #b47914;}
+.manager-bottom a > i {position: absolute; bottom: 5px; width: 5px; height: 5px; background: #bc811b; border-radius: 50%;}
+.manager-shell .employee-empty {padding: 14px; font-size: 13px;}
+.manager-shell .employee-empty strong {font-size: 14px;}
+.manager-shell .employee-empty p {font-size: 12px;}
+@media(min-width: 650px) {.manager-shell {margin-block: 16px; min-height: calc(100dvh - 16px); border: 1px solid #ecd5b1; border-radius: 17px 17px 0 0; overflow: clip;}.manager-bottom {width: 598px;}}
+@media(max-width: 380px) {
+ .manager-header {padding-inline: 13px;}.manager-content {padding-inline: 11px;}.manager-heading h1 {font-size: 25px;}
+ .manager-metric {gap: 7px; padding: 9px 8px;}.manager-metric > .employee-icon-disc {width: 31px; height: 34px;}.manager-metric > span:nth-child(2) > span {font-size: 11px;}.manager-metric > svg {width: 12px;}
+ .manager-report-shortcuts > a {gap: 6px; padding: 10px 8px;}.manager-report-shortcuts strong {font-size: 12px;}.manager-report-shortcuts .employee-icon-disc {width: 29px; height: 31px;}.manager-report-shortcuts small {font-size: 10px;}
+ .manager-project-card {grid-template-columns: 54px minmax(0,1fr); padding: 9px; gap: 8px;}.manager-project-card > .employee-project-thumbnail {width: 54px; height: 56px;}.manager-project-card-heading {flex-wrap: wrap; gap: 4px;}.manager-project-card h3 {font-size: 14px;}.manager-project-card .employee-badge {font-size: 9px;}.manager-project-team {font-size: 10px;}
+ .manager-idea-row {gap: 7px; padding: 10px 8px;}.manager-idea-row > .employee-icon-disc {width: 29px; height: 31px;}.manager-idea-row strong {font-size: 12px;}.manager-idea-row .employee-badge {font-size: 9px; white-space: normal; text-align: center; max-width: 72px;}
+ .manager-tabs {gap: 5px;}.manager-tabs button {font-size: 11px; padding-inline: 5px;}
+}

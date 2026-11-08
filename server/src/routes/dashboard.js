@@ -5,8 +5,10 @@ import {same,belgradeDay} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {allow} from '../lib/auth.js';
 import {employeeOverview} from '../services/employee.js';
+import {managerOverview} from '../services/manager.js';
 const r=Router();
 r.get('/employee',allow('employee'),async(req,res)=>res.json(await employeeOverview(req.user,req.query)));
+r.get('/manager',allow('manager'),async(req,res)=>res.json(await managerOverview(req.user,req.query)));
 r.get('/overview',async(req,res)=>{
  const u=req.user;let projectFilter={archived:false},activityFilter={},ideaFilter={};
  if(u.role==='manager'){projectFilter.sector=u.sector;activityFilter.sector=u.sector;ideaFilter={sector:u.sector,status:{$in:['submitted','in_review']}};}

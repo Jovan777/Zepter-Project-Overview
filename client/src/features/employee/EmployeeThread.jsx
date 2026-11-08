@@ -5,7 +5,7 @@ import useEmployeeResource from './useEmployeeResource.js';
 import {Badge, EmptyState, IconDisc, Pagination, ResourceState} from './EmployeeComponents.jsx';
 
 const time = value => new Intl.DateTimeFormat('sr-Latn-RS', {timeZone: 'Europe/Belgrade', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}).format(new Date(value));
-export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments'}) {
+export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments', variant, initialReply}) {
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState('');
   const [parent, setParent] = useState(null);
@@ -16,6 +16,7 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
   const base = `/comments?targetType=${type}&targetId=${id}`;
   const {data, busy, error: loadError, reload} = useEmployeeResource(`${base}&page=${page}&limit=20`, {keepPreviousData: true});
   useEffect(() => {setPage(1); setMessage(''); setParent(null); setError(''); setNotice('');}, [type, id]);
+  useEffect(() => {if (initialReply) {setParent(initialReply); editor.current?.focus();}}, [initialReply]);
   const send = async event => {
     event.preventDefault();
     if (lock.current || !message.trim()) return;
@@ -32,15 +33,17 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
     finally {lock.current = false; setSending(false);}
   };
   return <section className="employee-section employee-discussion" id={sectionId} aria-labelledby={`${sectionId}-heading`}>
-    <h2 id={`${sectionId}-heading`}>{heading}</h2>
+    <h2 id={`${sectionId}-heading`}>{heading}{variant === 'idea' && data ? ` (${data.total})` : ''}</h2>
     <ResourceState busy={busy && !data} error={loadError} onRetry={reload} noun="razgovor"/>
-    {data && !data.items.length && <EmptyState icon="message" title="Započnite razgovor">Postavite pitanje ili podelite novost o {type === 'project' ? 'projektu' : 'aktivnosti'}.</EmptyState>}
+    {data && !data.items.length && <EmptyState icon="message" title="Započnite razgovor">Postavite pitanje ili podelite novost o {type === 'project' ? 'projektu' : type === 'idea' ? 'ideji' : type === 'sector' ? 'sektoru' : 'aktivnosti'}.</EmptyState>}
     {data?.items.map(comment => {
       const own = comment.author?._id === user._id;
-      const name = comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac' : `${comment.author?.firstName || 'Korisnik'} ${comment.author?.lastName || ''}`.trim();
-      return <article className={`employee-discussion-card ${own ? 'is-own' : ''}`} key={comment._id}>
-        <IconDisc name={comment.author?.role === 'manager' ? 'users' : 'user'}/><div className="employee-discussion-body">
+      const fullName = `${comment.author?.firstName || 'Korisnik'} ${comment.author?.lastName || ''}`.trim();
+      const name = variant === 'idea' ? fullName : comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac' : fullName;
+      return <article className={`employee-discussion-card ${own ? 'is-own' : ''} ${['president', 'manager'].includes(comment.author?.role) ? 'is-leader' : ''}`} key={comment._id}>
+        {variant === 'idea' ? <span className="employee-comment-initials" aria-hidden="true">{[comment.author?.firstName, comment.author?.lastName].filter(Boolean).map(x => x[0]).join('') || '?'}</span> : <IconDisc name={comment.author?.role === 'manager' ? 'users' : 'user'}/>}<div className="employee-discussion-body">
           <div className="employee-discussion-heading"><h3>{name}{own && <small> (vi)</small>}</h3><time dateTime={comment.createdAt}>{time(comment.createdAt)}</time></div>
+          {variant === 'idea' && <span className="employee-comment-role">{own ? 'Autor ideje' : comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac sektora' : 'Zaposleni'}</span>}
           {comment.parent && <span className="employee-reply-caption">Odgovor na komentar</span>}
           <p>{comment.body}</p>
           <div className="employee-discussion-actions">{comment.kind === 'instruction' && <Badge>{({open: 'Čeka odgovor', answered: 'Odgovoreno', resolved: 'Rešeno'})[comment.responseStatus]}</Badge>}<button type="button" className="employee-text-button" disabled={sending} onClick={() => {setParent(comment); setNotice(''); editor.current?.focus();}}>Odgovori <Icon name="arrow" size={14}/></button></div>

@@ -138,7 +138,37 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
       for (const session of [admin, president, manager]) {
         assert.equal((await call('/dashboard/employee', session)).status, 403);
         assert.equal((await call('/projects/mine', session)).status, 403);
+        assert.equal((await call('/ideas/mine', session)).status, 403);
       }
+    });
+    await t.test('Personal ideas and global counters match the existing author-scoped API', async () => {
+      const source = await call('/ideas?limit=50', employee);
+      const mine = await call('/ideas/mine?limit=50', employee);
+      assert.equal(mine.status, 200);
+      assert.equal(mine.data.stats.total, source.data.total);
+      assert.equal(mine.data.total, source.data.total);
+      assert.deepEqual(mine.data.items.map(i => i._id).sort(), source.data.items.map(i => i._id).sort());
+      const revision = await call('/ideas?status=revision_requested', employee);
+      assert.equal(mine.data.stats.revision, revision.data.total);
+      const spoof = await call(`/ideas/mine?limit=50&author=${otherEmployee.user._id}&sector=${otherEmployee.user.sector}`, employee);
+      assert.deepEqual(spoof.data.items, mine.data.items);
+      assert.deepEqual(spoof.data.stats, mine.data.stats);
+      for (const item of mine.data.items) {
+        assert.equal((await call('/ideas/' + item._id, employee)).status, 200);
+        assert.equal((await call('/ideas/' + item._id, otherEmployee)).status, 403);
+        if (item.thumbnailId) assert.equal((await fetch(base + '/api/attachments/' + item.thumbnailId, {headers: {Authorization: `Bearer ${otherEmployee.token}`}})).status, 403);
+      }
+    });
+    await t.test('Idea filters include both review states and keep counters independent of the filter', async () => {
+      const all = await call('/ideas/mine', employee);
+      for (const [tab, states] of [['review', ['submitted', 'in_review']], ['revision', ['revision_requested']], ['forwarded', ['forwarded']]]) {
+        const result = await call('/ideas/mine?tab=' + tab, employee);
+        assert.equal(result.status, 200);
+        assert.ok(result.data.items.every(item => states.includes(item.status)));
+        assert.deepEqual(result.data.stats, all.data.stats);
+      }
+      assert.equal((await call('/ideas/mine?tab=invalid', employee)).status, 422);
+      assert.equal((await call('/ideas/mine')).status, 401);
     });
     await t.test('Upload configuration requires authentication and exposes only formats and a size limit', async () => {
       assert.equal((await call('/attachments/config')).status, 401);
@@ -148,6 +178,33 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
       assert.ok(config.data.extensions.includes('.png') && config.data.extensions.includes('.pdf'));
       assert.deepEqual(Object.keys(config.data).sort(), ['extensions', 'maxBytes']);
     });
+    await t.test('Categorized notifications remain private and grouped totals agree with the original feed', async () => {
+      const source = await call('/notifications?limit=50', employee);
+      const grouped = await call('/notifications?grouped=true&limit=50', employee);
+      assert.equal(grouped.status, 200);
+      assert.equal(grouped.data.total, source.data.total);
+      assert.equal(grouped.data.unread, source.data.unread);
+      assert.ok(grouped.data.items.every(item => item.user === employee.user._id));
+      const spoof = await call(`/notifications?grouped=true&limit=50&user=${otherEmployee.user._id}`, employee);
+      assert.deepEqual(spoof.data.items, grouped.data.items);
+      for (const category of ['tasks','projects','ideas','guidance']) {
+        const result = await call('/notifications?grouped=true&category='+category, employee);
+        assert.equal(result.status, 200);
+        assert.ok(result.data.items.every(item => item.user === employee.user._id));
+        assert.equal(result.data.unread, source.data.unread);
+      }
+      assert.equal((await call('/notifications?category=invalid', employee)).status, 422);
+      assert.equal((await call('/notifications?grouped=true')).status, 401);
+    });
+    await t.test('Own idea details include a save version; other employee cannot open them', async () => {
+      const source = await call('/ideas/mine?limit=1', employee);
+      assert.ok(source.data.items.length, 'Own idea fixture required');
+      const detail = await call('/ideas/' + source.data.items[0]._id, employee);
+      assert.equal(detail.status, 200);
+      assert.equal(detail.data.idea.author._id, employee.user._id);
+      assert.ok(Number.isFinite(Date.parse(detail.data.idea.updatedAt)));
+      assert.equal((await call('/ideas/' + source.data.items[0]._id, otherEmployee)).status, 403);
+    });
     await t.test('Activity detail returns the project context, assigned people and a usable save version', async () => {
       const project = mine.data.items.find(p => p.myActivities.length);
       assert.ok(project, 'Assigned activity fixture required');
@@ -156,6 +213,61 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
       assert.equal(detail.data.project._id, project._id);
       assert.ok(detail.data.activity.assignees.some(person => person._id === employee.user._id));
       assert.ok(Number.isFinite(Date.parse(detail.data.activity.updatedAt)));
+    });
+    await t.test('Manager feeds reject other roles and cannot be redirected to another sector', async () => {
+      for (const session of [employee, president, admin]) {
+        assert.equal((await call('/dashboard/manager', session)).status, 403);
+        assert.equal((await call('/projects/sector', session)).status, 403);
+      }
+      assert.equal((await call('/dashboard/manager')).status, 401);
+      const list = await call('/projects/sector?limit=50', manager);
+      const spoof = await call(`/projects/sector?limit=50&sectorId=${otherManager.user.sector}&userId=${otherManager.user._id}`, manager);
+      const source = await call('/projects?limit=50', manager);
+      assert.equal(list.status, 200);
+      assert.equal(list.data.sector._id, manager.user.sector);
+      assert.deepEqual(list.data.items.map(x => x._id).sort(), source.data.items.map(x => x._id).sort());
+      assert.deepEqual(spoof.data, list.data);
+      assert.equal(list.data.stats.totalProjects, source.data.total);
+      assert.equal(list.data.stats.activeProjects, source.data.items.filter(x => ['active','at_risk','on_hold'].includes(x.status)).length);
+      for (const project of list.data.items) {
+        assert.equal(project.sector, manager.user.sector);
+        assert.equal((await call('/projects/'+project._id, manager)).status, 200);
+      }
+    });
+    await t.test('Manager overview uses sector names, eligible late work, president comments and review ideas', async () => {
+      const result = await call('/dashboard/manager', manager);
+      assert.equal(result.status, 200);
+      assert.equal(result.data.sector._id, manager.user.sector);
+      assert.ok(result.data.sector.name);
+      const spoof = await call('/dashboard/manager?sectorId='+otherManager.user.sector, manager);
+      assert.deepEqual(spoof.data.stats, result.data.stats);
+      assert.ok(result.data.ideas.every(x => ['submitted','in_review'].includes(x.status)));
+      assert.ok(result.data.presidentComments.items.every(x => x.author.role === 'president'));
+      for (const comment of result.data.presidentComments.items) assert.equal((await call(comment.link, manager)).status, 200);
+      for (const activity of result.data.delayed.items) {
+        const source = await call('/activities/'+activity._id, manager);
+        assert.equal(source.status, 200); assert.equal(source.data.activity.sector, manager.user.sector);
+        assert.ok(new Date(activity.dueDate) < new Date(result.data.today+'T00:00:00Z'));
+        assert.notEqual(activity.status, 'completed');
+      }
+    });
+    await t.test('Manager project filters preserve global counts and derived status rules', async () => {
+      const all = await call('/projects/sector', manager);
+      for (const tab of ['active','review','on_track','attention','at_risk','completed']) {
+        const result = await call('/projects/sector?tab='+tab, manager);
+        assert.equal(result.status, 200); assert.deepEqual(result.data.stats, all.data.stats);
+        for (const project of result.data.items) {
+          if(tab==='review')assert.equal(project.hasReview,true);
+          if(tab==='on_track'){assert.equal(project.onTrack,true);assert.equal(project.status,'active');}
+          if(tab==='active')assert.ok(['active','at_risk','on_hold'].includes(project.status));
+        }
+      }
+      const literal = await call('/projects/sector?q='+encodeURIComponent('.*'), manager);
+      assert.equal(literal.status,200);assert.equal(literal.data.total,0);
+      assert.equal((await call('/projects/sector?tab=invalid',manager)).status,422);
+      const other = await call('/dashboard/manager',otherManager);
+      assert.equal(other.data.sector._id,otherManager.user.sector);
+      assert.notEqual(other.data.sector.name,all.data.sector.name);
     });
   } finally {
     for (const session of sessions) {

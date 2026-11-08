@@ -4,7 +4,7 @@
 
 - Nastavljaj postojeću MERN aplikaciju; ne pravi projekat ponovo i ne uklanjaj funkcionalnosti koje rade.
 - Pre izmene pročitaj `README.md`, `BACKEND_FUNKCIONALNOSTI.md`, `docs/ANALIZA_PROJEKTA.md`, `docs/PLAN_FRONTEND.md` i relevantan postojeći kod.
-- Rad se nastavlja na grani `develop`. Prema najnovijem nalogu korisnika, prvo se uređuju ekrani zaposlenog, u talasima po dve dostavljene reference; zatim se nastavlja ostalim ulogama.
+- Rad se nastavlja na grani `develop`. Po završetku osam ekrana zaposlenog, najnoviji nalog korisnika je prelazak na rukovodioca sektora, u talasima po dve dostavljene reference. Prvi talas su pregled sektora i projekti sektora.
 - Ne radi automatski git commit, push, reset, force-push ili prepisivanje tuđih izmena.
 - Ne menjaj MongoDB šemu, nazive statusa ni API ugovore bez potrebe. Kada je promena potrebna, objasni kompatibilnost i eventualnu migraciju.
 
@@ -46,7 +46,8 @@
 ## Interfejs i izveštaji
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.
-- Implementirani prvi talas su „Moj pregled“ i „Moji projekti“; aktuelni drugi talas su „Detalji projekta“ i „Detalji aktivnosti — uređivanje“. Dostavljene slike određuju raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
+- Implementirano je svih osam ekrana zaposlenog; četvrti talas obuhvata „Detalji ideje“ i „Obaveštenja“. Browser vizuelna provera četvrtog talasa čeka dostupnu browser automatizaciju; ne tvrdi da je urađena dok je lokalni browser isključen. Dostavljene slike određuju raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
+- Rukovodilac ima nove `/dashboard/manager` i `/projects/sector` feed-ove, vezane isključivo za sektor sa sesije. „Po planu“ i „Na proveri“ su izvedene oznake, ne novi statusi; pravila su u `docs/MANAGER_WAVE_01.md`. Model nema posebno ime tima: koristi stvarni sektor, odgovornu osobu i članove, bez izmišljanja timova.
 - Srpska latinica, bela pozadina, zlatni akcenti, tamna čitljiva tipografija. Ne izmišljaj novi identitet.
 - Koristi odobrene referentne slike kada budu dostupne. Ne tvrdi da je ekran veran dizajnu bez reference i vizuelne provere.
 - Komentari pripadaju sektoru, projektu, aktivnosti ili ideji; ne uvodi poseban ekran komentara zaposlenog.

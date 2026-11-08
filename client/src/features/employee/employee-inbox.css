@@ -1,0 +1,89 @@
+.employee-bottom nav {grid-template-columns: repeat(4, minmax(0, 1fr));}
+.employee-shell textarea:focus-visible {outline: 3px solid #bd8b25; outline-offset: 3px;}
+.employee-bottom nav a {min-width: 0;}
+.employee-bottom nav a > span {font-size: 12px;}
+.employee-notification-count {position: absolute; top: 0; right: 0; min-width: 17px; height: 17px; padding-inline: 3px; border: 2px solid white; border-radius: 20px; background: #c88c16; color: white; font-size: 10px; font-weight: 750; display: inline-flex; justify-content: center; align-items: center; box-sizing: content-box;}
+.employee-idea-header-title {font-size: 20px; font-weight: 750; color: var(--employee-ink);}
+.employee-idea-summary {padding: 16px; border: 1px solid #e0dfe6; border-radius: 14px; background: white; box-shadow: 0 3px 10px #191c3004;}
+.employee-idea-summary-top {display: flex; align-items: start; justify-content: space-between; gap: 10px; margin-bottom: 9px;}
+.employee-idea-summary-top .employee-icon-disc {width: 39px; height: 39px; border-radius: 10px; background: #fff0ce;}
+.employee-idea-summary-top .employee-icon-disc svg {width: 24px; height: 24px;}
+.employee-idea-summary-top .employee-badge {white-space: normal; text-align: center; max-width: 165px; font-size: 12px;}
+.employee-idea-summary h1 {font-size: 23px; font-weight: 750; line-height: 1.3; margin: 0 0 9px; overflow-wrap: anywhere;}
+.employee-idea-full-description, .employee-idea-benefit p {white-space: pre-wrap; overflow-wrap: anywhere; color: #434a63; font-size: 14px; line-height: 1.55; margin: 0;}
+.employee-idea-benefit {margin-top: 14px;}
+.employee-idea-benefit h2 {font-size: 14px; margin-bottom: 5px;}
+.employee-idea-author {display: flex; align-items: center; gap: 9px; border-top: 1px solid #e8e5ed; padding-top: 12px; margin-top: 15px;}
+.employee-idea-author > .employee-icon-disc {width: 34px; height: 34px;}
+.employee-idea-author > .employee-icon-disc svg {width: 20px; height: 20px;}
+.employee-idea-author > div:not(.employee-idea-dates) {flex: 1; min-width: 0;}
+.employee-idea-author strong {display: block; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere;}
+.employee-idea-author span {font-size: 11px; line-height: 1.5; color: #68738d;}
+.employee-idea-dates {max-width: 43%; display: flex; flex-direction: column; gap: 3px;}
+.employee-idea-dates > span {display: flex; align-items: start; gap: 6px; overflow-wrap: anywhere;}
+.employee-idea-review-note {display: flex; align-items: start; gap: 10px; background: #fff7e7; border: 1px solid #f2e5ca; border-radius: 12px; padding: 13px; margin: 13px 0; color: #906318; font-size: 13px; line-height: 1.5;}
+.employee-idea-review-note > div {min-width: 0; flex: 1;}
+.employee-idea-review-note p {margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere;}
+.employee-idea-detail .employee-attachment-panel {margin-top: 14px; padding: 13px;}
+.employee-idea-detail .employee-attachment-heading .employee-icon-disc {display: none;}
+.employee-idea-detail .employee-attachment-heading h2 {font-size: 17px;}
+.employee-idea-detail .employee-discussion h2 {font-size: 20px;}
+.employee-idea-detail .employee-discussion-card {padding: 12px; gap: 9px;}
+.employee-comment-initials {display: inline-flex; justify-content: center; align-items: center; width: 35px; height: 35px; flex-shrink: 0; border-radius: 50%; font-size: 13px; font-weight: 650; color: #9d6e25; background: #faf0df;}
+.employee-idea-detail .employee-discussion-heading h3 {font-size: 13px;}
+.employee-idea-detail .employee-discussion-heading time {font-size: 10px;}
+.employee-comment-role {display: block; color: #68738d; font-size: 11px; margin-top: 2px;}
+.employee-idea-detail .employee-discussion-body > p {background: #f6f7fa; padding: 9px; border-radius: 8px; margin: 7px 0 0; font-size: 13px; line-height: 1.5;}
+.employee-idea-detail .employee-discussion-card.is-leader:not(.is-own) .employee-discussion-body > p {background: #fff9ed;}
+.employee-idea-bottom-actions {display: flex; gap: 9px; margin-top: 18px; align-items: stretch;}
+.employee-idea-bottom-actions > button {flex: 1; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 47px; margin: 0; font-size: 14px; padding: 10px;}
+.employee-idea-edit-button {border: 1px solid #d5d8e2; border-radius: 10px; background: white; color: #252b42; font-weight: 650;}
+.employee-idea-edit-button:disabled {opacity: .5;}
+.employee-refresh-idea {display: flex; align-items: center; gap: 7px; margin: 13px auto 0; font-size: 12px;}
+.employee-idea-revision-form {border: 1px solid #e4d8bd; border-radius: 14px; padding: 16px; margin-top: 17px; background: #fffdf9; scroll-margin-top: 90px;}
+.employee-idea-revision-form h2 {font-size: 20px; margin-bottom: 7px;}
+.employee-idea-revision-form > p {font-size: 13px; color: #626475; line-height: 1.5;}
+.employee-idea-revision-form label {display: block; font-size: 14px; font-weight: 650; margin: 13px 0 6px;}
+.employee-idea-revision-form label small {font-weight: 400;}
+.employee-idea-revision-form :is(input,textarea) {width: 100%; box-sizing: border-box; border: 1px solid #ccc9d5; border-radius: 9px; background: white; font: inherit; font-size: 16px; line-height: 1.5; padding: 11px; color: #242941;}
+.employee-idea-revision-form textarea {resize: vertical;}
+.employee-idea-edit-actions {display: flex; gap: 14px; margin-top: 13px; flex-wrap: wrap;}
+.employee-idea-latest {border-top: 1px solid #dccdb1; padding-top: 10px; margin-top: 10px; max-height: 400px; overflow: auto;}
+.employee-notifications .employee-greeting h1 {font-size: 27px;}
+.employee-notifications .employee-greeting p {font-size: 15px;}
+.employee-notification-tabs {gap: 7px; margin-block: 18px;}
+.employee-notification-tabs > button {flex: 1; padding: 8px 9px; min-width: 0; font-size: 13px; min-height: 40px;}
+.employee-notification-tabs > button.is-active {background: linear-gradient(110deg,#ce982f,#b67513); color: white;}
+.employee-notification-group {margin: 19px 0 25px;}
+.employee-notification-group h2 {font-size: 20px; margin-bottom: 12px;}
+.employee-notification-card {display: flex; align-items: start; gap: 11px; width: 100%; box-sizing: border-box; text-align: left; background: white; border: 1px solid #e4e5ec; border-radius: 13px; padding: 13px; margin-bottom: 8px; color: #1d263e; cursor: pointer;}
+.employee-notification-card.is-unread {background: #fff9ee; border-color: #faf0df;}
+.employee-notification-card:disabled {opacity: .65; cursor: wait;}
+.employee-notification-card > .employee-icon-disc {width: 37px; height: 37px;}
+.employee-notification-card > .employee-icon-disc svg {width: 23px; height: 23px;}
+.employee-notification-copy {display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;}
+.employee-notification-copy strong {font-size: 15px; line-height: 1.3; font-weight: 730; overflow-wrap: anywhere;}
+.employee-notification-copy > span {font-size: 13px; line-height: 1.45; color: #47536f; overflow-wrap: anywhere;}
+.employee-notification-copy time {font-size: 11px; line-height: 1.4; color: #68748c;}
+.employee-notification-tail {display: flex; flex-direction: column; align-items: center; gap: 12px; align-self: stretch; padding-top: 1px;}
+.employee-notification-tail i {width: 7px; height: 7px; border-radius: 50%; background: #bd841c;}
+.employee-notification-tail svg {margin-block: auto;}
+.employee-notification-tools {display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: -4px;}
+.employee-notification-tools > span {font-size: 12px; color: #68748c;}
+.employee-notification-tools button {font-size: 12px; min-height: 36px;}
+.employee-push-settings {border-top: 1px solid #e8e5ed; padding-block: 15px; margin-top: 25px; font-size: 13px; color: #626a7e;}
+.employee-push-settings summary {cursor: pointer; min-height: 30px; color: #3d4661;}
+.employee-push-settings p {line-height: 1.5;}
+@media(max-width: 380px) {
+  .employee-bottom nav a > span {font-size: 10px;}
+  .employee-notification-tabs {gap: 4px;}
+  .employee-notification-tabs > button {font-size: 11px; padding-inline: 6px;}
+  .employee-notification-card {padding: 11px 10px; gap: 8px;}
+  .employee-notification-copy strong {font-size: 14px;}
+  .employee-notification-copy > span {font-size: 12px;}
+  .employee-idea-summary {padding: 13px;}
+  .employee-idea-summary h1 {font-size: 21px;}
+  .employee-idea-author {flex-wrap: wrap;}
+  .employee-idea-dates {flex-basis: 100%; max-width: 100%; margin-left: 43px; flex-direction: row; flex-wrap: wrap; gap: 10px;}
+  .employee-idea-bottom-actions > button {font-size: 12px; gap: 5px;}
+}

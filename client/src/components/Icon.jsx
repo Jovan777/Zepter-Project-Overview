@@ -1,6 +1,10 @@
 import React from 'react';
 
 const shapes = {
+  crown: <><path d="m2 6 5 4 5-7 5 7 5-4-3 13H5Z"/><path d="M5 22h14"/></>,
+  warning: <><path d="m12 3 10 18H2Z"/><path d="M12 9v5m0 3h.01"/></>,
+  plusSquare: <><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 7v10M7 12h10"/></>,
+  edit: <><path d="m15 3 6 6M4 16 16 4a3 3 0 0 1 4 4L8 20l-6 2Z"/></>,
   home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></>,
   folder: <><path d="M3 7V5a2 2 0 0 1 2-2h5l3 3h6a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><path d="M3 9h18"/></>,
   clock: <><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></>,

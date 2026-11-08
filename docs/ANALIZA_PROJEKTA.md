@@ -1,6 +1,6 @@
 # Analiza postojećeg projekta
 
-Ovaj dokument beleži početnu analizu. Naknadno su implementirana prva četiri ekrana zaposlenog na `develop`; dopune i aktuelne provere su u [prvom talasu](EMPLOYEE_WAVE_01.md) i [drugom talasu](EMPLOYEE_WAVE_02.md). Drugi talas rešava i ranije evidentirani povratak completed aktivnosti u review pri dnevnom unosu na 100%.
+Ovaj dokument beleži početnu analizu. Pregled i projekti rukovodiočevog sektora naknadno su uređeni u [prvom talasu rukovodioca](MANAGER_WAVE_01.md); naziv sektora više nije hardkodovan u rukovodiočevom novom početnom ekranu. Naknadno je implementirano svih osam ekrana zaposlenog ([ideje i nova ideja](EMPLOYEE_WAVE_03.md), [detalji ideje i obaveštenja](EMPLOYEE_WAVE_04.md)) na `develop`; dopune i aktuelne provere su u [prvom talasu](EMPLOYEE_WAVE_01.md) i [drugom talasu](EMPLOYEE_WAVE_02.md). Drugi talas rešava i ranije evidentirani povratak completed aktivnosti u review pri dnevnom unosu na 100%.
 
 Datum: 7. novembar 2026. Analizirana je lokalna Git radna kopija; nije rađen commit/push. Nisu implementirani novi ekrani. MongoDB modeli i formati API odgovora nisu menjani.
 

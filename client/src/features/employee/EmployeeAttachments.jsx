@@ -5,7 +5,7 @@ import useEmployeeResource from './useEmployeeResource.js';
 import {IconDisc, ResourceState} from './EmployeeComponents.jsx';
 import {formatFileSize, validateAttachment} from './activityForm.js';
 
-export default function EmployeeAttachments({type, id, user, editable = false, resource}) {
+export default function EmployeeAttachments({type, id, user, editable = false, resource, showCount = false}) {
   const ownResource = useEmployeeResource(resource ? null : `/attachments/target/${type}/${id}`, {keepPreviousData: true});
   const {data, busy, error: loadError, reload} = resource || ownResource;
   const config = useEmployeeResource('/attachments/config', {live: false});
@@ -35,7 +35,7 @@ export default function EmployeeAttachments({type, id, user, editable = false, r
     finally {lock.current = false; setWorking(false);}
   };
   return <section className="employee-attachment-panel" aria-label="Prilozi">
-    <div className="employee-attachment-heading"><IconDisc name="clip"/><h2>Prilozi</h2>{editable && <button type="button" className="employee-add-file" disabled={working || !config.data} onClick={() => picker.current?.click()}><span aria-hidden="true">+</span> {working ? 'Sačekajte…' : 'Dodaj prilog'}</button>}</div>
+    <div className="employee-attachment-heading"><IconDisc name="clip"/><h2>Prilozi{showCount && data ? ` (${data.items.length})` : ''}</h2>{editable && <button type="button" className="employee-add-file" disabled={working || !config.data} onClick={() => picker.current?.click()}><span aria-hidden="true">+</span> {working ? 'Sačekajte…' : 'Dodaj prilog'}</button>}</div>
     <ResourceState busy={busy && !data} error={loadError} onRetry={reload} noun="priloge"/>
     <div className="employee-attachment-list">{data?.items.map(attachment => <div className="employee-attachment-item" key={attachment._id}>
       <Icon name="file" size={25}/><button className="employee-attachment-download" disabled={working} onClick={async () => {try {await downloadAttachment(attachment._id, attachment.originalName);} catch (e) {setError(e.message);}}}><strong>{attachment.originalName}</strong><small>{formatFileSize(attachment.size)}</small></button><Icon name="download" size={17}/>

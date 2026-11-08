@@ -7,8 +7,10 @@ import {fail} from '../lib/errors.js';
 import {audit,notify} from '../services/events.js';
 import {allow} from '../lib/auth.js';
 import {employeeProjects} from '../services/employee.js';
+import {managerProjects} from '../services/manager.js';
 const r=Router();
 r.get('/mine',allow('employee'),async(req,res)=>res.json(await employeeProjects(req.user,req.query)));
+r.get('/sector',allow('manager'),async(req,res)=>res.json(await managerProjects(req.user,req.query)));
 r.get('/',async(req,res)=>{
  const {limit,skip,page}=safePage(req.query),filter={archived:false};
  if(req.query.sectorId){requireId(req.query.sectorId);await sectorAccess(req.user,req.query.sectorId);filter.sector=req.query.sectorId;}

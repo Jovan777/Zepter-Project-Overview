@@ -1,5 +1,17 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Prvi talas rukovodiočevih ekrana
+
+Dodati su autentifikovani, read-only `GET /api/dashboard/manager` i `GET /api/projects/sector`, samo za manager nalog sa sektorom. Pregled i globalni brojači su sektorski; podržani su pažnja, predsednikovi komentari, kašnjenja po beogradskom danu, ideje na pregledu, statusni/pretraživački filteri i paginacija. Modeli i stari ugovori ostaju isti. Semantika izvedenih oznaka i testovi su u [prvom talasu rukovodioca](docs/MANAGER_WAVE_01.md).
+
+## Četvrti talas zaposlenih ekrana
+
+Detalji ideje koriste postojeće rute. `PATCH /api/ideas/:id` i `POST /api/ideas/:id/resubmit` prihvataju opcioni `If-Match` sa `updatedAt` vremenom u navodnicima; zastarela verzija vraća 409. Ponovno slanje ima atomski uslov `revision_requested`, pa samo jedan zahtev može promeniti status. `GET /api/notifications` ima opcione `category` i `grouped=true`, sa nepročitanim stavkama pre ranijih i dodatnim `filteredUnread` brojačem. Podrazumevani ugovor, modeli i autorizacija ostaju kompatibilni. Detalji i ograničenje vizuelne provere su u [četvrtom talasu](docs/EMPLOYEE_WAVE_04.md).
+
+## Treći talas zaposlenih ekrana
+
+`GET /api/ideas/mine` je novi autentifikovani pregled samo za zaposlenog: lične ideje, tabovi `all/review/revision/forwarded`, paginacija, globalni brojači i reference autorizovanih minijatura. `review` obuhvata `submitted` i `in_review`. Kreiranje i upload koriste postojeće rute, sektor i autor dolaze sa sesije. Modeli i postojeći ugovori nisu menjani. Detalji su u [trećem talasu](docs/EMPLOYEE_WAVE_03.md).
+
 ## Drugi talas zaposlenih ekrana
 
 Detalji projekta/aktivnosti, komentari, odgovori, upload/download i dnevna evidencija koriste postojeće ugovore. `PATCH /api/activities/:id` dodatno podržava opcioni `If-Match` sa navedenim `updatedAt` ISO vremenom u navodnicima i atomsku proveru verzije; zastareli upis vraća 409. `GET /api/attachments/config` iza autentifikacije vraća formate i ograničenje veličine. Dnevni unos na 100% više ne vraća `completed` u `review`. Modeli nisu menjani. Detalji i testovi su u [drugom talasu](docs/EMPLOYEE_WAVE_02.md).

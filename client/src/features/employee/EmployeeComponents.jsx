@@ -22,7 +22,7 @@ export function ResourceState({busy, error, onRetry, noun = 'pregled'}) {
 export function EmptyState({icon = 'folder', title, children}) {
   return <div className="employee-empty"><IconDisc name={icon}/><div><strong>{title}</strong>{children && <p>{children}</p>}</div></div>;
 }
-export function ProjectThumbnail({attachmentId}) {
+export function ProjectThumbnail({attachmentId, icon = 'folder'}) {
   const [url, setUrl] = useState(null);
   useEffect(() => {
     setUrl(null);
@@ -36,7 +36,7 @@ export function ProjectThumbnail({attachmentId}) {
     }).catch(() => {});
     return () => {controller.abort(); if (objectUrl) URL.revokeObjectURL(objectUrl);};
   }, [attachmentId]);
-  return <span className={`employee-project-thumbnail ${url ? 'has-image' : ''}`}>{url ? <img src={url} alt="" loading="lazy" onError={() => setUrl(null)}/> : <Icon name="folder" size={34}/>}</span>;
+  return <span className={`employee-project-thumbnail ${url ? 'has-image' : ''}`}>{url ? <img src={url} alt="" loading="lazy" onError={() => setUrl(null)}/> : <Icon name={icon} size={34}/>}</span>;
 }
 export function ProjectCard({project, compact = false, sectorName = ''}) {
   const status = projectStatus(project);
