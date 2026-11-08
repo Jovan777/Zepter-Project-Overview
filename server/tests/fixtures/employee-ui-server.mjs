@@ -165,6 +165,25 @@ if(process.env.ZEPTER_UI_WAVE03==='1'&&authUser.role==='president'&&process.env.
   const id='d3'+index.toString(16).padStart(22,'0');stores.Attachment.set(id,{_id:id,targetType:'activity',targetId:activityId,owner:self,originalName:name,fileName,mime:'image/png',size:preview.length,createdAt:now()});
  }
 }
+if(process.env.ZEPTER_UI_WAVE04==='1'&&authUser.role==='president'&&process.env.ZEPTER_UI_QA==='1'){
+ const other='e1'.repeat(12),stamp=new Date('2026-11-08T15:00Z');
+ stores.Project.get(projectId).title='ZZ — projekat van prve stranice';
+ for(let i=0;i<24;i++){const id='d4'+i.toString(16).padStart(22,'0');stores.Project.set(id,{_id:id,title:'Abecedni test projekat '+String(i+1).padStart(2,'0'),sector,status:'planned',progress:0,archived:false,members:[self,manager],owner:manager,createdAt:stamp,updatedAt:stamp});}
+ const entries=Array.from({length:7},(_,i)=>({day:'2026-11-06',employee:'Test Zaposleni',project:'Raniji naziv projekta',projectId,activityId,activity:'Priprema početne stranice',text:'Sačuvani rezultat rada '+(i+1)+'.'}));
+ const snapshot={asOf:stamp.toISOString(),completed:Array.from({length:6},(_,i)=>({id:i?('c8'+(i-1).toString(16).padStart(22,'0')):colleagueActivity,title:'Završena aktivnost u sačuvanom pregledu '+(i+1),projectId,progress:100})),late:[{id:activityId,title:'Aktivnost sa zabeleženim kašnjenjem',projectId,dueDate:'2026-11-05T12:00Z'}]};
+ const generated={type:'weekly',periodStart:'2026-11-02',periodEnd:'2026-11-08',generatedAt:stamp.toISOString(),stats:{completedActivities:6,lateActivities:1,workEntries:7},activitySnapshot:snapshot,completed:entries,blockers:[{day:'2026-11-06',employee:'Test Zaposleni',text:'Sačuvana prepreka: čeka se odobrenje materijala.',projectId,activityId}],nextSteps:[{day:'2026-11-06',text:'Sačuvani naredni korak: pripremiti finalnu verziju.',projectId,activityId}]};
+ stores.Report.set('d5'.repeat(12),{_id:'d5'.repeat(12),sector,type:'weekly',periodStart:'2026-11-02',periodEnd:'2026-11-08',status:'published',results:'Objavljen sažetak marketinga: pripremljeni materijali i usaglašen plan.',problems:'Objavljen rizik: čeka se potvrda termina.',nextSteps:'Dogovoriti termin i završiti pripremu.',generated,createdAt:stamp,updatedAt:stamp,publishedAt:stamp});
+ stores.Report.set('d6'.repeat(12),{_id:'d6'.repeat(12),sector,type:'daily',periodStart:'2026-11-07',periodEnd:'2026-11-07',status:'published',results:'Istorijski dnevni rezultat.',problems:'',nextSteps:'Raniji sledeći korak.',generated:{stats:{completedActivities:3,lateActivities:2},completed:[{day:'2026-11-07',text:'Stari snimak bez spiska aktivnosti.'}]},publishedAt:stamp,createdAt:stamp,updatedAt:stamp});
+ stores.Report.set('d7'.repeat(12),{_id:'d7'.repeat(12),sector:other,type:'weekly',periodStart:'2026-11-02',periodEnd:'2026-11-08',status:'published',results:'Objavljen IT sažetak.',problems:'Prijavljena IT prepreka.',nextSteps:'Pripremiti proveru integracije.',generated:{stats:{completedActivities:1,lateActivities:0},completed:[]},publishedAt:stamp,createdAt:stamp,updatedAt:stamp});
+ stores.Report.set('d8'.repeat(12),{_id:'d8'.repeat(12),sector:'e3'.repeat(12),type:'weekly',periodStart:'2026-11-02',periodEnd:'2026-11-08',status:'draft',results:'PRIVATE_DRAFT_WAVE04',createdAt:stamp,updatedAt:stamp});
+ for(const [index,day]of ['2026-11-06','2026-10-26'].entries()){const id='d9'+index.toString(16).padStart(22,'0');stores.WorkLog.set(id,{_id:id,user:self,sector,project:projectId,activity:activityId,day,done:index?'Rezultat van izabranog perioda.':'Evidentiran rad u izabranom periodu.',blockers:index?'':'Prepreka iz evidencije.',nextSteps:index?'':'Završiti kontrolu sadržaja.',createdAt:stamp});}
+ Object.assign(stores.Comment.get(sectorCommentId),{responseStatus:'answered',updatedAt:stamp});
+ stores.Comment.set('da'.repeat(12),{_id:'da'.repeat(12),targetType:'project',targetId:'d0'+'9'.padStart(22,'0'),author:president,body:'Pripremite pregled integracije.',kind:'instruction',responseStatus:'answered',addressedTo:[],createdAt:stamp,updatedAt:stamp});
+ stores.Comment.set('db'.repeat(12),{_id:'db'.repeat(12),targetType:'sector',targetId:sector,author:manager,parent:sectorCommentId,body:'Predlog prioriteta je spreman za vaš pregled.',kind:'comment',responseStatus:'open',createdAt:stamp,updatedAt:stamp});
+ const itProject='d0'+'9'.padStart(22,'0');
+ for(let i=0;i<45;i++){const id='de'+i.toString(16).padStart(22,'0'),createdAt=new Date(Date.UTC(2026,10,1,8,0,i));stores.Comment.set(id,{_id:id,targetType:'project',targetId:itProject,author:'cb'.repeat(12),body:'Raniji komentar projekta '+(i+1),kind:'comment',responseStatus:'open',createdAt,updatedAt:createdAt});}
+ stores.Comment.set('dc'.repeat(12),{_id:'dc'.repeat(12),targetType:'project',targetId:itProject,author:'cb'.repeat(12),parent:'da'.repeat(12),body:'Integracija je spremna za predsednikov pregled.',kind:'comment',responseStatus:'open',createdAt:new Date(stamp.getTime()+60000),updatedAt:new Date(stamp.getTime()+60000)});
+}
 function fixtureClone(value){
  if(value instanceof Date)return new Date(value);
  if(typeof value?.toHexString==='function')return value.toHexString();
@@ -274,6 +293,11 @@ if(process.env.ZEPTER_UI_QA==='1'){
   stores.Idea.set(id,{_id:id,sector,author:self,title:'QA predlog '+(i+1),description:'Izolovani predlog za proveru dodatnih stranica.',status:'submitted',createdAt:new Date(Date.now()+i*1000),updatedAt:now()});
  }
  const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false,commentResponseLostOnce:false,worklogResponseLostOnce:false,attachmentResponseLostOnce:false,presidentFailOnce:false,socketDisconnect:false,presidentIdeasFailOnce:false,ideaReadFailOnce:false,decisionResponseLostOnce:false,decisionDeliveryFailOnce:false,reportProjectListEmpty:false,activityFailOnce:false,ideaDetailFailOnce:false,attachmentListFailOnce:false,commentsFailOnce:false};
+ Object.assign(controls,{presidentReportFailOnce:false,presidentAttentionFailOnce:false,reportOptionsFailOnce:false,presidentReportDelayOnce:false});
+ for(const [route,key,label]of [['/api/reports/president/options','reportOptionsFailOnce','Izbor izveštaja'],['/api/reports/president','presidentReportFailOnce','Izveštaj'],['/api/dashboard/president/attention','presidentAttentionFailOnce','Važna pitanja']])app.get(route,async(req,res,next)=>{
+  if(controls[key]){controls[key]=false;return res.status(503).json({error:'Test: '+label+' trenutno nije dostupan.'});}
+  if(route==='/api/reports/president'&&controls.presidentReportDelayOnce){controls.presidentReportDelayOnce=false;await new Promise(resolve=>setTimeout(resolve,900));}next();
+ });
  for(const [route,key,label]of [['/api/activities/:id','activityFailOnce','Aktivnost'],['/api/ideas/:id','ideaDetailFailOnce','Ideja'],['/api/attachments/target/:type/:id','attachmentListFailOnce','Spisak priloga'],['/api/comments','commentsFailOnce','Razgovor']])app.get(route,(req,res,next)=>{
   if(controls[key]&&(!req.params.id||/^[a-f0-9]{24}$/.test(req.params.id))){controls[key]=false;return res.status(503).json({error:'Test: '+label+' trenutno nije dostupan.'});}next();
  });

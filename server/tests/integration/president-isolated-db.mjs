@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import {randomBytes,randomUUID} from 'node:crypto';
+import {withRoutes} from '../helpers/http.mjs';
 if(process.env.ZEPTER_ISOLATED_DB_TEST!=='1')throw Error('Enable ZEPTER_ISOLATED_DB_TEST=1 explicitly.');
 const configured=new URL(process.env.MONGODB_URI);
 if(!['127.0.0.1','localhost'].includes(configured.hostname)||configured.pathname!=='/zepter_management_demo')throw Error('Expected local demo configuration.');
@@ -13,10 +14,13 @@ function check(value,label){if(!value)throw Error('Check failed: '+label);checks
 try{
  await mongoose.connect(configured.href,{serverSelectionTimeoutMS:5000});connected=true;
  if(mongoose.connection.name!==database||!database.startsWith(prefix))throw Error('Unsafe database target.');
- const {User,Sector,Idea,IdeaRead,Comment,Notification,Attachment}=await import('../../src/models/index.js');
+ const {User,Sector,Idea,IdeaRead,Comment,Notification,Attachment,Project,Activity,WorkLog,Report}=await import('../../src/models/index.js');
  const {decideIdea,deliverPendingIdeaDecisions}=await import('../../src/services/idea-decisions.js');
  const {presidentIdeas,markPresidentIdeaRead}=await import('../../src/services/president-ideas.js');
- await Promise.all([User.init(),Sector.init(),Idea.init(),IdeaRead.init(),Comment.init(),Notification.init(),Attachment.init()]);
+ const {generateReport}=await import('../../src/services/reports.js');
+ const {presidentReport}=await import('../../src/services/president-reports.js');
+ const {presidentAttention,presidentOverview}=await import('../../src/services/president.js');
+ await Promise.all([User.init(),Sector.init(),Idea.init(),IdeaRead.init(),Comment.init(),Notification.init(),Attachment.init(),Project.init(),Activity.init(),WorkLog.init(),Report.init()]);
  const sector=await Sector.create({name:'Isolated test sector',code:'ISOLATED_W02'});
  const makeUser=(role,index)=>User.create({firstName:'Test',lastName:role,email:'isolated-'+index+'@fixture.zepter.test',passwordHash:'synthetic-not-for-login',role,approval:'approved',...(role==='president'?{}:{sector:sector._id})});
  const [president,manager,author,otherManager]=await Promise.all([makeUser('president',1),makeUser('manager',2),makeUser('employee',3),makeUser('manager',4)]);
@@ -58,6 +62,33 @@ try{
  check(await Attachment.countDocuments({owner:president._id,uploadId})===1,'Unique comment upload persisted once.');
  const otherUpload=await Attachment.create({...file,owner:author._id});check(String(otherUpload.comment)===String(instruction._id),'Optional comment reference casts correctly; operation keys belong to their owner.');
  await Attachment.create({...file,uploadId:undefined});await Attachment.create({...file,uploadId:undefined});check(await Attachment.countDocuments({uploadId:{$exists:false}})===2,'Legacy attachments without a key remain compatible.');
+ const project=await Project.create({title:'Isolated reporting project',sector:sector._id,owner:manager._id,members:[manager._id,author._id],status:'active',progress:50,archived:false});
+ const finished=await Activity.create({title:'Snapshot finished activity',sector:sector._id,project:project._id,status:'completed',progress:100,assignees:[author._id]});
+ await WorkLog.create({user:author._id,sector:sector._id,project:project._id,activity:finished._id,day:'2026-11-06',done:'Saved period evidence.',nextSteps:'Review the saved evidence.'});
+ const generated=await generateReport({scope:'sector',id:String(sector._id),type:'weekly',day:'2026-11-08'});
+ const report=await Report.create({sector:sector._id,type:'weekly',periodStart:'2026-11-02',periodEnd:'2026-11-08',status:'published',generated,results:'Frozen manager results.',publishedAt:new Date()});
+ await Activity.updateOne({_id:finished._id},{$set:{status:'in_progress',progress:30}});
+ const frozen=await presidentReport(president,{reportId:String(report._id)});
+ check(frozen.completedActivities.length===1&&frozen.metrics.completedActivities===1,'Real saved Mixed snapshot does not follow later activity changes.');
+ check(String(frozen.results[0].activityId)===String(finished._id),'Saved evidence retains its actual activity destination.');
+ check((await presidentReport(president,{scope:'sector',id:String(sector._id),type:'weekly',day:'2026-11-08'})).mode==='published','Exact saved sector period is read from MongoDB.');
+ check((await presidentReport(president,{scope:'project',id:String(project._id),type:'weekly',day:'2026-11-09'})).results.length===0,'Another project period has no stale results.');
+ const instruction1=await Comment.create({targetType:'sector',targetId:sector._id,author:president._id,kind:'instruction',responseStatus:'answered',body:'Sector answer awaits review.'});
+ const instruction2=await Comment.create({targetType:'project',targetId:project._id,author:president._id,kind:'instruction',responseStatus:'answered',body:'Project answer awaits review.'});
+ const attention=await presidentAttention(president,{tab:'comments',sectorId:String(sector._id)});
+ check(attention.total===2&&attention.items.every(row=>!row.link.includes('undefined')),'Actual populated targets support both sector and project answers.');
+ const all=await presidentAttention(president,{}),overview=await presidentOverview(president,{});
+ check(all.total===overview.stats.attention,'Real MongoDB attention and home totals agree.');
+ check(overview.sectors.items.find(row=>String(row._id)===String(sector._id)).attentionCount===(await presidentAttention(president,{sectorId:String(sector._id)})).total,'Actual sector count includes answer targets.');
+ await Comment.updateOne({_id:instruction1._id},{$set:{responseStatus:'resolved'}});
+ check((await presidentAttention(president,{tab:'comments'})).total===1,'Resolving an actual instruction removes the pending answer.');
+ for(let i=0;i<23;i++)await Comment.create({targetType:'project',targetId:project._id,author:manager._id,body:'Earlier isolated comment '+i,createdAt:new Date('2026-11-01T08:00Z')});
+ const {default:commentRoutes}=await import('../../src/routes/comments.js');
+ await withRoutes(president,[['/comments',commentRoutes]],async base=>{
+  const response=await fetch(base+'/comments?'+new URLSearchParams({targetType:'project',targetId:String(project._id),focus:String(instruction2._id),limit:20})),body=await response.json();
+  check(response.ok&&body.page===2&&body.items.some(row=>row._id===String(instruction2._id)),'Real focused pagination finds the authorized comment on a later page.');
+  check((await fetch(base+'/comments?'+new URLSearchParams({targetType:'project',targetId:String(project._id),focus:String(instruction1._id)}))).status===404,'Real focus query cannot use another conversation.');
+ });
  console.log('PASS '+checks+' real MongoDB checks in a temporary isolated database. Demo data unchanged.');
 }catch(error){
  console.error(error.message?.startsWith('Check failed:')?error.message:'Isolated MongoDB check failed ('+error.name+'). No configuration values printed.');process.exitCode=1;

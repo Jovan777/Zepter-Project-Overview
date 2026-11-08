@@ -10,11 +10,18 @@ r.get('/',async(req,res)=>{
  const {targetType,targetId}=req.query;
  if(!targetType||!targetId)fail(422,'Nedostaje cilj komentara.');
  await targetAccess(req.user,targetType,targetId);
- const {limit,skip,page}=safePage(req.query),q={targetType,targetId};
- const [items,total]=await Promise.all([Comment.find(q).sort({createdAt:1}).skip(skip).limit(limit).populate('author','firstName lastName role').populate('addressedTo','firstName lastName'),Comment.countDocuments(q)]);
- if(req.query.includeAttachments!=='1')return res.json({items,total,page,limit});
+ let {limit,skip,page}=safePage(req.query);const q={targetType,targetId};
+ if(req.query.focus){
+  const focus=await Comment.findOne({...q,_id:requireId(req.query.focus)}).select('_id createdAt');
+  if(!focus)fail(404,'Povezani komentar nije pronađen u ovom razgovoru.');
+  const before=await Comment.countDocuments({...q,$or:[{createdAt:{$lt:focus.createdAt}},{createdAt:focus.createdAt,_id:{$lt:focus._id}}]});
+  page=Math.floor(before/limit)+1;skip=(page-1)*limit;
+ }
+ const [items,total]=await Promise.all([Comment.find(q).sort({createdAt:1,_id:1}).skip(skip).limit(limit).populate('author','firstName lastName role').populate('addressedTo','firstName lastName'),Comment.countDocuments(q)]);
+ const context={total,page,limit,...(req.query.focus?{focusId:req.query.focus}:{})};
+ if(req.query.includeAttachments!=='1')return res.json({items,...context});
  const files=items.length?await Attachment.find({targetType,targetId,comment:{$in:items.map(c=>c._id)}}).select('_id comment originalName mime size owner').lean():[];
- res.json({items:items.map(c=>({...c.toObject(),attachments:files.filter(a=>same(a.comment,c._id)).map(a=>({_id:a._id,originalName:a.originalName,mime:a.mime,size:a.size,owner:a.owner}))})),total,page,limit});
+ res.json({items:items.map(c=>({...c.toObject(),attachments:files.filter(a=>same(a.comment,c._id)).map(a=>({_id:a._id,originalName:a.originalName,mime:a.mime,size:a.size,owner:a.owner}))})),...context});
 });
 r.post('/',async(req,res)=>{
  const d=schemas.comment.parse(req.body);

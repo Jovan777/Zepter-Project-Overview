@@ -7,10 +7,13 @@ import {uncertainWrite} from '../workspace/mutations.js';
 import useCommentFiles from '../workspace/useCommentFiles.js';
 import CommentAttachmentLinks from '../workspace/CommentAttachmentLinks.jsx';
 import {formatFileSize} from './activityForm.js';
+import {useSearchParams} from 'react-router-dom';
 
 const time = value => new Intl.DateTimeFormat('sr-Latn-RS', {timeZone: 'Europe/Belgrade', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}).format(new Date(value));
 function ThreadHistory({collapsed,total,children,historyRef}){return collapsed?<details ref={historyRef} className="president-thread-history"><summary>Razgovor sa rukovodiocem ({total??'—'})</summary>{children}</details>:children;}
 export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments', variant, initialReply, allowInstructions = false, allowAttachments = false, onDraftChange, onBusyChange, onCountChange, collapseHistory = false}) {
+  const [search]=useSearchParams(),focus=/^[a-f0-9]{24}$/i.test(search.get('commentId')||'')?search.get('commentId').toLowerCase():null;
+  const [focusResolved,setFocusResolved]=useState(false);
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState('');
   const [parent, setParent] = useState(null);
@@ -19,14 +22,17 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
   const [notice, setNotice] = useState('');
   const [kind, setKind] = useState('comment');
   const [uncertain,setUncertain]=useState(false);
-  const editor = useRef(null), lock = useRef(false), history = useRef(null),picker=useRef(null);
+  const editor = useRef(null), lock = useRef(false), history = useRef(null),picker=useRef(null),anchored=useRef(false);
   const files=useCommentFiles(allowAttachments,type,id);
   const base = `/comments?targetType=${type}&targetId=${id}&includeAttachments=1`;
   useEffect(()=>{onDraftChange?.(!!message.trim()||sending||uncertain||files.items.length>0||files.busy);},[message,sending,uncertain,files.items.length,files.busy,onDraftChange]);
   useEffect(()=>{onBusyChange?.(sending||files.busy);},[sending,files.busy,onBusyChange]);
-  const {data, busy, error: loadError, reload} = useEmployeeResource(`${base}&page=${page}&limit=20`, {keepPreviousData: true});
+  const {data, busy, error: loadError, reload} = useEmployeeResource(`${base}&page=${page}&limit=20${focus&&!focusResolved?'&focus='+focus:''}`, {keepPreviousData: true});
   useEffect(()=>{if(data)onCountChange?.(data.total);},[data?.total,onCountChange]);
-  useEffect(() => {setPage(1); setMessage(''); setParent(null); setKind('comment'); setError(''); setNotice('');setUncertain(false);}, [type, id]);
+  useEffect(()=>{if(data?.focusId===focus&&focus){setPage(data.page);setFocusResolved(true);}},[data,focus]);
+  useEffect(()=>{if(data&&!anchored.current&&(window.location.hash==='#'+sectionId||focus)&&(!focus||data.items.some(c=>c._id===focus))){if(history.current)history.current.open=true;document.getElementById(focus?'comment-'+focus:sectionId)?.scrollIntoView({block:'start'});anchored.current=true;}},[data,sectionId,focus]);
+  useEffect(() => {setPage(1); setMessage(''); setParent(null); setKind('comment'); setError(''); setNotice('');setUncertain(false);anchored.current=false;setFocusResolved(false);}, [type, id]);
+  useEffect(()=>{anchored.current=false;setFocusResolved(false);},[focus]);
   useEffect(() => {if (initialReply) {setParent(initialReply); editor.current?.focus();}}, [initialReply]);
   const send = async event => {
     event.preventDefault();
@@ -56,12 +62,13 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
   return <section className="employee-section employee-discussion" id={sectionId} aria-labelledby={`${sectionId}-heading`}>
     <h2 id={`${sectionId}-heading`}>{heading}{['idea','president'].includes(variant) && data ? ` (${data.total})` : ''}</h2>
     <ThreadHistory collapsed={collapseHistory} total={data?.total} historyRef={history}><ResourceState busy={busy && !data} error={loadError} onRetry={reload} noun="razgovor"/>
+    {loadError&&focus&&!focusResolved&&<button className="employee-text-button" onClick={()=>{setFocusResolved(true);setPage(1);}}>Prikaži ceo razgovor</button>}
     {data && !data.items.length && <EmptyState icon="message" title="Započnite razgovor">Postavite pitanje ili podelite novost o {type === 'project' ? 'projektu' : type === 'idea' ? 'ideji' : type === 'sector' ? 'sektoru' : 'aktivnosti'}.</EmptyState>}
     {data?.items.map(comment => {
       const own = comment.author?._id === user._id;
       const fullName = `${comment.author?.firstName || 'Korisnik'} ${comment.author?.lastName || ''}`.trim();
       const name = ['idea','president'].includes(variant) ? (variant==='president'&&comment.author?.role==='president'?'Predsednik':fullName) : comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac' : fullName;
-      return <article className={`employee-discussion-card ${own ? 'is-own' : ''} ${comment.author?.role==='president'?'is-president':''} ${['president', 'manager'].includes(comment.author?.role) ? 'is-leader' : ''}`} key={comment._id}>
+      return <article id={'comment-'+comment._id} className={`employee-discussion-card ${own ? 'is-own' : ''} ${comment._id===focus?'is-focused':''} ${comment.author?.role==='president'?'is-president':''} ${['president', 'manager'].includes(comment.author?.role) ? 'is-leader' : ''}`} key={comment._id}>
         {['idea','president'].includes(variant) ? <span className="employee-comment-initials" aria-hidden="true">{variant==='president'&&comment.author?.role==='president'?<Icon name="crown" size={20}/>: [comment.author?.firstName, comment.author?.lastName].filter(Boolean).map(x => x[0]).join('') || '?'}</span> : <IconDisc name={comment.author?.role === 'manager' ? 'users' : 'user'}/>}<div className="employee-discussion-body">
           <div className="employee-discussion-heading"><h3>{name}{own && <small> (vi)</small>}</h3><time dateTime={comment.createdAt}>{time(comment.createdAt)}</time></div>
           {['idea','president'].includes(variant) && <span className="employee-comment-role">{comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac sektora' : 'Zaposleni'}</span>}

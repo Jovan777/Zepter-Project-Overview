@@ -19,7 +19,8 @@ try{
  const auth=await response.json();token=auth.accessToken;check(auth.user.role==='president'&&!!token&&!!cookie,'President session was not confirmed.');
  const home=await get('/dashboard/president'),projects=await get('/projects?activeOnly=1');
  check(home.stats.activeProjects===projects.total,'Active project count differs from its destination.');
- const attention=await get('/dashboard/president/attention');check(home.stats.attention===attention.total,'Attention totals differ.');
+ const attention=await get('/dashboard/president/attention');check(home.stats.attention===attention.total&&attention.stats.all===attention.total,'Attention totals differ.');
+ for(const tab of ['approvals','deadlines','comments','ideas']){const filtered=await get('/dashboard/president/attention?tab='+tab);check(filtered.total===attention.stats[tab],'Attention category total differs.');}
  const ideas=await get('/ideas/president');
  check(ideas.items.every(idea=>['forwarded','approved','rejected'].includes(idea.status)),'A private unforwarded idea escaped.');
  check(ideas.stats.total===ideas.total,'Idea totals differ.');
@@ -40,7 +41,12 @@ try{
  for(const type of ['daily','weekly']){
   const company=await get('/reports/preview?scope=company&type='+type);check(company.report.scope==='company'&&company.report.type===type,'Company report context differs.');
   const id=home.sectors.items[0]?._id;if(id){const sector=await get('/reports/preview?scope=sector&id='+id+'&type='+type);check(sector.report.targetId===id&&sector.report.type===type,'Sector report context differs.');}
+  const reader=await get('/reports/president?scope=company&type='+type);check(reader.context.scope==='company'&&reader.context.type===type,'Company reader context differs.');
+  if(id){const selected=await get('/reports/president?scope=sector&id='+id+'&type='+type);check(String(selected.context.targetId)===id&&selected.context.type===type,'Sector reader context differs.');}
+  if(projects.items[0]){const selected=await get('/reports/president?scope=project&id='+projects.items[0]._id+'&type='+type);check(selected.context.targetId===projects.items[0]._id&&selected.summaries.length===0,'Project reader context differs.');}
  }
+ const published=await get('/reports?limit=1');if(published.items[0]){const saved=await get('/reports/president?reportId='+published.items[0]._id);check(saved.mode==='published'&&saved.reportId===published.items[0]._id,'Saved reader did not return the published report.');}
+ const targets=await get('/reports/president/options?scope=employee');check(targets.items.every(row=>Object.keys(row).every(key=>['_id','name'].includes(key))),'Target options exposed extra account fields.');
  console.log('PASS '+checks+' live presidential read/auth checks. No business data changed; no credential values printed.');
 }finally{
  if(cookie){

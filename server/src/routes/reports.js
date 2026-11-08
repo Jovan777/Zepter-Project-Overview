@@ -7,7 +7,10 @@ import {belgradeDay,periodRange,requireId,same,safePage} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {allow} from '../lib/auth.js';
 import {audit,notify} from '../services/events.js';
+import {presidentReport,presidentReportOptions} from '../services/president-reports.js';
 const r=Router();
+r.get('/president/options',allow('president'),async(req,res)=>res.json(await presidentReportOptions(req.user,req.query)));
+r.get('/president',allow('president'),async(req,res)=>res.json(await presidentReport(req.user,req.query)));
 const checkVersion=(req,report)=>{
  const version=req.get('If-Match');
  if(version&&(!report||version!==`"${report.updatedAt?.toISOString()}"`))fail(409,'Izveštaj je u međuvremenu promenjen. Proverite sačuvanu verziju pre nastavka.');

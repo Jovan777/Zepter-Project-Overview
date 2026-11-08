@@ -1,5 +1,7 @@
 # ZEPTER | Management Overview
 
+**Predsednik — četvrti talas:** [izveštaji i sva pitanja za pažnju](docs/PRESIDENT_WAVE_04.md) imaju mobilni/tablet/desktop prikaz. Zajednički čitač prati kompaniju, sektor, projekat ili zaposlenog i izabrani dnevni/nedeljni period; objavljeni snimci ostaju istorijski. Lista pažnje ima filtere, sektorske brojače i direktan ulazak u odgovor čak i na kasnijoj stranici razgovora. Dokument navodi izvršene testove i preostalu dopunsku browser proveru posle prekida alata.
+
 **Predsednik — treći talas:** [detalji ideje i aktivnosti](docs/PRESIDENT_WAVE_03.md) prate nove mobilne reference i imaju tablet/desktop raspored. Predsednik komentariše, šalje instrukcije i prilaže dokumente uz konkretnu poruku; zaposleni vidi prilog i odgovara u istom razgovoru. Sačuvane su odluke o idejama i zaštita od duplih komentara/priloga pri nejasnoj potvrdi.
 
 **Predsednik — drugi talas:** [projekat, aktivnosti i ideje](docs/PRESIDENT_WAVE_02.md) imaju mobilni/tablet/desktop prikaz. Odobrenje ideje zahteva komentar sa narednim koracima za rukovodioca koji ju je prosledio; odbijanje je završno. Dodati su stvarni završni statusi, lične oznake novih ideja i bezbedan nastavak isporuke odluke. Postojeće ideje ne zahtevaju migraciju.

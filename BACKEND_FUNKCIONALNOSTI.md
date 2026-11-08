@@ -1,5 +1,9 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Četvrti predsednički talas
+
+Read-only `/api/reports/president` i `/president/options` iza president ovlašćenja podržavaju objavljeni snimak ili automatsku evidenciju odgovarajućeg cilja/perioda. Generator aditivno čuva `activitySnapshot` i ID-jeve evidencije u postojećem Mixed polju, uz beogradski početak dana i isključivanje kašnjenja zatvorenih projekata. `/dashboard/president/attention` dodaje kategorije/statistiku i predsednikove answered instrukcije do resolved, a kompanija/sektori koriste iste izvore. Opcioni `focus` komentara računa stvarnu stranicu samo unutar autorizovanog razgovora. Nema izmene šema ni migracije. [Ugovori, provere i ograničenja](docs/PRESIDENT_WAVE_04.md).
+
 ## Treći predsednički talas
 
 Attachment dobija opcioni komentar i UUID operacije, uz parcijalni jedinstveni owner/uploadId indeks. POST priloga proverava isti cilj i autora komentara pre prihvata fajla; predsednik može dodati dokument prosleđenoj/završenoj ideji samo uz svoj komentar. Idempotentni retry vraća postojeći fajl. GET komentara opciono dodaje javne metapodatke priloga preko includeAttachments=1. Stari ugovori i dokumenti ostaju kompatibilni, bez migracije. [Ugovori, provere i ograničenja](docs/PRESIDENT_WAVE_03.md).
