@@ -70,4 +70,8 @@ Ova provera nije instalacioni PWA test na pravom Android/iOS uređaju. HTTPS, in
 
 ## Nastavak razvoja
 
-Svaki naredni talas najpre prenosi dve odobrene mobilne reference, zatim prilagođava iste ekrane tabletu i desktopu koristeći ovaj zajednički shell. Proveriti i prelaz širina sa započetim unosom. Sledeći rukovodiočevi ekrani čekaju korisnikove reference.
+Naknadna provera rukovodiočevih ekrana 7–8, 8. novembar 2026: nakon osvežavanja browser sesija potvrđeni su prikazi na 320/390, 820 i 1440 px, očuvanje sažetka pri resize-u, zaštita pri promeni perioda, mobilno čuvanje/objava i filteri/otvaranje ideja. Ispravljeni su rastezanje ikonice napretka i prelamanje duže statusne oznake. Obim, rezultati i preostala ograničenja su u [četvrtom rukovodiočevom talasu](MANAGER_WAVE_04.md). Ova dopuna ne predstavlja proveru svih prethodnih talasa.
+
+Peti rukovodiočev talas, ekrani 9–10, pregledan je na 320/390, 820 i 1440 px: predlog/odluka levo i razgovor desno na desktopu, donja/bočna navigacija i grupisanje obaveštenja. Komentar i obrazloženje ostali su sačuvani pri resize-u. [Obim funkcionalnih provera i ograničenja](MANAGER_WAVE_05.md).
+
+Svaki naredni talas najpre prenosi dve odobrene mobilne reference, zatim prilagođava iste ekrane tabletu i desktopu koristeći ovaj zajednički shell. Proveriti i prelaz širina sa započetim unosom. Naredne ekrane određuje korisnik.

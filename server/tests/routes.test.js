@@ -71,8 +71,12 @@ test('President and employee cannot edit or publish report drafts', async t => {
 
 test('Manager and admin can edit a draft; published reports stay locked', async t => {
   let saved = 0;
-  const report = {sector, status: 'draft', save: async () => {saved++;}};
+  const report = {_id: reportId, sector, status: 'draft'};
   t.mock.method(Report, 'findById', async () => report);
+  t.mock.method(Report, 'findOneAndUpdate', async (filter, patch) => {
+    assert.deepEqual(filter, {_id: reportId, status: 'draft'});
+    saved++; return {...report, ...patch.$set};
+  });
   // Audit writes are stubbed as well, so no collection is touched.
   const {Audit} = await import('../src/models/index.js');
   t.mock.method(Audit, 'create', async () => ({}));

@@ -4,13 +4,15 @@ import Icon from '../../components/Icon.jsx';
 import {api, subscribePush} from '../../api.js';
 import {EmptyState, IconDisc, Pagination, ResourceState} from './EmployeeComponents.jsx';
 import useEmployeeResource from './useEmployeeResource.js';
+import {managerNotificationTabs,managerNotificationIcon} from '../manager/notifications.js';
 import {notificationDestination, notificationIcon, notificationTabs, notificationTime} from './notifications.js';
 
-export default function EmployeeNotifications() {
+export default function EmployeeNotifications({variant='employee'}) {
+  const manager=variant==='manager', tabs=manager?managerNotificationTabs:notificationTabs;
   const [search, setSearch] = useSearchParams(), navigate = useNavigate();
-  const category = notificationTabs.some(([key]) => key === search.get('category')) ? search.get('category') : 'all';
+  const category = tabs.some(([key]) => key === search.get('category')) ? search.get('category') : 'all';
   const page = Math.max(1, Math.floor(Number(search.get('page')) || 1));
-  const resource = useEmployeeResource('/notifications?' + new URLSearchParams({category, page, limit: 12, grouped: true}));
+  const resource = useEmployeeResource('/notifications?' + new URLSearchParams({category, page, limit: 12, grouped: true,...(manager?{view:'manager'}:{})}));
   const {data, busy, error: loadError, reload} = resource;
   const [working, setWorking] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState(''), [failedLink, setFailedLink] = useState(null);
   const [now, setNow] = useState(Date.now());
@@ -45,11 +47,11 @@ export default function EmployeeNotifications() {
   };
   const fresh = data?.items.filter(item => !item.readAt) || [], earlier = data?.items.filter(item => item.readAt) || [];
   const group = (items, heading, id) => items.length > 0 && <section className="employee-notification-group" aria-labelledby={id}><h2 id={id}>{heading}</h2>{items.map(item => <button className={`employee-notification-card ${item.readAt ? '' : 'is-unread'}`} key={item._id} onClick={() => open(item)} disabled={working}>
-    <IconDisc name={notificationIcon(item)}/><span className="employee-notification-copy"><strong>{item.title}</strong><span>{item.body}</span><time dateTime={item.createdAt}>{notificationTime(item.createdAt, now)}</time></span><span className="employee-notification-tail">{!item.readAt && <i aria-label="Nepročitano"/>}<Icon name="chevron" size={19}/></span>
+    <IconDisc name={manager?managerNotificationIcon(item):notificationIcon(item)}/><span className="employee-notification-copy"><strong>{item.title}</strong><span>{item.body}</span><time dateTime={item.createdAt}>{notificationTime(item.createdAt, now)}</time></span><span className="employee-notification-tail">{!item.readAt && <i aria-label="Nepročitano"/>}<Icon name="chevron" size={19}/></span>
   </button>)}</section>;
-  return <div className="employee-notifications">
-    <div className="employee-greeting"><h1>Obaveštenja</h1><p>Sve važne novosti i aktivnosti</p></div>
-    <div className="employee-filter-tabs employee-notification-tabs" role="group" aria-label="Kategorija obaveštenja">{notificationTabs.map(([key, title]) => <button key={key} aria-pressed={category === key} className={category === key ? 'is-active' : ''} onClick={() => change(key)}>{title}</button>)}</div>
+  return <div className={manager?"employee-notifications manager-notifications":"employee-notifications"}>
+    <div className="employee-greeting">{manager&&<IconDisc name="bell"/>}<div><h1>Obaveštenja</h1><p>{manager?"Pregled važnih novosti u sektoru":"Sve važne novosti i aktivnosti"}</p></div></div>
+    <div className="employee-filter-tabs employee-notification-tabs" role="group" aria-label="Kategorija obaveštenja">{tabs.map(([key, title]) => <button key={key} aria-pressed={category === key} className={category === key ? 'is-active' : ''} onClick={() => change(key)}>{title}</button>)}</div>
     {data?.unread > 0 && <div className="employee-notification-tools"><span>{data.unread} nepročitanih ukupno</span><button className="employee-text-button" disabled={working} onClick={readAll}>Označi sva kao pročitana</button></div>}
     <ResourceState busy={busy} error={loadError} onRetry={reload} noun="pregled obaveštenja"/>
     {error && <div className="employee-form-error" role="alert"><p>{error}</p>{failedLink && <Link className="employee-text-button" to={failedLink}>Otvori sadržaj bez označavanja</Link>}</div>}

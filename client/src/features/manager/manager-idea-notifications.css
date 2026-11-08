@@ -1,0 +1,112 @@
+.manager-idea-page-heading {display:flex; align-items:center; gap:12px; margin-bottom:17px;}
+.manager-idea-page-heading > a {background:#fdf3e3; border-radius:50%; color:#ad741c; width:38px; height:38px; flex-shrink:0;}
+.manager-idea-page-heading h1 {font-size:23px; line-height:1.25; margin:0 0 3px;}
+.manager-idea-page-heading p {font-size:13px; color:#647086; margin:0;}
+.manager-idea-detail-grid > :is(div,aside,section) {min-width:0;}
+.manager-idea-proposal {border:1px solid #e6e3ea; border-radius:13px; background:white; overflow:hidden;}
+.manager-idea-proposal-title {display:flex; gap:10px; align-items:center; padding:14px 13px 0;}
+.manager-idea-proposal-title .employee-icon-disc {width:36px; height:36px; border-radius:10px; flex-shrink:0;}
+.manager-idea-proposal-title h2 {font-size:18px; line-height:1.35; margin:0; overflow-wrap:anywhere;}
+.manager-idea-proposal > p,.manager-idea-benefit p {font-size:14px; line-height:1.65; margin:12px 14px; white-space:pre-wrap; overflow-wrap:anywhere; color:#4e5e78;}
+.manager-idea-benefit {border-top:1px solid #eee9e2; padding-top:12px; margin-top:15px;}
+.manager-idea-benefit h3 {font-size:14px; margin:0 14px;}
+.manager-idea-proposal-meta {display:flex; flex-wrap:wrap; align-items:center; gap:9px; border-top:1px solid #eae6ed; padding:12px; background:#fcfcfe;}
+.manager-idea-initials {width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:#faefd9; border-radius:50%; color:#a66f17; font-size:12px; flex-shrink:0; font-weight:650;}
+.manager-idea-proposal-meta > div {flex:1; min-width:0;}
+.manager-idea-proposal-meta strong {display:block; font-size:12px; overflow-wrap:anywhere;}
+.manager-idea-proposal-meta small {font-size:11px; color:#718097; display:block; margin-top:3px;}
+.manager-idea-proposal-meta time {font-size:11px; display:flex; gap:5px; align-items:center; color:#66758e;}
+.manager-idea-proposal-meta .employee-badge {font-size:10px; padding:5px 8px; display:flex; gap:4px; white-space:normal; max-width:135px;}
+.manager-idea-proposal-meta .employee-badge svg {flex-shrink:0;}
+.manager-idea-detail .employee-badge--review {background:#e9f2ff; color:#2464b7;}
+.manager-idea-detail .employee-attachment-panel {border:0; padding:0; margin:22px 0; box-shadow:none;}
+.manager-idea-detail .employee-attachment-heading {gap:7px;}
+.manager-idea-detail .employee-attachment-heading > .employee-icon-disc {display:none;}
+.manager-idea-detail .employee-attachment-heading h2 {font-size:19px;}
+.manager-idea-detail .employee-attachment-list {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
+.manager-idea-detail .employee-attachment-item {min-width:0; width:auto; padding:10px 8px; gap:6px; background:#fdfbf7;}
+.manager-idea-detail .employee-attachment-item > svg {flex-shrink:0; color:#ae771b; width:18px;}
+.manager-idea-detail .employee-attachment-download {min-width:0; min-height:44px;}
+.manager-idea-detail .employee-attachment-download strong {font-size:11px; overflow-wrap:anywhere;}
+.manager-idea-detail .employee-attachment-download small {font-size:10px;}
+.manager-idea-review-note,.manager-idea-latest {border:1px solid #ecd9b8; border-radius:11px; padding:13px; margin-block:17px; background:#fffaf0;}
+.manager-idea-review-note h2 {font-size:16px; margin:0 0 7px;}
+.manager-idea-review-note p,.manager-idea-latest p {font-size:13px; line-height:1.6; margin:7px 0; white-space:pre-wrap; overflow-wrap:anywhere; color:#5a6680;}
+.manager-idea-conversation .employee-discussion {margin-top:18px;}
+.manager-idea-conversation .employee-discussion h2 {font-size:20px;}
+.manager-idea-conversation .employee-discussion-card {padding:12px; gap:8px;}
+.manager-idea-conversation .employee-comment-initials {width:29px; height:29px; font-size:11px; flex-shrink:0;}
+.manager-idea-conversation .employee-discussion-heading {flex-wrap:wrap; gap:5px;}
+.manager-idea-conversation .employee-discussion-heading h3 {font-size:13px;}
+.manager-idea-conversation .employee-discussion-heading time {font-size:10px;}
+.manager-idea-conversation .employee-discussion-body > p {font-size:13px; line-height:1.55;}
+.manager-idea-conversation .employee-comment-composer {display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px;}
+.manager-idea-conversation .employee-comment-composer textarea {font-size:16px;}
+.manager-idea-conversation .manager-comment-kind {grid-column:1 / -1;}
+.manager-own-idea .employee-comment-composer {display:grid; grid-template-columns:minmax(0,1fr) auto;}
+.manager-idea-decision {margin-top:19px;}
+.manager-idea-forward-note {display:flex; align-items:center; gap:10px; border-radius:11px; padding:12px; border:1px solid #f0dfbf; background:#fff6e7; font-size:12px; line-height:1.5; color:#70582f;}
+.manager-idea-forward-note > svg {flex-shrink:0; color:#ac751d;}
+.manager-idea-decision > label {display:block; font-size:14px; font-weight:650; margin:19px 0 8px;}
+.manager-idea-decision > label small {font-size:11px; color:#7a8597; font-weight:400;}
+.manager-idea-decision > textarea {width:100%; min-width:0; box-sizing:border-box; resize:vertical; padding:11px; border:1px solid #ded9e5; border-radius:10px; font:inherit; font-size:16px; line-height:1.55;}
+.manager-idea-decision-actions,.manager-idea-confirm > div {display:flex; gap:9px; margin-top:13px;}
+.manager-idea-decision-actions > button,.manager-idea-confirm button {flex:1; min-width:0; min-height:46px; padding:10px 8px; margin:0; font-size:12px;}
+.manager-idea-confirm {border:1px solid #e8cd9e; border-radius:12px; padding:14px; margin-block:17px; scroll-margin-top:100px;}
+.manager-idea-confirm strong {font-size:14px;}
+.manager-idea-confirm p,.manager-idea-status-note {font-size:13px; line-height:1.6; color:#67738c;}
+.manager-idea-decision > .employee-text-button {font-size:12px; min-height:44px; margin-top:10px;}
+.manager-notifications .employee-greeting {display:flex; align-items:center; gap:12px; margin-bottom:20px;}
+.manager-notifications .employee-greeting > .employee-icon-disc {width:42px; height:42px; border-radius:10px; flex-shrink:0;}
+.manager-notifications .employee-greeting h1 {font-size:25px; margin:0 0 5px;}
+.manager-notifications .employee-greeting p {font-size:13px; margin:0;}
+.manager-notifications .employee-notification-tabs {display:grid; grid-template-columns:.6fr 1.1fr 1.1fr .8fr .6fr; gap:5px; overflow:visible;}
+.manager-notifications .employee-notification-tabs > button {min-width:0; width:auto; padding:7px 4px; border-radius:10px; min-height:44px; white-space:normal; font-size:11px; line-height:1.25;}
+.manager-notifications .employee-notification-tabs > .is-active {color:white; background:linear-gradient(110deg,#d1a143,#b57814);}
+.manager-notifications .employee-notification-group h2 {font-size:18px;}
+.manager-notifications .employee-notification-card {padding:12px; gap:10px; border-color:#e9e1d7; border-radius:12px;}
+.manager-notifications .employee-notification-card.is-unread {background:#fffbf5;}
+.manager-notifications .employee-notification-card > .employee-icon-disc {width:33px; height:33px; flex-shrink:0;}
+.manager-notifications .employee-notification-copy strong {font-size:13px; line-height:1.35;}
+.manager-notifications .employee-notification-copy > span {font-size:12px; line-height:1.5;}
+.manager-notifications .employee-notification-copy time {font-size:10px;}
+.manager-notifications .employee-notification-tools {font-size:11px; flex-wrap:wrap; gap:5px;}
+.manager-notifications .employee-notification-tools button {font-size:11px; min-height:44px;}
+.manager-idea-detail :is(a,button,textarea):focus-visible {outline:3px solid #c89539; outline-offset:3px;}
+@media(max-width:359px){
+ .manager-idea-detail .employee-attachment-list {grid-template-columns:minmax(0,1fr);}
+ .manager-idea-decision-actions {flex-direction:column;}
+ .manager-idea-proposal-meta > time {flex-basis:100%;}
+}
+@media(min-width:768px){
+ .manager-idea-page-heading h1 {font-size:31px;}
+ .manager-idea-page-heading {margin-bottom:25px;}
+ .manager-idea-proposal-title {padding:22px 22px 0; gap:16px;}
+ .manager-idea-proposal-title h2 {font-size:25px;}
+ .manager-idea-proposal > p,.manager-idea-benefit p {margin:17px 22px; font-size:16px;}
+ .manager-idea-benefit h3 {margin-inline:22px; font-size:17px;}
+ .manager-idea-proposal-meta {padding:17px 22px; gap:14px;}
+ .manager-idea-proposal-meta strong {font-size:14px;}
+ .manager-idea-proposal-meta small,.manager-idea-proposal-meta time {font-size:12px;}
+ .manager-idea-proposal-meta .employee-badge {font-size:12px;}
+ .manager-idea-detail .employee-attachment-download strong {font-size:13px;}
+ .manager-idea-conversation .employee-discussion-card {padding:18px;}
+ .manager-idea-conversation .employee-discussion-heading h3,.manager-idea-conversation .employee-discussion-body > p {font-size:14px;}
+ .manager-idea-decision-actions button {font-size:15px;}
+ .manager-idea-forward-note {font-size:14px; padding:17px;}
+ .manager-notifications .employee-greeting h1 {font-size:31px;}
+ .manager-notifications .employee-notification-tabs {max-width:1100px; gap:10px;}
+ .manager-notifications .employee-notification-tabs > button {font-size:14px; padding:12px;}
+ .manager-notifications .employee-notification-card {padding:19px;}
+ .manager-notifications .employee-notification-copy strong {font-size:16px;}
+ .manager-notifications .employee-notification-copy > span {font-size:14px;}
+ .manager-notifications .employee-notification-copy time {font-size:12px;}
+}
+@media(min-width:1200px){
+ .manager-idea-detail-grid {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.95fr); gap:30px; align-items:start;}
+ .manager-idea-conversation {grid-column:2; grid-row:1 / span 2; border-left:1px solid #e9e2d8; padding-left:27px;}
+ .manager-idea-conversation .employee-discussion {margin-top:0;}
+ .manager-idea-decision {grid-column:1; margin-top:0;}
+ .manager-notifications .employee-notifications-feed {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:27px;}
+ .manager-notifications .employee-notification-group {min-width:0; margin-top:0;}
+}

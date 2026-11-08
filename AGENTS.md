@@ -4,7 +4,7 @@
 
 - Nastavljaj postojeću MERN aplikaciju; ne pravi projekat ponovo i ne uklanjaj funkcionalnosti koje rade.
 - Pre izmene pročitaj `README.md`, `BACKEND_FUNKCIONALNOSTI.md`, `docs/ANALIZA_PROJEKTA.md`, `docs/PLAN_FRONTEND.md` i relevantan postojeći kod.
-- Rad se nastavlja na grani `develop`. Završeno je osam ekrana zaposlenog; rukovodilac se razvija u talasima po dve dostavljene reference. Prvi talas su pregled sektora i projekti sektora, drugi detalji projekta i kreiranje/uređivanje, treći upravljanje aktivnošću i lista izveštaja. Sledeće ekrane radi po novim korisnikovim referencama.
+- Rad se nastavlja na grani `develop`. Implementirano je osam ekrana zaposlenog i deset rukovodiočevih ekrana, u talasima po dve dostavljene reference. Sledeći razvoj i reference određuje korisnik; ne zatvaraj automatski preostale provere ranijih talasa.
 - Ne radi automatski git commit, push, reset, force-push ili prepisivanje tuđih izmena.
 - Ne menjaj MongoDB šemu, nazive statusa ni API ugovore bez potrebe. Kada je promena potrebna, objasni kompatibilnost i eventualnu migraciju.
 
@@ -30,6 +30,7 @@
 - Integracioni testovi nad postojećom bazom smeju samo da čitaju poslovne podatke. Prijava menja `lastLoginAt` i pravi sesiju; testne sesije odjavi. Testove pisanja izvršavaj sa modelima u memoriji ili posebnom izolovanom bazom.
 - Za browser provere pisanja dostupan je `server/tests/fixtures/employee-ui-server.mjs`, sa eksplicitnim `ZEPTER_UI_FIXTURE=1`, bez MongoDB veze, na loopback portu 4002. Pročitaj `docs/EMPLOYEE_WAVE_02.md` za pokretanje i gašenje; kroz agentski terminal koristi `tty:true` ako želiš da radi komanda `stop`. Ugasiti testni proces i očistiti njegove privremene priloge pre završetka zadatka.
 - Ne menjaj postojeće podatke da bi test postao zelen. Jasno prijavi zastarele demo pretpostavke i stvaran rezultat.
+- Dopunska browser QA za izveštaje/ideje koristi opcioni `ZEPTER_UI_QA=1` samo u izolovanom fixture-u i `server/tests/fixtures/manager-ui-qa.mjs`. Kontrole simuliraju greške i prazne odgovore bez MongoDB veze; postupak je u `docs/MANAGER_WAVE_04.md`. Standardni `manager-wave04-check.mjs` pokreni na svežem fixture-u bez QA režima (početna četiri predloga); QA režim dodaje još 12 ideja.
 
 ## Ovlašćenja
 
@@ -46,11 +47,13 @@
 ## Interfejs i izveštaji
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.
-- Implementirano je svih osam ekrana zaposlenog i prvih šest rukovodiočevih ekrana. Zaposleni i prva dva rukovodiočeva ekrana prošli su prilagođavanje opisano u `docs/RESPONSIVE_LAYOUTS.md`; detalji i obrazac projekta su u `docs/MANAGER_WAVE_02.md`, a aktivnost i izveštaji u `docs/MANAGER_WAVE_03.md`, sa zasebno navedenim granicama vizuelne provere. Dostavljene slike određuju mobilni raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
+- Implementirano je svih osam ekrana zaposlenog i svih deset rukovodiočevih ekrana. Zaposleni i prva dva rukovodiočeva ekrana prošli su prilagođavanje opisano u `docs/RESPONSIVE_LAYOUTS.md`; naredni talasi su u `docs/MANAGER_WAVE_02.md`, `docs/MANAGER_WAVE_03.md`, `docs/MANAGER_WAVE_04.md` i `docs/MANAGER_WAVE_05.md`, sa zasebno navedenim granicama vizuelne provere. Dostavljene slike određuju mobilni raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
 - Svaki naredni talas prvo implementira odobrene mobilne reference, pa prilagođava iste ekrane tabletu i desktopu. Koristi zajednički `features/workspace` shell: donja navigacija na telefonu/tabletu, bočna od 1024 px, detalji u kolonama od 1200 px. Ne ograničavaj desktop na simulirani telefonski okvir.
 - Očuvaj jednu instancu forme/razgovora na svim širinama; ne remount-uj sadržaj na resize i ne pravi odvojene mobilne i desktop kopije forme. Proveri očuvanje započetog unosa pri promeni širine.
 - Drugi rukovodiočev talas i provere opisani su u `docs/MANAGER_WAVE_02.md`. Projektni PATCH koristi opcioni `If-Match`; ne uklanjaj člana sa postojećim dodelama i ne dodaj aktivnost zatvorenom/arhiviranom projektu. Kreiranje početnih aktivnosti ostaje odvojen tok sa nastavkom potvrđenih neuspeha i bez slepog retry-ja posle nejasnog ishoda. Zasebna tablet vizuelna provera tog talasa nije završena.
 - Implementirani su i rukovodiočevi ekrani 5–6: `docs/MANAGER_WAVE_03.md`. Aktivnost koristi postojeća polja, verzionisani PATCH i read-only istoriju samo svog sektora, bez privatnih audit detalja. Izveštaji razlikuju nacrt/objavljen i dnevni/nedeljni tip; ne mešaj dnevne rezultate za period sa aktuelnom statistikom projekta. Browser vizuelna/E2E provera ovog talasa nije završena zbog prekida browser alata.
+- Četvrti rukovodiočev talas, priprema/objava izveštaja i ideje sektora, opisan je u `docs/MANAGER_WAVE_04.md`. Nastavljaj postojeći nacrt istog perioda, koristi `If-None-Match` za novi i `If-Match` za čuvanje/objavu. Ne prikazuj današnji pregled kao snapshot starijeg objavljenog izveštaja bez sačuvanih podataka. `/ideas/sector` i `/reports/prepare` koriste sektor sesije; review obuhvata submitted i in_review. Naknadna Chrome provera potvrdila je 320/390/820/1440 px, očuvanje unosa pri resize-u, mobilno čuvanje/objavu i osnovne tokove ideja; obim i ograničenja su u dokumentaciji talasa.
+- Peti rukovodiočev talas je u `docs/MANAGER_WAVE_05.md`. Review koristi `If-Match` i atomski prelaz iz submitted/in_review; dorada zahteva obrazloženje. Prosleđivanje nije odobrenje za realizaciju. Sačuvaj autorsku dopunu sopstvene ideje rukovodioca. `view=manager` obaveštenja uvek koriste primaoca iz sesije; kategorije po akteru zavise od aktuelne uloge, a „Odgovori zaposlenih“ obuhvataju i komentare. Ne izmišljaj događaje kašnjenja koje postojeći mehanizmi nisu poslali. Ne ponavljaj odluku posle nejasnog ishoda bez provere servera.
 - Rukovodilac ima nove `/dashboard/manager` i `/projects/sector` feed-ove, vezane isključivo za sektor sa sesije. „Po planu“ i „Na proveri“ su izvedene oznake, ne novi statusi; pravila su u `docs/MANAGER_WAVE_01.md`. Model nema posebno ime tima: koristi stvarni sektor, odgovornu osobu i članove, bez izmišljanja timova.
 - Srpska latinica, bela pozadina, zlatni akcenti, tamna čitljiva tipografija. Ne izmišljaj novi identitet.
 - Koristi odobrene referentne slike kada budu dostupne. Ne tvrdi da je ekran veran dizajnu bez reference i vizuelne provere.

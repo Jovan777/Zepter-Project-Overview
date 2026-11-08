@@ -12,7 +12,7 @@ import {formatDeadline} from './presentation.js';
 const draftOf = idea => ({title: idea.title, description: idea.description, benefit: idea.benefit || ''});
 const sameDraft = (a, b) => ['title', 'description', 'benefit'].every(key => a[key] === b[key]);
 const statuses = {submitted: ['Na razmatranju', 'gold'], in_review: ['Na razmatranju', 'gold'], revision_requested: ['Vraćena na doradu', 'warning'], forwarded: ['Prosleđeno predsedniku', 'success']};
-function IdeaView({initial, user}) {
+export function IdeaView({initial, user}) {
   const [idea, setIdea] = useState(initial), [draft, setDraft] = useState(() => draftOf(initial));
   const [editing, setEditing] = useState(false), [working, setWorking] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [conflict, setConflict] = useState(false), [latest, setLatest] = useState(null), [uncertain, setUncertain] = useState(false);
@@ -83,7 +83,7 @@ function IdeaView({initial, user}) {
       <label htmlFor="revision-benefit">Korist za kompaniju <small>· opciono</small></label><textarea id="revision-benefit" rows={3} maxLength={4000} value={draft.benefit} disabled={working} onChange={event => setDraft({...draft, benefit: event.target.value})}/>
       <div className="employee-idea-edit-actions"><button className="employee-text-button" disabled={working || uncertain || !dirty} type="submit">Sačuvaj dopunu</button><button className="employee-text-button" disabled={working} type="button" onClick={() => {setDraft(draftOf(idea)); setEditing(false);}}>Otkaži izmene</button></div>
     </form>}
-    </div><div className="workspace-detail-aside"><EmployeeThread type="idea" id={idea._id} user={user} sectionId="idea-comments" variant="idea"/></div><div className="workspace-detail-footer">
+    </div><div className="workspace-detail-aside"><EmployeeThread type="idea" id={idea._id} user={user} sectionId="idea-comments" variant="idea" allowInstructions={user.role==='manager'}/></div><div className="workspace-detail-footer">
     {error && <p className="employee-form-error" role="alert">{error}</p>}
     {(conflict || uncertain) && <div className="employee-idea-review-note" role="alert"><Icon name="info" size={20}/><div><strong>{uncertain ? 'Proverite da li je zahtev sačuvan' : 'Predlog je promenjen u drugom prozoru'}</strong><p>Vaš unos ostaje u formi. Pregledajte aktuelni predlog pre daljeg čuvanja ili slanja.</p><button className="employee-text-button" disabled={working} onClick={refresh}>Proveri aktuelni predlog</button>{latest && <div className="employee-idea-latest"><strong>{latest.title}</strong><p>{statuses[latest.status]?.[0] || latest.status}</p><p>{latest.description}</p><button className="employee-text-button" disabled={working} onClick={() => adopt(latest)}>Odbaci moj unos i preuzmi ovu verziju</button></div>}</div></div>}
     {notice && <p className="employee-form-success" role="status">{notice}</p>}

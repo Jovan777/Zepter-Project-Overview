@@ -8,6 +8,19 @@ import {fail} from '../lib/errors.js';
 import {allow} from '../lib/auth.js';
 import {audit,notify} from '../services/events.js';
 const r=Router();
+const checkVersion=(req,report)=>{
+ const version=req.get('If-Match');
+ if(version&&(!report||version!==`"${report.updatedAt?.toISOString()}"`))fail(409,'Izveštaj je u međuvremenu promenjen. Proverite sačuvanu verziju pre nastavka.');
+ return version?{updatedAt:report.updatedAt}:{};
+};
+r.get('/prepare',allow('manager'),async(req,res)=>{
+ if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');
+ const sector=await sectorAccess(req.user,String(req.user.sector));
+ const type=req.query.type||'daily',day=req.query.day||belgradeDay(),{start,end}=periodRange(type,day);
+ const report=await Report.findOne({sector:sector._id,type,periodStart:start});
+ const generated=report?(report.generated||null):await generateReport({scope:'sector',id:String(sector._id),type,day});
+ res.set('Cache-Control','no-store').json({report,generated,period:{type,start,end},sector:{_id:sector._id,name:sector.name}});
+});
 r.get('/preview',async(req,res)=>{
  const {scope='company',id,type='daily',day=belgradeDay()}=req.query;
  await authorizeReport(req.user,scope,id);
@@ -29,12 +42,20 @@ r.post('/',async(req,res)=>{
  const d=schemas.report.parse(req.body);
  if(!managing(req.user,d.sectorId))fail(403,'Izveštaj drugog sektora nije dostupan.');
  const {start,end}=periodRange(d.type,d.day);
- const generated=await generateReport({scope:'sector',id:d.sectorId,type:d.type,day:d.day});
  const existing=await Report.findOne({sector:d.sectorId,type:d.type,periodStart:start});
+ if(req.get('If-None-Match')==='*'&&existing)fail(409,'Izveštaj za ovaj period već postoji. Otvorite sačuvanu verziju.');
  if(existing?.status==='published')fail(409,'Objavljen izveštaj se ne može menjati.');
- const report=existing || new Report({sector:d.sectorId,type:d.type,periodStart:start,periodEnd:end,createdBy:req.user._id});
- report.generated=generated;report.results=d.results||'';report.problems=d.problems||'';report.nextSteps=d.nextSteps||'';
- await report.save();
+ const version=checkVersion(req,existing);
+ const generated=await generateReport({scope:'sector',id:d.sectorId,type:d.type,day:d.day});
+ const fields={generated,results:d.results||'',problems:d.problems||'',nextSteps:d.nextSteps||''};
+ let report;
+ if(existing){
+  report=await Report.findOneAndUpdate({_id:existing._id,status:'draft',...version},{$set:fields},{new:true,runValidators:true});
+  if(!report)fail(409,'Izveštaj je promenjen ili objavljen. Vaš unos je ostao u obrascu.');
+ }else{
+  report=new Report({sector:d.sectorId,type:d.type,periodStart:start,periodEnd:end,createdBy:req.user._id,...fields});
+  await report.save();
+ }
  await audit(req,'report.draft_saved','Report',report._id,{periodStart:start,type:d.type});res.status(201).json({report});
 });
 r.get('/:id',async(req,res)=>{
@@ -46,18 +67,22 @@ r.get('/:id',async(req,res)=>{
 r.patch('/:id',allow('manager','admin'),async(req,res)=>{
  const report=await Report.findById(requireId(req.params.id));if(!report)fail(404,'Izveštaj ne postoji.');
  if(!managing(req.user,report.sector)||report.status==='published')fail(403,'Objavljen izveštaj se ne može menjati.');
- const d=schemas.reportPatch.parse(req.body);Object.assign(report,d);await report.save();
- await audit(req,'report.edited','Report',report._id,{fields:Object.keys(d)});res.json({report});
+ const version=checkVersion(req,report),d=schemas.reportPatch.parse(req.body);
+ const saved=await Report.findOneAndUpdate({_id:report._id,status:'draft',...version},{$set:d},{new:true,runValidators:true});
+ if(!saved)fail(409,'Izveštaj je promenjen ili objavljen. Vaš unos je ostao u obrascu.');
+ await audit(req,'report.edited','Report',report._id,{fields:Object.keys(d)});res.json({report:saved});
 });
 r.post('/:id/publish',allow('manager','admin'),async(req,res)=>{
  const report=await Report.findById(requireId(req.params.id));if(!report)fail(404,'Izveštaj ne postoji.');
  if(!managing(req.user,report.sector))fail(403,'Samo rukovodilac sektora objavljuje njegov izveštaj.');
  if(report.status!=='draft')fail(409,'Izveštaj je već objavljen.');
- report.generated=await generateReport({scope:'sector',id:String(report.sector),type:report.type,day:report.periodStart});
- report.status='published';report.publishedAt=new Date();await report.save();
+ const version=checkVersion(req,report);
+ const generated=await generateReport({scope:'sector',id:String(report.sector),type:report.type,day:report.periodStart});
+ const published=await Report.findOneAndUpdate({_id:report._id,status:'draft',...version},{$set:{generated,status:'published',publishedAt:new Date()}},{new:true,runValidators:true});
+ if(!published)fail(409,'Izveštaj je promenjen ili već objavljen. Proverite sačuvanu verziju.');
  await audit(req,'report.published','Report',report._id);
  const presidents=await User.find({role:'president',approval:'approved'}).select('_id');
  await notify(presidents.map(x=>x._id),{type:'report_published',title:'Objavljen izveštaj sektora',body:`${report.type==='daily'?'Dnevni':'Nedeljni'} izveštaj za ${report.periodStart}`,link:`/reports/${report._id}`},req.user._id);
- res.json({report});
+ res.json({report:published});
 });
 export default r;

@@ -290,6 +290,41 @@ test('Live demo authorization boundaries (no business data changes)', async t =>
       }
       assert.equal((await call('/reports',employee)).status,403);
     });
+    await t.test('Manager idea feed and counters cannot expose another sector or accept other roles', async () => {
+      for(const session of [employee,president,admin])assert.equal((await call('/ideas/sector',session)).status,403);
+      assert.equal((await call('/ideas/sector')).status,401);
+      const all=await call('/ideas/sector?limit=2',manager),spoof=await call('/ideas/sector?limit=2&sectorId='+otherManager.user.sector,manager);
+      assert.equal(all.status,200);assert.deepEqual(spoof.data,all.data);
+      const source=await call('/ideas?limit=1',manager);assert.equal(all.data.stats.total,source.data.total);
+      const submitted=await call('/ideas?status=submitted&limit=1',manager),inReview=await call('/ideas?status=in_review&limit=1',manager);
+      assert.equal(all.data.stats.review,submitted.data.total+inReview.data.total);
+      for(const tab of ['review','revision','forwarded']){
+        const result=await call('/ideas/sector?tab='+tab+'&limit=2',manager);assert.equal(result.status,200);assert.deepEqual(result.data.stats,all.data.stats);
+        for(const idea of result.data.items){const detail=await call('/ideas/'+idea._id,manager);assert.equal(detail.status,200);assert.equal(detail.data.idea.sector._id,manager.user.sector);}
+      }
+    });
+    await t.test('Report preparation reads only session sector and never creates a draft', async () => {
+      for(const session of [employee,president,admin])assert.equal((await call('/reports/prepare',session)).status,403);
+      assert.equal((await call('/reports/prepare')).status,401);
+      const before=await call('/reports?limit=1',manager);
+      const result=await call('/reports/prepare?type=weekly&day=2026-11-08&sectorId='+otherManager.user.sector,manager);
+      assert.equal(result.status,200);assert.equal(result.data.sector._id,manager.user.sector);
+      assert.equal(result.data.period.start,'2026-11-02');assert.equal(result.data.period.end,'2026-11-08');
+      if(result.data.report)assert.equal(String(result.data.report.sector),manager.user.sector);
+      assert.equal((await call('/reports?limit=1',manager)).data.total,before.data.total);
+    });
+    await t.test('Manager notification view uses actual actors, rejects other roles and cannot override recipient',async()=>{
+      for(const session of [employee,president,admin])assert.equal((await call('/notifications?view=manager',session)).status,403);
+      assert.equal((await call('/notifications?view=manager')).status,401);
+      for(const category of ['all','president','employees','projects','ideas']){
+        const own=await call('/notifications?view=manager&grouped=true&category='+category,manager);
+        const spoof=await call('/notifications?view=manager&grouped=true&category='+category+'&user='+otherManager.user._id,manager);
+        assert.equal(own.status,200);assert.deepEqual(own.data,spoof.data);
+        assert.ok(own.data.items.every(row=>row.user===manager.user._id));
+        if(category==='president')assert.ok(own.data.items.every(row=>row.actor?.role==='president'));
+        if(category==='employees')assert.ok(own.data.items.every(row=>row.actor?.role==='employee'));
+      }
+    });
   } finally {
     for (const session of sessions) {
       if (session.cookie) {

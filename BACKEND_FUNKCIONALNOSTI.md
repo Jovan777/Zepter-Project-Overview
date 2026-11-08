@@ -1,5 +1,13 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Peti talas rukovodiočevih ekrana
+
+`POST /api/ideas/:id/review` zadržava postojeće telo zahteva, prihvata opcioni `If-Match` i atomski proverava sektor i status `submitted`/`in_review`. Dorada zahteva obrazloženje; konkurentna ili ponovljena odluka vraća 409 bez duplih događaja. `GET /api/notifications?view=manager` dodaje kategorije `all`, `president`, `employees`, `projects`, `ideas`, ulogu aktera i `no-store`; primalac je uvek korisnik sesije. Stari feed ostaje kompatibilan. Modeli i statusi nisu menjani. [Detalji, granice klasifikacije i provere](docs/MANAGER_WAVE_05.md).
+
+## Četvrti talas rukovodiočevih ekrana
+
+Novi read-only `GET /api/reports/prepare` nastavlja nacrt ili priprema novi period bez upisa, samo za manager sektor sa sesije. POST nacrta prihvata opcioni `If-None-Match: *`, a POST/PATCH i objava opcioni `If-Match` sa `updatedAt`. Atomski uslovi sprečavaju prepisivanje objavljenog izveštaja i duplu objavu. Novi `GET /api/ideas/sector` daje sektorsku listu, grupisane statusne filtere, paginaciju i globalne brojače. Modeli, statusi i tela zahteva nisu menjani; stari pozivi bez zaglavlja ostaju podržani. [Ugovori, kompatibilnost i provere](docs/MANAGER_WAVE_04.md).
+
 ## Treći talas rukovodiočevih ekrana
 
 Upravljanje aktivnošću koristi postojeći verzionisani PATCH i privatne priloge/komentare. Nova read-only `GET /api/activities/:id/history` ruta namenjena je rukovodiocu njegovog sektora; odvojeno paginira stvarne dnevne unose aktivnosti i sanitizovane audit događaje, bez IP/kontakt podataka i sa `no-store` odgovorom. Izveštaji koriste postojeće filtriranje dnevnih/nedeljnih lista; manager bez sektora se odbija pre upita. Nema promene modela, statusa ili migracije. [Detalji i testovi](docs/MANAGER_WAVE_03.md).

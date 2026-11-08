@@ -5,7 +5,7 @@ import useEmployeeResource from './useEmployeeResource.js';
 import {Badge, EmptyState, IconDisc, Pagination, ResourceState} from './EmployeeComponents.jsx';
 
 const time = value => new Intl.DateTimeFormat('sr-Latn-RS', {timeZone: 'Europe/Belgrade', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}).format(new Date(value));
-export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments', variant, initialReply, allowInstructions = false}) {
+export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments', variant, initialReply, allowInstructions = false, onDraftChange}) {
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState('');
   const [parent, setParent] = useState(null);
@@ -15,6 +15,7 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
   const [kind, setKind] = useState('comment');
   const editor = useRef(null), lock = useRef(false);
   const base = `/comments?targetType=${type}&targetId=${id}`;
+  useEffect(()=>{onDraftChange?.(!!message.trim()||sending);},[message,sending,onDraftChange]);
   const {data, busy, error: loadError, reload} = useEmployeeResource(`${base}&page=${page}&limit=20`, {keepPreviousData: true});
   useEffect(() => {setPage(1); setMessage(''); setParent(null); setKind('comment'); setError(''); setNotice('');}, [type, id]);
   useEffect(() => {if (initialReply) {setParent(initialReply); editor.current?.focus();}}, [initialReply]);
@@ -51,7 +52,7 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
       return <article className={`employee-discussion-card ${own ? 'is-own' : ''} ${['president', 'manager'].includes(comment.author?.role) ? 'is-leader' : ''}`} key={comment._id}>
         {variant === 'idea' ? <span className="employee-comment-initials" aria-hidden="true">{[comment.author?.firstName, comment.author?.lastName].filter(Boolean).map(x => x[0]).join('') || '?'}</span> : <IconDisc name={comment.author?.role === 'manager' ? 'users' : 'user'}/>}<div className="employee-discussion-body">
           <div className="employee-discussion-heading"><h3>{name}{own && <small> (vi)</small>}</h3><time dateTime={comment.createdAt}>{time(comment.createdAt)}</time></div>
-          {variant === 'idea' && <span className="employee-comment-role">{own ? 'Autor ideje' : comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac sektora' : 'Zaposleni'}</span>}
+          {variant === 'idea' && <span className="employee-comment-role">{comment.author?.role === 'president' ? 'Predsednik' : comment.author?.role === 'manager' ? 'Rukovodilac sektora' : own ? 'Autor ideje' : 'Zaposleni'}</span>}
           {comment.parent && <span className="employee-reply-caption">Odgovor na komentar</span>}
           <p>{comment.body}</p>
           <div className="employee-discussion-actions">{comment.kind === 'instruction' && <Badge>{({open: 'Čeka odgovor', answered: 'Odgovoreno', resolved: 'Rešeno'})[comment.responseStatus]}</Badge>}<button type="button" className="employee-text-button" disabled={sending} onClick={() => {setParent(comment); setNotice(''); editor.current?.focus();}}>Odgovori <Icon name="arrow" size={14}/></button>{allowInstructions && own && comment.kind === 'instruction' && comment.responseStatus !== 'resolved' && <button type="button" className="employee-text-button" disabled={sending} onClick={() => resolve(comment)}>Označi kao rešeno</button>}</div>

@@ -55,6 +55,16 @@ const sectorCommentId = 'ffffffffffffffffffffffff';
 stores.Comment.set(sectorCommentId, {_id:sectorCommentId,targetType:'sector',targetId:sector,author:president,body:'Pripremite kratak pregled prioriteta sektora i narednih koraka.',kind:'instruction',responseStatus:'open',addressedTo:[manager],createdAt:now()});
 stores.Notification.set('f1'.repeat(12), {_id:'f1'.repeat(12),user:manager,actor:president,type:'comment',title:'Nova instrukcija',body:'Novi prioriteti sektora.',link:'/sectors/'+sector,readAt:null,createdAt:now()});
 if(authUser.role==='manager'){
+ for(const [i,type,actor,link,read]of [
+  [0,'comment',self,'/projects/'+projectId,false],[1,'project_updated',manager,'/projects/'+projectId,false],
+  [2,'new_idea',self,'/ideas/'+'b0'.repeat(12),false],[3,'activity_overdue',manager,'/activities/'+activityId,true],
+  [4,'idea_resubmitted',colleague,'/ideas/'+'b1'.repeat(12),true]
+ ]){
+  const id='af'+i.toString(16).padStart(22,'0');stores.Notification.set(id,{_id:id,user:manager,actor,type,title:['Odgovor zaposlenog na projektu','Promena statusa projekta','Nova ideja čeka pregled','Aktivnost kasni','Dopunjena ideja'][i],body:'Izolovano obaveštenje za proveru direktnog otvaranja.',link,readAt:read?now():null,createdAt:new Date(Date.now()-(i+1)*600000)});
+ }
+ stores.Comment.set('ad'.repeat(12),{_id:'ad'.repeat(12),targetType:'idea',targetId:'b0'.repeat(12),author:manager,body:'Molim detaljniji plan primene.',kind:'comment',createdAt:now()});
+ stores.Comment.set('a9'.repeat(12),{_id:'a9'.repeat(12),targetType:'idea',targetId:'b0'.repeat(12),author:self,body:'Dopunio sam očekivane koristi i naredne korake.',kind:'comment',parent:'ad'.repeat(12),createdAt:now()});
+ stores.Attachment.set('c9'.repeat(12),{_id:'c9'.repeat(12),targetType:'idea',targetId:'b0'.repeat(12),owner:self,originalName:'Predlog.png',fileName:'fixture.png',mime:'image/png',size:preview.length,createdAt:now()});
  const yesterday=new Date(Date.now()-86400000*2);
  const extraProject=(id,fields)=>stores.Project.set(id,{_id:id,sector,archived:false,title:'Test projekat',status:'active',progress:40,owner:manager,members:[self,manager],createdAt:now(),updatedAt:now(),...fields});
  extraProject('f2'.repeat(12),{title:'Kampanja — potrebna pažnja',status:'at_risk',dueDate:yesterday});
@@ -71,6 +81,7 @@ if(authUser.role==='manager'){
   stores.Report.set(id,{_id:id,scope:'sector',sector,type:i===2?'weekly':'daily',periodStart:i===2?'2026-11-02':day,periodEnd:i===2?'2026-11-08':day,status:i===1?'draft':'published',results:i===1?'':'Pripremljen pregled rezultata rada tima.',problems:'',nextSteps:'Nastavak planiranih aktivnosti.',generated:{periodStart:day,periodEnd:day,type:i===2?'weekly':'daily',stats:{projects:2,activities:3,workEntries:4,avgProgress:70,completedActivities:1,lateActivities:1},completed:[{day,employee:'Test Zaposleni',text:'Pripremljeni materijali.'}],blockers:[],nextSteps:[]},createdAt:now(),updatedAt:now()});
  }
  stores.Report.set('ab'.repeat(12),{_id:'ab'.repeat(12),sector:'f7'.repeat(12),type:'daily',periodStart:'2026-11-08',periodEnd:'2026-11-08',status:'published',results:'Strani sektor'});
+ stores.Idea.set('ac'.repeat(12),{_id:'ac'.repeat(12),sector:'f7'.repeat(12),author:colleague,title:'Privatna ideja drugog sektora',description:'Ovo se ne prikazuje rukovodiocu.',status:'submitted',createdAt:now(),updatedAt:now()});
 }
 for (const [index,[type,title,body,link,readAt]] of fixtureNotifications.entries()) {
  const id=('e'+index).repeat(12);
@@ -105,7 +116,7 @@ function documentFor(name, raw) {
   const plain = () => Object.fromEntries(Object.entries(doc).filter(([, value]) => typeof value !== 'function'));
   const depopulate = data => {
     const copy = structuredClone(data);
-    for (const key of ['owner', 'author', 'project', 'activity', 'user', 'parent', 'sector']) if (copy[key]?._id) copy[key] = copy[key]._id;
+    for (const key of ['owner', 'author', 'actor', 'project', 'activity', 'user', 'parent', 'sector']) if (copy[key]?._id) copy[key] = copy[key]._id;
     for (const key of ['members', 'assignees', 'addressedTo']) if (Array.isArray(copy[key])) copy[key] = copy[key].map(refId);
     return copy;
   };
@@ -152,10 +163,66 @@ for (const [name, store] of Object.entries(stores)) {
   Model.updateMany = async (filter, patch) => {const rows = [...store.values()].filter(item => matches(item, filter)); for(const row of rows)Object.assign(row,patch.$set); return {modifiedCount:rows.length};};
 }
 
+// Report POST uses a Mongoose constructor; persist only into this fixture's store.
+models.Report.prototype.save=async function(){
+ const raw=this.toObject();raw._id=refId(raw._id);raw.sector=refId(raw.sector);
+ if([...stores.Report.values()].some(row=>row._id!==raw._id&&refId(row.sector)===raw.sector&&row.type===raw.type&&row.periodStart===raw.periodStart))throw Object.assign(new Error('Fixture duplicate report'),{code:11000});
+ raw.createdAt=raw.createdAt||now();raw.updatedAt=now();stores.Report.set(raw._id,raw);Object.assign(this,raw);return this;
+};
 const app = express(); app.use(express.json());
 app.post('/api/auth/refresh', (_req, res) => res.json({user:authUser, accessToken: 'isolated-ui-fixture'}));
 app.post('/api/auth/logout', (_req, res) => res.json({ok: true}));
 app.use('/api', (req, _res, next) => {req.user = authUser; next();});
+// Optional fault controls, available only in this explicitly enabled in-memory fixture.
+if(process.env.ZEPTER_UI_QA==='1'&&authUser.role==='manager'){
+ for(let i=0;i<12;i++){
+  const id='ae'+i.toString(16).padStart(22,'0');
+  stores.Idea.set(id,{_id:id,sector,author:self,title:'QA predlog '+(i+1),description:'Izolovani predlog za proveru dodatnih stranica.',status:'submitted',createdAt:new Date(Date.now()+i*1000),updatedAt:now()});
+ }
+ const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false};
+ app.post('/api/__fixture/controls',(req,res)=>{
+  if(req.get('Authorization')!=='Bearer isolated-ui-fixture')return res.sendStatus(403);
+  for(const [key,value]of Object.entries(req.body)){
+   if(!Object.hasOwn(controls,key)||(key==='ideasMode'?!['normal','empty'].includes(value):typeof value!=='boolean'))return res.status(422).json({error:'Invalid fixture control'});
+  }
+  Object.assign(controls,req.body);io.to('sector:'+sector).emit('data:changed',{entity:'Fixture'});res.json({ok:true});
+ });
+ app.get('/api/ideas/sector',async(req,res,next)=>{
+  if(controls.ideasFailOnce){controls.ideasFailOnce=false;return res.status(503).json({error:'Test: ideje trenutno nisu dostupne. Pokušajte ponovo.'});}
+  if(controls.ideasMode==='empty')return res.json({items:[],total:0,page:1,limit:10,stats:{total:0,review:0,revision:0,forwarded:0}});
+  next();
+ });
+ app.get('/api/reports/prepare',async(req,res,next)=>{
+  if(controls.prepareDelayOnce){controls.prepareDelayOnce=false;await new Promise(resolve=>setTimeout(resolve,2500));}
+  if(controls.prepareFailOnce){controls.prepareFailOnce=false;return res.status(503).json({error:'Test: priprema izveštaja trenutno nije dostupna.'});}
+  next();
+ });
+ app.post('/api/reports',(req,res,next)=>{
+  if(controls.saveFailOnce){controls.saveFailOnce=false;return res.status(503).json({error:'Test: nacrt nije sačuvan. Pokušajte ponovo.'});}
+  if(controls.saveResponseLostOnce){
+   controls.saveResponseLostOnce=false;const json=res.json.bind(res);
+   res.json=body=>{if(body.report&&res.statusCode<300)return json.call(res.status(503),{error:'Test: odgovor posle čuvanja nije potvrđen. Proverite sačuvan izveštaj.'});return json(body);};
+  }
+  next();
+ });
+ app.post('/api/reports/:id/publish',(req,res,next)=>{
+  if(controls.publishFailOnce){controls.publishFailOnce=false;return res.status(503).json({error:'Test: objava nije izvršena. Pokušajte ponovo.'});}
+  next();
+ });
+ app.post('/api/ideas/:id/review',(req,res,next)=>{
+  if(controls.reviewFailOnce){controls.reviewFailOnce=false;return res.status(503).json({error:'Test: odluka nije poslata. Proverite aktuelni predlog.'});}
+  if(controls.reviewResponseLostOnce){controls.reviewResponseLostOnce=false;const json=res.json.bind(res);res.json=body=>body.idea&&res.statusCode<300?json.call(res.status(503),{error:'Test: potvrda odluke nije dostupna. Proverite predlog.'}):json(body);}
+  next();
+ });
+ app.get('/api/notifications',(req,res,next)=>{
+  if(req.query.view==='manager'){
+   if(controls.notificationFailOnce){controls.notificationFailOnce=false;return res.status(503).json({error:'Test: obaveštenja trenutno nisu dostupna.'});}
+   if(controls.notificationsEmpty)return res.json({items:[],total:0,unread:0,filteredUnread:0,page:1,limit:12});
+  }
+  next();
+ });
+ app.patch('/api/notifications/:id/read',(req,res,next)=>{if(controls.readFailOnce){controls.readFailOnce=false;return res.status(503).json({error:'Test: označavanje nije uspelo.'});}next();});
+}
 app.get('/api/sectors', (_req, res) => res.json({items: [...stores.Sector.values()]}));
 for (const [prefix, file] of [['projects', 'projects'], ['activities', 'activities'], ['comments', 'comments'], ['attachments', 'attachments'], ['worklogs', 'worklogs'], ['ideas', 'ideas'], ['notifications','notifications'], ['dashboard','dashboard'], ['sectors','sectors'], ['reports','reports']]) {
   app.use('/api/' + prefix, (await import('../../src/routes/' + file + '.js')).default);

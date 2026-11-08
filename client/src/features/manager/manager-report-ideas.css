@@ -1,0 +1,138 @@
+.manager-wave-heading {display:flex; align-items:center; gap:10px; margin:0 0 16px;}
+.manager-wave-heading > .employee-icon-disc {width:43px; height:43px; flex-shrink:0; border-radius:10px;}
+.manager-wave-heading > div {min-width:0; flex:1;}
+.manager-wave-heading h1 {font-size:23px; line-height:1.2; margin:0 0 4px; overflow-wrap:anywhere;}
+.manager-wave-heading p {margin:0; font-size:13px; color:#68758a;}
+.manager-wave-heading > .employee-badge {font-size:11px;}
+.manager-idea-metrics {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-bottom:17px;}
+.manager-idea-metrics > button {display:flex; align-items:center; gap:6px; min-width:0; min-height:66px; padding:9px 7px; text-align:left; border:1px solid #e9e5ec; border-radius:12px; color:#202e48; background:#fff;}
+.manager-idea-metrics .employee-icon-disc {width:29px; height:32px; border-radius:8px; flex-shrink:0;}
+.manager-idea-metrics .employee-icon-disc svg {width:23px; height:23px;}
+.manager-idea-metrics button > span:last-child {min-width:0;}
+.manager-idea-metrics strong {display:block; font-size:20px; line-height:1.1;}
+.manager-idea-metrics small {display:block; font-size:10px; line-height:1.3; margin-top:3px; color:#5e6b83;}
+.manager-idea-tabs {display:grid; grid-template-columns:.65fr 1.15fr .85fr 1.2fr; gap:4px; margin-bottom:18px;}
+.manager-idea-tabs button {min-width:0; min-height:44px; padding:6px 4px; border:1px solid #e3dfe8; border-radius:10px; font-size:11px; line-height:1.25; font-weight:600; color:#47536d; background:white;}
+.manager-idea-tabs .is-active {color:white; border-color:#c28b28; background:linear-gradient(110deg,#d2a246,#ae7417);}
+.manager-idea-list {display:grid; gap:10px;}
+.manager-idea-card {display:block; min-width:0; padding:13px 11px; border:1px solid #e7e3ed; border-radius:13px; background:white; color:#1a2742; box-shadow:0 2px 5px #18253a04;}
+.manager-idea-card-title {display:flex; align-items:start; justify-content:space-between; gap:8px;}
+.manager-idea-card h2 {font-size:15px; line-height:1.35; margin:0; overflow-wrap:anywhere;}
+.manager-idea-card .employee-badge {display:inline-flex; align-items:center; gap:4px; padding:5px 7px; font-size:10px; line-height:1.25; max-width:116px; flex-shrink:0; white-space:normal;}
+.manager-idea-card .employee-badge svg {flex-shrink:0;}
+.employee-badge--review {background:#e9f2ff; color:#2464b7;}
+.manager-idea-author {display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:10px 0 7px; font-size:11px; color:#54627b;}
+.manager-idea-author strong {font-size:11px; overflow-wrap:anywhere;}
+.manager-person-initials {display:flex; align-items:center; justify-content:center; width:25px; height:25px; border-radius:50%; flex-shrink:0; background:#fcf0dc; color:#a76c17; font-size:10px; font-weight:650;}
+.manager-idea-author time {display:inline-flex; gap:5px; align-items:center;}
+.manager-idea-card-bottom {display:flex; align-items:end; gap:10px;}
+.manager-idea-card-bottom p {flex:1; min-width:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:12px; line-height:1.5; color:#66728a; margin:0; overflow-wrap:anywhere;}
+.manager-idea-card-bottom > span {display:flex; align-items:center; justify-content:center; gap:3px; flex-shrink:0; color:#a56d1d; border:1px solid #e5d5bd; border-radius:18px; padding:7px; font-size:11px; font-weight:650; min-height:30px; box-sizing:border-box;}
+.manager-idea-extra {display:flex; justify-content:flex-end; margin-top:18px;}
+.manager-idea-extra > a {font-size:12px; min-height:44px;}
+.manager-report-period {margin-bottom:14px;}
+.manager-report-period .manager-report-tabs {margin-bottom:12px;}
+.manager-report-period label {font-size:12px; display:block; margin-bottom:6px; color:#5c687e;}
+.manager-report-period input {width:100%; min-height:44px; border:1px solid #e0dce6; border-radius:9px; padding:9px; font:inherit; font-size:16px; color:#293851; background:white; box-sizing:border-box;}
+.manager-report-period-label {display:flex; align-items:center; flex-wrap:wrap; gap:7px; font-size:13px; color:#58667e; margin-bottom:15px;}
+.manager-report-explainer {display:flex; align-items:center; gap:10px; padding:11px; margin-bottom:18px; border:1px solid #f0e0c3; border-radius:10px; color:#9e701f; background:#fff9ef;}
+.manager-report-explainer > svg {flex-shrink:0;}
+.manager-report-explainer p {font-size:12px; line-height:1.5; margin:0; color:#5e5b55;}
+.manager-report-editor-grid > section {min-width:0;}
+.manager-report-source h2,.manager-report-summary h2 {font-size:17px; margin:0 0 10px;}
+.manager-report-source .manager-form-section-heading {gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+.manager-report-source .manager-form-section-heading h2 {margin:0;}
+.manager-report-source .manager-form-section-heading time {font-size:11px; color:#657188;}
+.manager-report-progress {border:1px solid #e8e3eb; border-radius:11px; padding:11px;}
+.manager-report-progress > div:first-child {display:flex; align-items:center; gap:8px;}
+.manager-report-progress .employee-icon-disc {width:31px; height:31px; border-radius:8px; flex-shrink:0;}
+.manager-report-progress > div:first-child > span:not(.employee-icon-disc) {flex:1;}
+.manager-report-progress strong {display:block; font-size:13px;}
+.manager-report-progress small {display:block; font-size:11px; color:#6d7990; margin-top:3px;}
+.manager-report-progress b {font-size:18px;}
+.manager-report-progress .employee-detail-progress {margin-top:9px;}
+.manager-report-progress .employee-detail-progress > strong {display:none;}
+.manager-report-progress .employee-progress {height:8px;}
+.manager-report-facts {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin:10px 0;}
+.manager-report-facts > :is(div,a) {padding:8px 5px; border:1px solid #e8e3ec; border-radius:10px; min-width:0; text-align:center; color:#33445f;}
+.manager-report-facts .employee-icon-disc {width:27px; height:27px; margin:0 auto 6px; border-radius:7px;}
+.manager-report-facts .employee-icon-disc svg {width:19px; height:19px;}
+.manager-report-facts strong {display:block; font-size:20px; line-height:1.1;}
+.manager-report-facts small {display:block; font-size:10px; line-height:1.3; margin-top:4px; color:#627088;}
+.manager-report-raw {margin:17px 0; border-bottom:1px solid #e8e3db; padding-bottom:12px;}
+.manager-report-raw > summary {cursor:pointer; min-height:36px; font-size:13px; color:#95651d;}
+.manager-report-raw .manager-report-preview h2 {font-size:18px;}
+.manager-report-projects {margin:21px 0;}
+.manager-report-projects > a {display:flex; align-items:center; gap:7px; padding:12px 9px; border:1px solid #e9e4ed; border-radius:9px; margin:6px 0; color:#44516b; min-width:0;}
+.manager-report-projects > a > strong {flex:1; min-width:0; overflow-wrap:anywhere; font-size:12px;}
+.manager-report-projects > a > svg {flex-shrink:0; color:#ad771f;}
+.manager-report-projects .employee-badge {font-size:11px; padding:4px 6px;}
+.manager-report-projects > a > span:not(.employee-badge) {display:none;}
+.manager-report-summary {margin-top:22px;}
+.manager-report-summary fieldset {border:0; margin:0; padding:0; min-width:0;}
+.manager-report-field {margin-bottom:16px;}
+.manager-report-field label,.manager-report-field h3 {display:block; margin:0 0 7px; font-size:14px; font-weight:650;}
+.manager-report-field label small {font-weight:400; font-size:12px; color:#768298;}
+.manager-report-field textarea {display:block; width:100%; box-sizing:border-box; border:1px solid #e0dce7; border-radius:10px; padding:11px; background:#fcfcfe; color:#33435d; font:inherit; font-size:16px; line-height:1.55; resize:vertical;}
+.manager-report-character-count {display:block; text-align:right; font-size:10px; margin-top:4px; color:#7f889a;}
+.manager-report-submit {display:flex; gap:9px;}
+.manager-report-submit > button {flex:1; min-width:0; min-height:46px; margin:0; padding:10px 8px; font-size:13px;}
+.manager-report-readonly {white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; line-height:1.65; color:#52617b; background:#fafafd; border-radius:9px; padding:10px;}
+.manager-report-check,.manager-report-back {min-height:44px; font-size:12px; margin-block:5px;}
+.manager-report-back {display:flex;}
+.manager-report-editor :is(button,a,input,textarea):focus-visible,.manager-sector-ideas :is(button,a):focus-visible {outline:3px solid #c59237; outline-offset:3px;}
+@media(max-width:359px) {
+  .manager-idea-metrics > button {flex-wrap:wrap;}
+  .manager-idea-card-title {flex-wrap:wrap;}
+  .manager-idea-card .employee-badge {max-width:none;}
+  .manager-idea-card-bottom {flex-wrap:wrap;}
+  .manager-idea-card-bottom p {flex-basis:100%;}
+  .manager-wave-heading h1 {font-size:21px;}
+}
+@media(min-width:768px) {
+  .manager-wave-heading {gap:16px; margin-bottom:25px;}
+  .manager-wave-heading h1 {font-size:31px;}
+  .manager-wave-heading p {font-size:15px;}
+  .manager-wave-heading > .employee-icon-disc {width:53px; height:53px;}
+  .manager-idea-metrics {max-width:960px; gap:16px; margin-bottom:24px;}
+  .manager-idea-metrics > button {padding:18px; gap:15px; min-height:90px;}
+  .manager-idea-metrics strong {font-size:29px;}
+  .manager-idea-metrics small {font-size:13px;}
+  .manager-idea-metrics .employee-icon-disc {width:41px; height:41px;}
+  .manager-idea-tabs {max-width:960px; gap:10px; margin-bottom:25px;}
+  .manager-idea-tabs button {font-size:14px; padding:11px; min-height:48px;}
+  .manager-idea-card {padding:22px;}
+  .manager-idea-card h2 {font-size:19px;}
+  .manager-idea-card .employee-badge {max-width:155px; font-size:12px; padding:7px 9px;}
+  .manager-idea-author {margin-block:16px 12px; gap:9px;}
+  .manager-idea-author,.manager-idea-author strong {font-size:13px;}
+  .manager-person-initials {width:32px; height:32px; font-size:12px;}
+  .manager-idea-card-bottom p {font-size:14px;}
+  .manager-idea-card-bottom > span {font-size:13px; padding:10px;}
+  .manager-report-period {display:flex; align-items:center; gap:15px; max-width:1000px;}
+  .manager-report-period .manager-report-tabs {flex:1; margin:0;}
+  .manager-report-period input {width:190px;}
+  .manager-report-period label {margin:0; max-width:110px;}
+  .manager-report-explainer {padding:16px; gap:13px; margin-block:23px;}
+  .manager-report-explainer p {font-size:14px;}
+  .manager-report-source h2,.manager-report-summary h2 {font-size:21px;}
+  .manager-report-progress {padding:17px;}
+  .manager-report-progress strong {font-size:16px;}
+  .manager-report-facts {gap:12px;}
+  .manager-report-facts > :is(div,a) {padding:15px 9px;}
+  .manager-report-facts strong {font-size:27px;}
+  .manager-report-facts small {font-size:12px;}
+  .manager-report-projects > a {padding:15px 13px;}
+  .manager-report-projects > a > strong {font-size:14px;}
+  .manager-report-projects > a > span:not(.employee-badge) {display:inline; font-size:12px;}
+  .manager-report-field label {font-size:16px;}
+  .manager-report-submit > button {font-size:15px; min-height:48px;}
+}
+@media(min-width:1200px) {
+  .manager-idea-list {grid-template-columns:repeat(2,minmax(0,1fr)); gap:19px;}
+  .manager-idea-list > .employee-empty {grid-column:1/-1;}
+  .manager-report-editor-grid {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:35px; align-items:start;}
+  .manager-report-summary {grid-column:2; grid-row:1 / span 2; margin-top:0; padding-left:30px; border-left:1px solid #e8e1d7;}
+  .manager-report-projects {grid-column:1; grid-row:2; margin-top:0;}
+  .manager-report-source .manager-form-section-heading time {font-size:12px;}
+}

@@ -5,7 +5,22 @@ import {schemas} from '../lib/validation.js';
 import {safePage,requireId,same} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {audit,notify,notifyManagers} from '../services/events.js';
+import {allow} from '../lib/auth.js';
 const r=Router();
+// Manager feed: every list and global count derives its sector from the session.
+r.get('/sector',allow('manager'),async(req,res)=>{
+ if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');
+ const tabs={all:null,review:['submitted','in_review'],revision:['revision_requested'],forwarded:['forwarded']};
+ const tab=req.query.tab||'all';if(!Object.hasOwn(tabs,tab))fail(422,'Nepoznat filter ideja.');
+ const own={sector:req.user.sector},filter={...own,...(tabs[tab]?{status:{$in:tabs[tab]}}:{})};
+ const {page:rawPage,limit:rawLimit}=safePage(req.query),page=Math.floor(rawPage),limit=Math.floor(rawLimit);
+ const [items,total,all,review,revision,forwarded]=await Promise.all([
+  Idea.find(filter).select('title description author createdAt status').sort({createdAt:-1,_id:-1}).skip((page-1)*limit).limit(limit).populate('author','firstName lastName').lean(),
+  Idea.countDocuments(filter),Idea.countDocuments(own),Idea.countDocuments({...own,status:{$in:tabs.review}}),
+  Idea.countDocuments({...own,status:'revision_requested'}),Idea.countDocuments({...own,status:'forwarded'})
+ ]);
+ res.set('Cache-Control','no-store').json({items,total,page,limit,stats:{total:all,review,revision,forwarded}});
+});
 // Separate employee feed: totals cover all the author's ideas, independent of pagination/filter.
 r.get('/mine',async(req,res)=>{
  if(req.user.role!=='employee')fail(403,'Pregled je namenjen zaposlenom.');
@@ -27,7 +42,7 @@ r.get('/mine',async(req,res)=>{
 r.get('/',async(req,res)=>{
  const filter={};
  if(req.user.role==='president')filter.status='forwarded';
- else if(req.user.role==='manager')filter.sector=req.user.sector;
+ else if(req.user.role==='manager'){if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');filter.sector=req.user.sector;}
  else if(req.user.role==='employee')filter.author=req.user._id;
  if(req.query.status){
   if(!['submitted','in_review','revision_requested','forwarded'].includes(req.query.status))fail(422,'Nepoznat status ideje.');
@@ -74,14 +89,19 @@ r.post('/:id/resubmit',async(req,res)=>{
  await notifyManagers(idea.sector,{type:'idea_resubmitted',title:'Dopunjena ideja',body:idea.title,link:`/ideas/${idea._id}`},req.user._id);
  res.json({idea});
 });
-r.post('/:id/review',async(req,res)=>{
- const idea=await Idea.findById(requireId(req.params.id));if(!idea)fail(404,'Ideja ne postoji.');
- if(req.user.role!=='manager'||!same(req.user.sector,idea.sector))fail(403,'Samo rukovodilac sektora razmatra ideju.');
- if(!['submitted','in_review'].includes(idea.status))fail(409,'Ideja nije dostupna za ovu odluku.');
+r.post('/:id/review',allow('manager'),async(req,res)=>{
+ if(!req.user.sector)fail(403,'Nalog nema dodeljen sektor.');
+ const current=await Idea.findById(requireId(req.params.id));if(!current)fail(404,'Ideja ne postoji.');
+ if(!same(req.user.sector,current.sector))fail(403,'Samo rukovodilac sektora razmatra ideju.');
+ if(!['submitted','in_review'].includes(current.status))fail(409,'Ideja nije dostupna za ovu odluku.');
+ const version=req.get('If-Match');
+ if(version&&version!==`"${current.updatedAt?.toISOString()}"`)fail(409,'Predlog je u međuvremenu promenjen. Proverite aktuelnu verziju pre odluke.');
  const d=schemas.review.parse(req.body);
  if(d.action==='request_revision'&&!d.note?.trim())fail(422,'Unesite objašnjenje za doradu.');
- idea.status=d.action==='forward'?'forwarded':'revision_requested';idea.reviewNote=d.note||'';idea.reviewedBy=req.user._id;
- if(d.action==='forward')idea.forwardedAt=new Date();await idea.save();
+ const fields={status:d.action==='forward'?'forwarded':'revision_requested',reviewNote:d.note||'',reviewedBy:req.user._id};
+ if(d.action==='forward')fields.forwardedAt=new Date();
+ const idea=await Idea.findOneAndUpdate({_id:current._id,sector:req.user.sector,status:{$in:['submitted','in_review']},...(version?{updatedAt:current.updatedAt}:{})},{$set:fields},{new:true,runValidators:true});
+ if(!idea)fail(409,'Ideja je promenjena ili je odluka već doneta. Proverite aktuelni predlog.');
  await audit(req,'idea.'+(d.action==='forward'?'forwarded':'revision_requested'),'Idea',idea._id,{note:d.note});
  await notify([idea.author],{type:'idea_status',title:d.action==='forward'?'Ideja prosleđena predsedniku':'Ideja vraćena na doradu',body:idea.title,link:`/ideas/${idea._id}`},req.user._id);
  if(d.action==='forward'){
