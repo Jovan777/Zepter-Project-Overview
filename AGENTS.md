@@ -46,7 +46,9 @@
 ## Interfejs i izveštaji
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.
-- Implementirano je svih osam ekrana zaposlenog; četvrti talas obuhvata „Detalji ideje“ i „Obaveštenja“. Browser vizuelna provera četvrtog talasa čeka dostupnu browser automatizaciju; ne tvrdi da je urađena dok je lokalni browser isključen. Dostavljene slike određuju raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
+- Implementirano je svih osam ekrana zaposlenog i prva dva rukovodiočeva ekrana. Naknadno su prilagođeni mobilnom, tablet i desktop prikazu; izvršene browser provere i ograničenja su u `docs/RESPONSIVE_LAYOUTS.md`. Dostavljene slike određuju mobilni raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
+- Svaki naredni talas prvo implementira odobrene mobilne reference, pa prilagođava iste ekrane tabletu i desktopu. Koristi zajednički `features/workspace` shell: donja navigacija na telefonu/tabletu, bočna od 1024 px, detalji u kolonama od 1200 px. Ne ograničavaj desktop na simulirani telefonski okvir.
+- Očuvaj jednu instancu forme/razgovora na svim širinama; ne remount-uj sadržaj na resize i ne pravi odvojene mobilne i desktop kopije forme. Proveri očuvanje započetog unosa pri promeni širine.
 - Rukovodilac ima nove `/dashboard/manager` i `/projects/sector` feed-ove, vezane isključivo za sektor sa sesije. „Po planu“ i „Na proveri“ su izvedene oznake, ne novi statusi; pravila su u `docs/MANAGER_WAVE_01.md`. Model nema posebno ime tima: koristi stvarni sektor, odgovornu osobu i članove, bez izmišljanja timova.
 - Srpska latinica, bela pozadina, zlatni akcenti, tamna čitljiva tipografija. Ne izmišljaj novi identitet.
 - Koristi odobrene referentne slike kada budu dostupne. Ne tvrdi da je ekran veran dizajnu bez reference i vizuelne provere.

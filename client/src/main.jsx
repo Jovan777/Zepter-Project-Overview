@@ -4,6 +4,7 @@ import {createBrowserRouter, RouterProvider} from 'react-router-dom';
 import {registerSW} from 'virtual:pwa-register';
 import App from './App.jsx';
 import './styles.css';
+import './features/workspace/responsive.css';
 registerSW({immediate:true});
 const router=createBrowserRouter([{path:'*',element:<App/>}]);
 createRoot(document.getElementById('root')).render(<RouterProvider router={router}/>);

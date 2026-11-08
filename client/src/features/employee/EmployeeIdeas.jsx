@@ -28,7 +28,7 @@ export default function EmployeeIdeas() {
     <section className="employee-section" aria-labelledby="idea-list-heading">
       <div className="employee-section-heading"><h2 id="idea-list-heading">Lista ideja</h2><Link className="employee-link-action employee-new-idea" to="/ideas/new"><span aria-hidden="true">＋</span> Nova ideja</Link></div>
       <ResourceState busy={busy} error={error} onRetry={reload} noun="spisak ideja"/>
-      <div aria-live="polite" aria-busy={busy}>{data?.items.map(idea => {
+      <div className="employee-ideas-list" aria-live="polite" aria-busy={busy}>{data?.items.map(idea => {
         const [label, tone] = statuses[idea.status] || [idea.status, 'neutral'];
         return <Link className="employee-idea-card" key={idea._id} to={'/ideas/' + idea._id}>
           <ProjectThumbnail attachmentId={idea.thumbnailId} icon="bulb"/>

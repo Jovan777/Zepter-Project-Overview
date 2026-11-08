@@ -29,6 +29,8 @@ Reference su neizmenjeno sačuvane u `design/employee/07-detalji-ideje.png` i `0
 
 ## Provere i ograničenja
 
+Naknadno, 8. novembra: browser pristup je omogućen i ekrani su pregledani u okviru [mobilnog/tablet/desktop prilagođavanja](RESPONSIVE_LAYOUTS.md). Tabela ispod čuva rezultate u trenutku četvrtog talasa.
+
 | Provera | Rezultat |
 |---|---|
 | `npm run test:server` | 37/37; autor/status dorade, verzionisan upis, zastarela verzija, atomska trka, jedno resubmit obaveštenje rukovodiocu, odgovor na instrukciju, tuđa ideja, privatnost obaveštenja i granice grupisane paginacije |

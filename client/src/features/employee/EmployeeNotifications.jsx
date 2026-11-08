@@ -54,7 +54,7 @@ export default function EmployeeNotifications() {
     <ResourceState busy={busy} error={loadError} onRetry={reload} noun="pregled obaveštenja"/>
     {error && <div className="employee-form-error" role="alert"><p>{error}</p>{failedLink && <Link className="employee-text-button" to={failedLink}>Otvori sadržaj bez označavanja</Link>}</div>}
     {notice && <p className="employee-form-success" role="status">{notice}</p>}
-    <div aria-busy={busy}>{group(fresh, `Nova (${data?.filteredUnread ?? fresh.length})`, 'new-notifications')}{group(earlier, 'Ranije', 'earlier-notifications')}</div>
+    <div className="employee-notifications-feed" aria-busy={busy}>{group(fresh, `Nova (${data?.filteredUnread ?? fresh.length})`, 'new-notifications')}{group(earlier, 'Ranije', 'earlier-notifications')}</div>
     {data && !data.items.length && <EmptyState icon="bell" title={category === 'all' ? 'Nema obaveštenja' : 'Nema obaveštenja u ovoj kategoriji'}>Nova zaduženja, komentari i promene biće prikazani ovde.</EmptyState>}
     {data && <Pagination {...data} label="Stranice obaveštenja" onPage={value => change(category, value)}/>}
     <details className="employee-push-settings"><summary>Obaveštenja na telefonu</summary><p>Uključite postojeći Web Push da biste dobijali obaveštenja i kada aplikacija nije otvorena.</p><button className="employee-text-button" disabled={working} onClick={enablePush}>Uključi obaveštenja na telefonu</button></details>

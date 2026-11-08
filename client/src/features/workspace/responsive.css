@@ -1,0 +1,181 @@
+/* One document and one set of forms at every size. Mobile rules live in the feature styles. */
+.workspace-shell .workspace-desktop-only {display: none;}
+.workspace-detail-primary, .workspace-detail-aside, .workspace-detail-footer {min-width: 0;}
+.workspace-shell .employee-notification-tabs {grid-template-columns: repeat(5, minmax(0, 1fr));}
+.workspace-shell .employee-notification-tabs > button {padding-inline: 4px; min-height: 44px;}
+
+@media (min-width: 768px) {
+  .app-shell.workspace-shell {max-width: none; width: 100%; min-height: 100dvh; margin: 0; border: 0; border-radius: 0; box-shadow: none; overflow: visible;}
+  .workspace-shell > .employee-header, .workspace-shell > .manager-header {padding-inline: 28px;}
+  .workspace-shell > .employee-content, .workspace-shell > .manager-content {padding: 28px 28px calc(104px + env(safe-area-inset-bottom)); min-width: 0;}
+  .workspace-shell > .workspace-navigation {width: 100%; border-inline: 0;}
+  .workspace-shell .employee-section, .workspace-shell .manager-section {scroll-margin-top: 110px;}
+  .workspace-shell .employee-home, .workspace-shell .manager-home {display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: start;}
+  .workspace-shell .employee-home > *, .workspace-shell .manager-home > * {grid-column: 1 / -1; min-width: 0; margin-block: 0;}
+  .workspace-shell .employee-home > .employee-metrics, .workspace-shell .employee-home > .employee-shortcuts {grid-column: span 6; align-self: stretch;}
+  .workspace-shell .employee-home .employee-metric, .workspace-shell .employee-home .employee-shortcut {min-height: 112px; height: 100%;}
+  .workspace-shell .employee-home > section[aria-labelledby="attention-heading"], .workspace-shell .employee-home > #najnoviji-komentari {grid-column: span 6;}
+  .workspace-shell .employee-attention-heading {flex-wrap: wrap;}
+  .workspace-shell .employee-home > section[aria-labelledby="my-projects-heading"] {display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px;}
+  .workspace-shell .employee-home > section[aria-labelledby="my-projects-heading"] > .employee-section-heading, .workspace-shell .employee-home > section[aria-labelledby="my-projects-heading"] > .employee-empty {grid-column: 1 / -1; margin: 0;}
+  .workspace-shell .employee-home .employee-project-card--compact {margin: 0;}
+  .workspace-shell .employee-home .employee-project-card--compact .employee-project-heading {flex-wrap: wrap;}
+  .workspace-shell .employee-projects > .employee-metrics, .workspace-shell .employee-ideas > .employee-metrics {max-width: 680px; gap: 16px; margin-bottom: 24px;}
+  .workspace-shell .employee-filter-tabs, .workspace-shell .manager-tabs {max-width: 820px;}
+  .workspace-shell .employee-filter-tabs button, .workspace-shell .manager-tabs button {min-height: 44px;}
+  .workspace-shell .employee-tools {display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 24px; align-items: end;}
+  .workspace-shell .employee-tools .employee-sort {margin: 0;}
+  .workspace-shell .employee-ideas-list {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;}
+  .workspace-shell .employee-idea-card {margin: 0; height: 100%;}
+  .workspace-shell .employee-ideas-list > .employee-empty {grid-column: 1 / -1;}
+  .workspace-shell .employee-idea-heading {flex-wrap: wrap;}
+  .workspace-shell .employee-idea-content {display: flex; flex-direction: column;}
+  .workspace-shell .employee-idea-footer {margin-top: auto;}
+  .workspace-shell .employee-notifications-feed {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; align-items: start;}
+  .workspace-shell .employee-notification-group {margin-top: 22px;}
+  .workspace-shell .employee-notification-card {padding: 17px;}
+  .workspace-shell .employee-notification-tabs {max-width: 800px;}
+  .workspace-shell .employee-push-settings {max-width: 800px;}
+  .workspace-shell .manager-home .manager-metrics {grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px;}
+  .workspace-shell .manager-metric {min-height: 105px; padding: 14px; gap: 10px;}
+  .workspace-shell .manager-metric strong {font-size: 30px;}
+  .workspace-shell .manager-metric > span:nth-child(2) > span {font-size: 13px;}
+  .workspace-shell .manager-home .manager-metric > svg {display: none;}
+  .workspace-shell .manager-report-shortcuts {gap: 18px;}
+  .workspace-shell .manager-report-shortcuts > a {padding: 18px; min-height: 90px; gap: 14px;}
+  .workspace-shell .manager-report-shortcuts strong {font-size: 16px;}
+  .workspace-shell .manager-report-shortcuts small {font-size: 13px;}
+  .workspace-shell .manager-home > .manager-sector-overview, .workspace-shell .manager-home > .manager-attention-overview {grid-column: span 6;}
+  .workspace-shell .manager-home .manager-section h2 {font-size: 22px;}
+  .workspace-shell .manager-president-card {padding: 18px;}
+  .workspace-shell .manager-president-card p {font-size: 14px; -webkit-line-clamp: 6;}
+  .workspace-shell .manager-project-card {padding: 15px; gap: 14px;}
+  .workspace-shell .manager-project-card h3 {font-size: 17px;}
+  .workspace-shell .manager-project-team {font-size: 12px;}
+  .workspace-shell .manager-project-card-footer > span {font-size: 12px;}
+  .workspace-shell .manager-ideas-overview {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;}
+  .workspace-shell .manager-ideas-overview > .manager-section-heading, .workspace-shell .manager-ideas-overview > .employee-empty {grid-column: 1 / -1;}
+  .workspace-shell .manager-idea-row {margin: 0; padding: 16px;}
+  .workspace-shell .manager-idea-row strong {font-size: 14px;}
+  .workspace-shell .manager-idea-row .employee-badge {font-size: 11px;}
+  .workspace-shell .manager-projects > .manager-metrics {max-width: 680px; margin-bottom: 22px; gap: 16px;}
+  .workspace-shell .manager-create-project {width: fit-content; padding-inline: 28px; min-height: 46px; margin-bottom: 20px;}
+  .workspace-shell .manager-project-tools {display: grid; grid-template-columns: minmax(0,1fr) 220px 200px; gap: 16px; align-items: end;}
+  .workspace-shell .manager-project-tools label {margin: 0;}
+  .workspace-shell .manager-project-tools input, .workspace-shell .manager-project-tools select {margin-top: 7px;}
+  .workspace-shell .manager-project-tools form button {align-self: end; min-height: 42px;}
+  .workspace-shell .employee-pagination {justify-content: flex-end;}
+  .workspace-shell .employee-project-summary {padding: 24px; gap: 24px; grid-template-columns: 120px minmax(0,1fr);}
+  .workspace-shell .employee-project-summary > .employee-project-thumbnail {width: 120px; height: 110px;}
+  .workspace-shell .employee-activity-summary {padding: 22px;}
+  .workspace-shell .employee-idea-create {max-width: 1240px; margin-inline: auto;}
+  .workspace-shell .employee-idea-field {padding: 22px;}
+  .workspace-shell .employee-idea-field textarea {min-height: 150px;}
+  .workspace-shell .employee-idea-summary {padding: 24px;}
+  .workspace-shell .employee-idea-summary h1 {font-size: 28px;}
+  .workspace-shell .employee-idea-full-description, .workspace-shell .employee-idea-benefit p {font-size: 16px; line-height: 1.65;}
+  .workspace-shell .employee-discussion-heading h3 {font-size: 16px;}
+  .workspace-shell .employee-discussion-body > p {font-size: 14px;}
+  .workspace-shell .employee-detail-title h1 {font-size: 30px;}
+  .workspace-shell .employee-detail-description {max-width: 90ch;}
+  .workspace-shell .employee-save-button {width: auto; min-width: 220px; padding-inline: 24px;}
+  .workspace-shell .employee-save-bar {display: flex; gap: 18px; align-items: center; justify-content: space-between;}
+  .workspace-shell .employee-idea-create > form > .employee-save-button {display: block; margin-left: auto;}
+  .workspace-shell .employee-idea-bottom-actions {justify-content: flex-end;}
+  .workspace-shell .employee-idea-bottom-actions > button {flex: 0 1 auto; min-width: 170px;}
+  .workspace-shell .employee-activity-form fieldset {min-width: 0;}
+  .workspace-shell dialog.employee-unsaved-dialog {max-width: calc(100vw - 48px);}
+}
+
+@media (min-width: 1024px) {
+  .app-shell.workspace-shell {--workspace-sidebar-width: 224px; padding-left: var(--workspace-sidebar-width); background: #fff;}
+  .workspace-shell > .employee-header, .workspace-shell > .manager-header {min-height: 80px; padding: 14px 32px; background: #fff; border-bottom: 1px solid #e7e3dc; z-index: 20;}
+  .workspace-shell > .employee-content, .workspace-shell > .manager-content {width: 100%; max-width: 1480px; margin-inline: auto; padding: 32px 32px 56px;}
+  .workspace-shell .workspace-desktop-only {display: flex;}
+  .workspace-shell > .workspace-navigation {position: fixed; inset: 0 auto 0 0; z-index: 25; width: var(--workspace-sidebar-width); height: 100dvh; padding: 0 14px 16px; border: 0; border-right: 1px solid #e8e2d6; background: #fff; display: flex; flex-direction: column; gap: 6px; overflow-y: auto;}
+  .workspace-shell .workspace-navigation-brand {flex-direction: column; gap: 7px; padding: 28px 12px; min-height: 109px;}
+  .workspace-navigation-brand > a {display: block; min-height: 0; padding: 0; font-size: 29px; font-weight: 850; letter-spacing: -.04em; color: #ac771c; line-height: 1;}
+  .workspace-navigation-brand > span {font-size: 11px; color: #757b8c; letter-spacing: .01em;}
+  .workspace-shell .workspace-nav-caption {font-size: 11px; color: #8a8e9a; text-transform: uppercase; letter-spacing: .08em; padding: 10px 13px;}
+  .workspace-shell .workspace-navigation nav {display: flex; flex-direction: column; gap: 6px;}
+  .workspace-shell .workspace-navigation nav a {min-width: 0; display: flex; flex-direction: row; justify-content: flex-start; align-items: center; min-height: 48px; gap: 12px; padding: 12px 13px; border-radius: 9px; color: #596176; font-weight: 500; font-size: 14px; line-height: 1.3;}
+  .workspace-shell .workspace-navigation nav a > span {font-size: 14px; overflow-wrap: anywhere;}
+  .workspace-shell .workspace-navigation nav a > svg {width: 22px; height: 22px;}
+  .workspace-shell .workspace-navigation nav a > i {display: none;}
+  .workspace-shell .workspace-navigation nav a:hover {background: #faf6ed; color: #8f641a;}
+  .workspace-shell .workspace-navigation nav a.is-active {background: #fbefd4; color: #99660f; font-weight: 700;}
+  .workspace-shell .workspace-navigation nav a.is-active svg {fill: none; stroke: currentColor;}
+  .workspace-shell .workspace-navigation .workspace-secondary-nav {margin-top: 24px; padding-top: 15px; border-top: 1px solid #eee9df;}
+  .workspace-shell .workspace-secondary-nav a > span {font-size: 12px;}
+  .workspace-shell .workspace-account {margin-top: auto; padding: 22px 8px 0; gap: 9px; align-items: center; border-top: 1px solid #eee9df;}
+  .workspace-account-icon {width: 35px; height: 35px; border-radius: 50%; background: #f8f1e2; color: #aa7928; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+  .workspace-account > div {min-width: 0; flex: 1;}
+  .workspace-account strong {display: block; font-size: 12px; line-height: 1.4; color: #333c51; overflow-wrap: anywhere;}
+  .workspace-account > div > span {display: block; color: #7b8191; font-size: 10px; margin-top: 3px;}
+  .workspace-account button {display: flex; align-items: center; justify-content: center; background: transparent; color: #687185; border: 0; padding: 5px; min-width: 30px; min-height: 44px; border-radius: 7px;}
+  .workspace-shell .employee-brand, .workspace-shell .manager-brand {font-size: 23px;}
+  .workspace-shell .employee-detail-brand > .employee-brand, .workspace-shell .manager-header > div > .manager-brand {display: none;}
+  .workspace-shell .workspace-header-context {font-size: 17px; font-weight: 650; color: #626a7d;}
+  .workspace-shell .employee-header--page {min-height: 80px;}
+  .workspace-shell .employee-page-heading h1 {font-size: 24px;}
+  .workspace-shell .employee-page-heading p {font-size: 13px;}
+  .workspace-shell .employee-header--page > .employee-back {display: none;}
+  .workspace-shell .employee-greeting {margin-bottom: 24px;}
+  .workspace-shell .employee-home > .employee-greeting {margin: 0;}
+  .workspace-shell .manager-heading h1 {font-size: 32px;}
+  .workspace-shell .manager-heading p {font-size: 16px;}
+  .workspace-shell .employee-metric {min-height: 100px;}
+  .workspace-shell .employee-detail-disclosure {scroll-margin-top: 100px;}
+  .workspace-shell .employee-discussion {scroll-margin-top: 100px;}
+  .workspace-shell .manager-content > form, .workspace-shell .manager-content > .panel {max-width: 1100px;}
+}
+
+@media (min-width: 1200px) {
+  .workspace-shell .workspace-detail-grid {display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr); gap: 28px; align-items: start; margin-top: 24px;}
+  .workspace-shell .workspace-detail-grid > .workspace-detail-primary > :first-child, .workspace-shell .workspace-detail-aside > .employee-discussion {margin-top: 0;}
+  .workspace-shell .workspace-detail-footer {grid-column: 1;}
+  .workspace-shell .employee-project-summary > div {min-width: 0;}
+  .workspace-shell .employee-project-summary .employee-summary-facts {display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px;}
+  .workspace-shell .employee-project-summary .employee-summary-facts > div {display: flex; flex-direction: column; align-items: start; gap: 5px; border: 0; padding: 0;}
+  .workspace-shell .employee-project-summary .employee-summary-facts dt {font-size: 12px;}
+  .workspace-shell .employee-project-summary .employee-summary-facts dd {font-size: 14px; margin: 0;}
+  .workspace-shell .employee-project-activity {padding: 17px;}
+  .workspace-shell .employee-project-activity-heading {flex-wrap: wrap;}
+  .workspace-shell .employee-edit-field {padding: 18px;}
+  .workspace-shell .employee-edit-field textarea {min-height: 110px;}
+  .workspace-shell .employee-idea-create > form {display: grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); gap: 22px 28px; align-items: start;}
+  .workspace-shell .employee-idea-create > form > * {min-width: 0; grid-column: 1 / -1; margin: 0;}
+  .workspace-shell .employee-idea-create .employee-idea-field--title {grid-column: 1; grid-row: 1;}
+  .workspace-shell .employee-idea-create .employee-idea-field--description {grid-column: 1; grid-row: 2;}
+  .workspace-shell .employee-idea-create .employee-idea-field--benefit {grid-column: 1; grid-row: 3;}
+  .workspace-shell .employee-idea-create .employee-idea-field--sector {grid-column: 2; grid-row: 1;}
+  .workspace-shell .employee-idea-create .employee-idea-field--files {grid-column: 2; grid-row: 2;}
+  .workspace-shell .employee-idea-create .employee-idea-info {grid-column: 2; grid-row: 3; align-self: start;}
+  .workspace-shell .employee-idea-create > form > .employee-save-button {justify-self: end; margin: 4px 0 0;}
+  .workspace-shell .employee-idea-field label, .workspace-shell .employee-idea-field h2 {font-size: 20px;}
+  .workspace-shell .employee-projects .employee-project-card, .workspace-shell .manager-projects .manager-project-card {padding: 20px; gap: 20px;}
+  .workspace-shell .employee-projects .employee-project-content, .workspace-shell .manager-projects .manager-project-card-content {display: grid; grid-template-columns: minmax(0,1fr) 150px 180px; column-gap: 22px; align-items: center;}
+  .workspace-shell .employee-projects .employee-project-heading, .workspace-shell .manager-projects .manager-project-card-heading {grid-column: 1; grid-row: 1; flex-wrap: wrap;}
+  .workspace-shell .employee-projects .employee-project-meta, .workspace-shell .manager-projects .manager-project-team {grid-column: 1; grid-row: 2; margin: 7px 0 0;}
+  .workspace-shell .employee-projects .employee-progress-row, .workspace-shell .manager-projects .manager-progress-row {grid-column: 2; grid-row: 1 / 3; margin: 0;}
+  .workspace-shell .employee-projects .employee-project-footer, .workspace-shell .manager-projects .manager-project-card-footer {grid-column: 3; grid-row: 1 / 3; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; border-top: 0; border-left: 1px solid #e9e6ed; padding: 2px 0 2px 19px; margin: 0;}
+  .workspace-shell .employee-projects .employee-project-footer > span:last-child, .workspace-shell .manager-projects .manager-project-card-footer > span:last-child {margin-left: 0;}
+  .workspace-shell .employee-projects .employee-project-heading h3 {font-size: 18px;}
+  .workspace-shell .employee-projects .employee-project-meta {font-size: 12px;}
+  .workspace-shell .employee-notification-copy strong {font-size: 16px;}
+  .workspace-shell .employee-notification-copy > span {font-size: 14px;}
+}
+
+@media (min-width: 1600px) {
+  .app-shell.workspace-shell {--workspace-sidebar-width: 248px;}
+  .workspace-shell > .employee-content, .workspace-shell > .manager-content {padding: 40px 44px 64px;}
+  .workspace-shell .employee-projects .employee-project-content, .workspace-shell .manager-projects .manager-project-card-content {grid-template-columns: minmax(0,1fr) 210px 210px;}
+}
+
+@media (max-width: 1199px) and (min-width: 768px) {
+  .workspace-shell .manager-project-tools {grid-template-columns: minmax(0,1fr) 180px;}
+  .workspace-shell .manager-project-tools > label:last-child {grid-column: 1 / -1;}
+  .workspace-shell .manager-home .manager-metric {gap: 7px; padding-inline: 10px;}
+  .workspace-shell .manager-home .manager-metric > .employee-icon-disc {width: 30px; height: 34px;}
+  .workspace-shell .manager-home .manager-metric > span:nth-child(2) > span {font-size: 11px;}
+}

@@ -43,6 +43,8 @@ Zajednički razgovor i meni naloga imaju male kompatibilne dopune; zaposleni zad
 
 ## Provere
 
+Naknadno, 8. novembra: oba ekrana pregledana su u browseru i prilagođena tabletu/desktopu. Aktuelni rezultati i ograničenja su u [responsive dopuni](RESPONSIVE_LAYOUTS.md); tabela ispod beleži stanje pri završetku prvog talasa.
+
 | Provera | Rezultat |
 |---|---|
 | `npm run test:server` | 44/44; sektor, uloge, prazna stanja, globalni brojači, izvedene oznake, pretraga, granica kašnjenja, komentari i odgovor predsedniku |
