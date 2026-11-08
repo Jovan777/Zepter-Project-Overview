@@ -19,7 +19,8 @@ r.post('/project/:projectId',async(req,res)=>{
  const assignees=await validateTeam(d.assigneeIds,p.sector);
  if(assignees.some(id=>!inRefs(p.members,id)))fail(422,'Odgovorna osoba mora biti član projektnog tima.');
  const a=await Activity.create({sector:p.sector,project:p._id,title:d.title,description:d.description,assignees,status:d.status,
-  progress:d.status==='completed'?100:d.progress,dueDate:dateValue(d.dueDate),priority:d.priority,createdBy:req.user._id});
+  progress:d.status==='completed'?100:d.progress,dueDate:dateValue(d.dueDate),priority:d.priority,createdBy:req.user._id,
+  ...(d.status!=='completed'&&d.progress===100?{status:'review'}:{})});
  await updateProjectProgress(p._id);await audit(req,'activity.created','Activity',a._id,{project:p._id});
  await notify(assignees,{type:'activity_assigned',title:'Nova aktivnost',body:a.title,link:`/activities/${a._id}`},req.user._id);
  res.status(201).json({activity:a});
@@ -48,6 +49,7 @@ r.get('/:id',async(req,res)=>{
 r.patch('/:id',async(req,res)=>{
  const {activity:current,project:p}=await activityAccess(req.user,req.params.id,true);
  let a=current;
+ const previousStatus=a.status,previousProgress=a.progress;
  const version=req.get('If-Match');
  if(version&&version!==`"${a.updatedAt?.toISOString()}"`)fail(409,'Aktivnost je u međuvremenu promenjena. Pregledajte aktuelne podatke pre čuvanja.');
  const manager=managing(req.user,p.sector);
@@ -59,6 +61,7 @@ r.patch('/:id',async(req,res)=>{
  if(d.dueDate!==undefined)a.dueDate=d.dueDate===null?null:dateValue(d.dueDate);
  if(a.status==='completed')a.progress=100;
  if(a.progress===100&&a.status!=='completed')a.status='review';
+ if((a.status!==previousStatus||a.progress!==previousProgress)&&(p.archived||p.status==='cancelled'||p.status==='completed'&&a.status!=='completed'))fail(409,'Ponovo aktivirajte projekat pre promene statusa ili napretka aktivnosti.');
  if(version){
   const fields={status:a.status,progress:a.progress};
   for(const key of ['title','description','priority','actualWork','nextStep','blockers'])if(d[key]!==undefined)fields[key]=a[key];

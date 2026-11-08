@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import {Server as SocketServer} from 'socket.io';
 import {verifyAccess,requireAuth} from './lib/auth.js';
+import {bindPresidentSocket} from './lib/president-socket.js';
 import {errorHandler} from './lib/errors.js';
 import {attachSocket} from './services/events.js';
 import authRoutes from './routes/auth.js';
@@ -36,6 +37,7 @@ app.disable('x-powered-by');
 app.use(helmet());app.use(compression());
 app.use(cors({origin:process.env.CLIENT_ORIGIN,credentials:true,methods:['GET','POST','PATCH','DELETE','OPTIONS']}));
 app.use(cookieParser());app.use(express.json({limit:'600kb'}));
+app.use('/api',(_req,res,next)=>{res.set('Cache-Control','no-store');next();});
 app.get('/health',(_req,res)=>res.json({ok:mongoose.connection.readyState===1,service:'zepter-management-api'}));
 app.use('/api/auth',authRoutes);
 app.get('/api/public/sectors',async(_req,res)=>{
@@ -64,6 +66,7 @@ io.use(async(socket,next)=>{
  const token=socket.handshake.auth?.token;
  const user=token?await verifyAccess(token):null;
  if(!user)return next(new Error('Unauthorized'));
+ bindPresidentSocket(socket,token);
  socket.data.userId=String(user._id);socket.data.sectorId=user.sector?String(user.sector):null;socket.data.role=user.role;next();
 });
 io.on('connection',socket=>{socket.join('user:'+socket.data.userId);if(socket.data.sectorId)socket.join('sector:'+socket.data.sectorId);if(socket.data.role==='president')socket.join('presidents');});

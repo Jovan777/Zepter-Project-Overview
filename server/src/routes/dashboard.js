@@ -1,12 +1,16 @@
 import {Router} from 'express';
 import {Project,Activity,Idea,Comment,Assignment,Notification,Sector,User,DecisionRequest} from '../models/index.js';
-import {omniscient} from '../lib/access.js';
+import {omniscient,requireSectorScope} from '../lib/access.js';
 import {same,belgradeDay} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {allow} from '../lib/auth.js';
 import {employeeOverview} from '../services/employee.js';
 import {managerOverview} from '../services/manager.js';
+import {presidentOverview,presidentAttention} from '../services/president.js';
 const r=Router();
+r.use(requireSectorScope);
+r.get('/president',allow('president'),async(req,res)=>res.json(await presidentOverview(req.user,req.query)));
+r.get('/president/attention',allow('president'),async(req,res)=>res.json(await presidentAttention(req.user,req.query)));
 r.get('/employee',allow('employee'),async(req,res)=>res.json(await employeeOverview(req.user,req.query)));
 r.get('/manager',allow('manager'),async(req,res)=>res.json(await managerOverview(req.user,req.query)));
 r.get('/overview',async(req,res)=>{

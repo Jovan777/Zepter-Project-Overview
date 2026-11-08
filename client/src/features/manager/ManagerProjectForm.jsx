@@ -55,7 +55,7 @@ function ProjectEditor({project, user, people, activities}) {
   const adopt = () => {
     const next = projectDraft(latest, user); setBaseline(next); setDraft(next); setRows([]); setRowStates({});
     session.current = {projectId: latest._id, version: latest.updatedAt, projectSaved: false, activities: new Map()};
-    setLatest(null); setConflict(false); setUncertain(false); setError('');
+    setLatest(null); setConflict(false); setUncertain(false); setSavedId(null); setError('');
   };
   return <div className="manager-project-editor"><h1 className="employee-sr-only">{edit ? 'Uredi projekat' : 'Kreiraj projekat'}</h1><p className="manager-form-sector">{edit ? 'Izmenite podatke i sastav tima.' : 'Osnovni podaci, tim i opcione početne aktivnosti.'}</p>
     <form ref={form} onSubmit={save} aria-busy={saving}>

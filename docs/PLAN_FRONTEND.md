@@ -1,5 +1,9 @@
 # Predlog faznog razvoja React frontend-a
 
+**Predsednik — prvi talas:** implementirani su kompanija i sektor prema dve reference, prvo mobilno, zatim tablet/desktop. Predsednik ulazi istim ličnim linkom na svakom uređaju, bez login formulara, menija naloga i odjave. [Obuhvat, pomoćna odredišta, provere i granice](PRESIDENT_WAVE_01.md). Naredne ekrane određuje korisnik.
+
+**Pre predsedničkih referenci:** izvršen je [pregled zaposlenog i rukovodioca](REVIEW_EMPLOYEE_MANAGER.md), sa ispravkama, povezanim HTTP scenarijem do predsedničkog pristupa i naknadnim browser proverama obe uloge. Potvrđeni tokovi, širine i preostala ograničenja navedeni su u tom dokumentu. Predsednički ekrani još nisu predmet ove izmene.
+
 **Peti rukovodiočev talas:** implementirani su i ekrani 9–10, [detalji/odluka o ideji i obaveštenja](MANAGER_WAVE_05.md), za mobilni, tablet i desktop prikaz. Time je implementirano svih deset planiranih rukovodiočevih ekrana; granice prethodnih vizuelnih/PWA provera ostaju evidentirane po talasima. Naredni razvoj bira se prema sledećim korisnikovim instrukcijama i referencama, uz preostali predsednički interfejs i završnu stabilizaciju iz plana.
 
 **Četvrti rukovodiočev talas:** implementirani su ekrani 7–8, [priprema/objava izveštaja i ideje zaposlenih](MANAGER_WAVE_04.md), na mobilnom/tablet/desktop rasporedu. Izveštaj podržava nastavak nacrta, opcioni sažetak, uslovno čuvanje i objavu. Ideje imaju sektorske brojače, filtere i paginaciju. Naknadno su u Chrome-u potvrđeni rasporedi 320/390/820/1440 px, očuvanje unosa, mobilna objava i osnovni tok ideja; preostale granice su u dokumentaciji talasa. Detalji/odluka i obaveštenja završeni su u petom talasu iznad.
@@ -18,7 +22,7 @@ Ovo je plan narednih zadataka; novi ekrani nisu implementirani u početnoj anali
 - Napraviti katalog referenci i mapu: ekran → ruta → API → dozvoljene akcije. Sačuvati postojeće ugovore i statuse.
 - Postepeno izvući postojeći API sloj, auth context, zajedničke kartice, forme, razgovor i priloge iz monolitnog `App.jsx`.
 - Uvesti zajednički mobile layout, postojeću belo/zlatnu paletu, tipografiju, stanja učitavanja/greške/prazne liste i zaštite ruta po ulozi.
-- Definisati datum `Europe/Belgrade`, paginaciju i način osvežavanja podataka. Predsednik koristi isti bezbedan login, bez javnog privilegovanog ulaza.
+- Definisati datum `Europe/Belgrade`, paginaciju i osvežavanje. Predsednik koristi dogovoreni višekratni lični link sa autentifikacijom u pozadini, bez login formulara i odjave; sama ruta nije privilegija.
 
 Kriterijum: postojeći tokovi ostaju funkcionalni; prolaze unit/regresije, RBAC, build i odgovarajući smoke u dokumentovanom demo stanju. Nema promene vizuelnog identiteta bez reference.
 

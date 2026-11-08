@@ -1,33 +1,39 @@
 import {Router} from 'express';
 import {WorkLog,User,Activity} from '../models/index.js';
-import {activityAccess,projectAccess,managing,omniscient} from '../lib/access.js';
+import {activityAccess,projectAccess,managing,omniscient,requireSectorScope} from '../lib/access.js';
 import {schemas} from '../lib/validation.js';
 import {fail} from '../lib/errors.js';
 import {belgradeDay,requireId,safePage,same,validDay,dateValue} from '../lib/utils.js';
 import {audit,notifyManagers} from '../services/events.js';
 import {updateProjectProgress} from '../services/progress.js';
 const r=Router();
+r.use(requireSectorScope);
 r.post('/',async(req,res)=>{
  if(!['employee','manager'].includes(req.user.role)||!req.user.sector)fail(403,'Dnevne unose vode samo zaposleni i rukovodioci sektora.');
  const d=schemas.worklog.parse(req.body);
  if(!validDay(d.day))fail(422,'Neispravan datum.');
+ if(d.updatedProgress!==undefined&&!d.activityId)fail(422,'Promena napretka zahteva izabranu aktivnost.');
  // Allow a standalone daily report even when no activity is assigned.
  let projectId=null,activityId=null;
  if(d.activityId){
   const {activity,project}=await activityAccess(req.user,d.activityId);
   if(!activity.assignees.some(x=>same(x,req.user._id))&&!managing(req.user,project.sector))fail(403,'Dnevni unos je moguć samo za sopstvenu aktivnost.');
   projectId=project._id;activityId=activity._id;
+  if(d.projectId&&!same(d.projectId,projectId))fail(422,'Aktivnost ne pripada izabranom projektu.');
   if(d.updatedProgress!==undefined){
+   const status=d.updatedProgress===100&&activity.status!=='completed'?'review':activity.status;
+   const changed=d.updatedProgress!==activity.progress||status!==activity.status;
+   if(changed&&(project.archived||['completed','cancelled'].includes(project.status)))fail(409,'Ponovo aktivirajte projekat pre promene napretka.');
    if(activity.status==='completed'&&d.updatedProgress<100)fail(409,'Završena aktivnost ne može se vratiti na manji napredak dnevnim unosom.');
-   activity.progress=d.updatedProgress;if(activity.progress===100&&activity.status!=='completed')activity.status='review';
-   await activity.save();await updateProjectProgress(project._id);}
+   if(changed){activity.progress=d.updatedProgress;activity.status=status;
+    await activity.save();await updateProjectProgress(project._id);}}
  }else if(d.projectId){
   const p=await projectAccess(req.user,d.projectId);projectId=p._id;
  }
  const item=await WorkLog.create({user:req.user._id,sector:req.user.sector||undefined,project:projectId,activity:activityId,
   day:d.day,done:d.done,nextSteps:d.nextSteps,blockers:d.blockers,minutes:d.minutes,updatedProgress:d.updatedProgress});
  await audit(req,'worklog.created','WorkLog',item._id,{day:item.day,activity:activityId});
- if(d.blockers)await notifyManagers(req.user.sector,{type:'worklog_blocker',title:'Prijavljena prepreka',body:d.done.slice(0,100),link:`/activities/${activityId||''}`},req.user._id);
+ if(d.blockers)await notifyManagers(req.user.sector,{type:'worklog_blocker',title:'Prijavljena prepreka',body:d.blockers.slice(0,130),link:activityId?`/activities/${activityId}`:projectId?`/projects/${projectId}`:`/reports?scope=sector&type=daily&day=${d.day}`},req.user._id);
  res.status(201).json({workLog:item});
 });
 r.get('/mine',async(req,res)=>{

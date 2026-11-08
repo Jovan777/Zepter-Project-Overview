@@ -2,8 +2,9 @@ import {Router} from 'express';
 import {User,Project} from '../models/index.js';
 import {fail} from '../lib/errors.js';
 import {requireId,same} from '../lib/utils.js';
-import {omniscient} from '../lib/access.js';
+import {omniscient,requireSectorScope} from '../lib/access.js';
 const r=Router();
+r.use(requireSectorScope);
 r.get('/',async(req,res)=>{
  const filter=omniscient(req.user)?{approval:'approved'}:{sector:req.user.sector,approval:'approved'};
  const items=await User.find(filter).select('firstName lastName role jobTitle sector').sort({lastName:1}).limit(300);

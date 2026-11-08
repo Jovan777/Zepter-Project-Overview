@@ -5,8 +5,10 @@ const base=`http://127.0.0.1:${process.env.PORT||4000}`;
 const pass=process.env.DEMO_SEED_PASSWORD;
 if(!pass){console.error('Nedostaje DEMO_SEED_PASSWORD u .env');process.exit(1);}
 let passed=0,failed=0;
+const sessions=new Set();
 async function call(route,token,method='GET',body){
- const response=await fetch(base+route,{method,headers:{...(token?{Authorization:`Bearer ${token}`} : {}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+ const response=await fetch(base+route,{method,signal:AbortSignal.timeout(10000),headers:{...(token?{Authorization:`Bearer ${token}`} : {}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+ if(route==='/api/auth/login'&&response.ok){const cookie=response.headers.getSetCookie()[0]?.split(';')[0];if(cookie)sessions.add(cookie);}
  const type=response.headers.get('content-type')||'';
  const data=type.includes('json')?await response.json():null;
  return {status:response.status,data};
@@ -47,4 +49,13 @@ async function run(){
  console.log(`\nRezultat: ${passed} OK, ${failed} gresaka.`);
  if(failed)process.exitCode=1;
 }
-run().catch(error=>{console.error('Smoke test prekinut:',error.message);process.exitCode=1;});
+async function logoutSessions(){
+ const outcomes=await Promise.allSettled([...sessions].map(async cookie=>{
+  const response=await fetch(base+'/api/auth/logout',{method:'POST',headers:{Cookie:cookie},signal:AbortSignal.timeout(10000)});
+  if(!response.ok)throw Error('Logout failed');
+ }));
+ const failed=outcomes.filter(result=>result.status==='rejected').length;
+ if(failed){console.error('FAIL Odjava testnih sesija nije potvrđena: '+failed);process.exitCode=1;}
+ console.log('Odjavljeno testnih sesija: '+(outcomes.length-failed));
+}
+run().catch(error=>{console.error('Smoke test prekinut:',error.message);process.exitCode=1;}).finally(logoutSessions);

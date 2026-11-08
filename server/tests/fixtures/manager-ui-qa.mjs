@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 if(process.env.ZEPTER_UI_FIXTURE!=='1')throw Error('Set ZEPTER_UI_FIXTURE=1.');
 const origin='http://127.0.0.1:4002';
 const session=await(await fetch(origin+'/api/auth/refresh',{method:'POST'})).json();
-assert.equal(session.accessToken,'isolated-ui-fixture');assert.equal(session.user.role,'manager');
+assert.equal(session.accessToken,'isolated-ui-fixture');assert.ok(['employee','manager'].includes(session.user.role));
 const command=process.argv[2],commands={
  'ideas-empty':{ideasMode:'empty'},'ideas-normal':{ideasMode:'normal'},'ideas-error':{ideasFailOnce:true},
  'prepare-error':{prepareFailOnce:true},'prepare-delay':{prepareDelayOnce:true},
  'save-error':{saveFailOnce:true},'publish-error':{publishFailOnce:true},'save-lost':{saveResponseLostOnce:true},
- 'review-error':{reviewFailOnce:true},'review-lost':{reviewResponseLostOnce:true},'notifications-error':{notificationFailOnce:true},'notifications-empty':{notificationsEmpty:true},'notifications-normal':{notificationsEmpty:false},'read-error':{readFailOnce:true}
+ 'review-error':{reviewFailOnce:true},'review-lost':{reviewResponseLostOnce:true},'notifications-error':{notificationFailOnce:true},'notifications-empty':{notificationsEmpty:true},'notifications-normal':{notificationsEmpty:false},'read-error':{readFailOnce:true},
+ 'comment-lost':{commentResponseLostOnce:true},'worklog-lost':{worklogResponseLostOnce:true},'attachment-lost':{attachmentResponseLostOnce:true}
 };
 async function api(path,body,headers={},method=body?'POST':'GET'){
  const response=await fetch(origin+'/api'+path,{method,headers:{Authorization:'Bearer isolated-ui-fixture',...(body?{'Content-Type':'application/json'}:{}),...headers},body:body?JSON.stringify(body):undefined});

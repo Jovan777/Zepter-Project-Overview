@@ -18,15 +18,17 @@ function ActivityView({activity, project, user, reload}) {
   const [version, setVersion] = useState(activity.updatedAt);
   const [saving, setSaving] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [conflict, setConflict] = useState(false), [latest, setLatest] = useState(null), [checking, setChecking] = useState(false);
+  const [threadDirty,setThreadDirty]=useState(false);
   const dialog = useRef(null), saveLock = useRef(false);
   const dirty = editable && !sameActivityDraft(draft, baseline);
-  const blocker = useBlocker(({currentLocation, nextLocation}) => dirty && nextLocation.pathname !== '/login' && currentLocation.pathname + currentLocation.search !== nextLocation.pathname + nextLocation.search);
+  const guarded=dirty||threadDirty||saving;
+  const blocker = useBlocker(({currentLocation, nextLocation}) => guarded && nextLocation.pathname !== '/login' && currentLocation.pathname + currentLocation.search !== nextLocation.pathname + nextLocation.search);
   useEffect(() => {
-    if (!dirty) return;
+    if (!guarded) return;
     const unload = event => {event.preventDefault(); event.returnValue = '';};
     window.addEventListener('beforeunload', unload);
     return () => window.removeEventListener('beforeunload', unload);
-  }, [dirty]);
+  }, [guarded]);
   useEffect(() => {
     if (blocker.state === 'blocked' && !dialog.current?.open) dialog.current?.showModal();
     return () => dialog.current?.close();
@@ -72,8 +74,8 @@ function ActivityView({activity, project, user, reload}) {
       {!dirty && baseline.actualWork.trim() && <Link className="employee-daily-link" to="/daily" state={{activityId: activity._id}}><Icon name="calendar" size={18}/>Dodaj urađeno u dnevni izveštaj<Icon name="arrow" size={17}/></Link>}
     </form> : <><div className="employee-readonly-note"><Icon name="info" size={20}/><p>Ovu aktivnost uređuju dodeljene osobe. Možete pregledati priloge i učestvovati u razgovoru.</p></div><section className="employee-readonly-work"><h2>Šta je urađeno</h2><p>{activity.actualWork || 'Još nema unosa.'}</p>{activity.nextStep && <><h3>Sledeći korak</h3><p>{activity.nextStep}</p></>}{activity.blockers && <><h3>Prepreke</h3><p>{activity.blockers}</p></>}</section></>}
     <EmployeeAttachments type="activity" id={activity._id} user={user} editable={editable}/>
-    </div><div className="workspace-detail-aside"><EmployeeThread type="activity" id={activity._id} user={user} heading="Komentari i odgovori" sectionId="activity-comments"/></div></div>
-    <dialog className="employee-unsaved-dialog" ref={dialog} aria-label="Nesačuvane izmene" onCancel={event => {event.preventDefault(); blocker.reset?.();}}><h2>Sačuvati izmene pre izlaska?</h2><p>Uneli ste izmene u aktivnost koje još nisu sačuvane.</p><button className="employee-save-button" disabled={saving} onClick={async () => {if (await save()) blocker.proceed?.();}}>Sačuvaj i nastavi</button><button className="employee-text-button" disabled={saving} onClick={() => blocker.proceed?.()}>Odbaci izmene</button><button className="employee-text-button" disabled={saving} onClick={() => blocker.reset?.()}>Ostani ovde</button>{error && <p role="alert" className="employee-form-error">{error}</p>}</dialog>
+    </div><div className="workspace-detail-aside"><EmployeeThread type="activity" id={activity._id} user={user} heading="Komentari i odgovori" sectionId="activity-comments" onDraftChange={setThreadDirty}/></div></div>
+    <dialog className="employee-unsaved-dialog" ref={dialog} aria-label="Nesačuvane izmene" onCancel={event => {event.preventDefault(); blocker.reset?.();}}><h2>Sačuvati izmene pre izlaska?</h2><p>{threadDirty?'Imate neposlat komentar. Ostanite na ekranu da biste završili razgovor.':'Uneli ste izmene u aktivnost koje još nisu sačuvane.'}</p><button className="employee-save-button" disabled={saving||threadDirty} onClick={async () => {if (await save()) blocker.proceed?.();}}>Sačuvaj i nastavi</button><button className="employee-text-button" disabled={saving} onClick={() => blocker.proceed?.()}>Odbaci izmene</button><button className="employee-text-button" disabled={saving} onClick={() => blocker.reset?.()}>Ostani ovde</button>{error && <p role="alert" className="employee-form-error">{error}</p>}</dialog>
   </div>;
 }
 

@@ -3,9 +3,11 @@ import Icon from '../../components/Icon.jsx';
 import {api} from '../../api.js';
 import useEmployeeResource from './useEmployeeResource.js';
 import {Badge, EmptyState, IconDisc, Pagination, ResourceState} from './EmployeeComponents.jsx';
+import {uncertainWrite} from '../workspace/mutations.js';
 
 const time = value => new Intl.DateTimeFormat('sr-Latn-RS', {timeZone: 'Europe/Belgrade', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}).format(new Date(value));
-export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments', variant, initialReply, allowInstructions = false, onDraftChange}) {
+function ThreadHistory({collapsed,total,children,historyRef}){return collapsed?<details ref={historyRef} className="president-thread-history"><summary>Razgovor sa rukovodiocem ({total??'—'})</summary>{children}</details>:children;}
+export default function EmployeeThread({type, id, user, heading = 'Komentari', sectionId = 'detail-comments', variant, initialReply, allowInstructions = false, onDraftChange, collapseHistory = false}) {
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState('');
   const [parent, setParent] = useState(null);
@@ -13,25 +15,26 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [kind, setKind] = useState('comment');
-  const editor = useRef(null), lock = useRef(false);
+  const [uncertain,setUncertain]=useState(false);
+  const editor = useRef(null), lock = useRef(false), history = useRef(null);
   const base = `/comments?targetType=${type}&targetId=${id}`;
-  useEffect(()=>{onDraftChange?.(!!message.trim()||sending);},[message,sending,onDraftChange]);
+  useEffect(()=>{onDraftChange?.(!!message.trim()||sending||uncertain);},[message,sending,uncertain,onDraftChange]);
   const {data, busy, error: loadError, reload} = useEmployeeResource(`${base}&page=${page}&limit=20`, {keepPreviousData: true});
-  useEffect(() => {setPage(1); setMessage(''); setParent(null); setKind('comment'); setError(''); setNotice('');}, [type, id]);
+  useEffect(() => {setPage(1); setMessage(''); setParent(null); setKind('comment'); setError(''); setNotice('');setUncertain(false);}, [type, id]);
   useEffect(() => {if (initialReply) {setParent(initialReply); editor.current?.focus();}}, [initialReply]);
   const send = async event => {
     event.preventDefault();
-    if (lock.current || !message.trim()) return;
+    if (lock.current || uncertain || !message.trim()) return;
     lock.current = true; setSending(true); setError(''); setNotice('');
     try {
-      await api('/comments', {method: 'POST', body: {targetType: type, targetId: id, body: message.trim(), kind: allowInstructions && user.role === 'manager' ? kind : 'comment', ...(parent ? {parentId: parent._id} : {})}});
+      await api('/comments', {method: 'POST', body: {targetType: type, targetId: id, body: message.trim(), kind: allowInstructions && ['manager','president'].includes(user.role) ? kind : 'comment', ...(parent ? {parentId: parent._id} : {})}});
       setMessage(''); setParent(null); setKind('comment'); setNotice('Komentar je poslat.');
       try {
         const last = await api(`${base}&limit=1`);
         setPage(Math.max(1, Math.ceil(last.total / 20)));
       } catch {setNotice('Komentar je poslat. Osvežite razgovor da biste ga videli.');}
       reload();
-    } catch (e) {setError(e.message);}
+    } catch (e) {setError(e.message);setUncertain(uncertainWrite(e));}
     finally {lock.current = false; setSending(false);}
   };
   const resolve = async comment => {
@@ -43,7 +46,7 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
   };
   return <section className="employee-section employee-discussion" id={sectionId} aria-labelledby={`${sectionId}-heading`}>
     <h2 id={`${sectionId}-heading`}>{heading}{variant === 'idea' && data ? ` (${data.total})` : ''}</h2>
-    <ResourceState busy={busy && !data} error={loadError} onRetry={reload} noun="razgovor"/>
+    <ThreadHistory collapsed={collapseHistory} total={data?.total} historyRef={history}><ResourceState busy={busy && !data} error={loadError} onRetry={reload} noun="razgovor"/>
     {data && !data.items.length && <EmptyState icon="message" title="Započnite razgovor">Postavite pitanje ili podelite novost o {type === 'project' ? 'projektu' : type === 'idea' ? 'ideji' : type === 'sector' ? 'sektoru' : 'aktivnosti'}.</EmptyState>}
     {data?.items.map(comment => {
       const own = comment.author?._id === user._id;
@@ -59,15 +62,16 @@ export default function EmployeeThread({type, id, user, heading = 'Komentari', s
         </div>
       </article>;
     })}
-    {data && <Pagination {...data} label="Stranice komentara" onPage={setPage}/>}
+    {data && <Pagination {...data} label="Stranice komentara" onPage={setPage}/>}</ThreadHistory>
     {parent && <div className="employee-reply-preview"><span><strong>Odgovor na:</strong> {parent.body.slice(0, 130)}</span><button className="employee-icon-button" onClick={() => setParent(null)} aria-label="Otkaži odgovor"><Icon name="close" size={17}/></button></div>}
     <form className="employee-comment-composer" onSubmit={send} aria-label="Novi komentar">
-      {allowInstructions && user.role === 'manager' && <label className="manager-comment-kind">Tip poruke<select value={kind} disabled={sending} onChange={event => setKind(event.target.value)}><option value="comment">Komentar / odgovor</option><option value="instruction">Instrukcija timu</option></select></label>}
+      {allowInstructions && ['manager','president'].includes(user.role) && <label className="manager-comment-kind">Tip poruke<select value={kind} disabled={sending} onChange={event => setKind(event.target.value)}><option value="comment">Komentar / odgovor</option><option value="instruction">{type==='sector'?'Instrukcija rukovodiocu':'Instrukcija timu'}</option></select></label>}
       <label className="employee-sr-only" htmlFor={`${sectionId}-message`}>{parent ? 'Odgovor na komentar' : 'Novi komentar'}</label>
       <textarea id={`${sectionId}-message`} ref={editor} rows={2} required maxLength={4000} value={message} disabled={sending} onChange={event => {setMessage(event.target.value); setNotice('');}} placeholder={parent ? 'Napišite odgovor…' : type === 'project' ? 'Napišite komentar na projekat…' : 'Napišite komentar ili odgovor…'}/>
-      <button className="employee-send-button" disabled={sending || !message.trim()} aria-label={sending ? 'Slanje komentara' : 'Pošalji komentar'} title="Pošalji komentar"><Icon name="send" size={23}/></button>
+      <button className="employee-send-button" disabled={sending || uncertain || !message.trim()} aria-label={sending ? 'Slanje komentara' : 'Pošalji komentar'} title="Pošalji komentar"><Icon name="send" size={23}/>{collapseHistory&&<span>Pošalji {kind==='instruction'?'instrukciju':'komentar'}</span>}</button>
     </form>
     {error && <p className="employee-form-error" role="alert">{error}</p>}
+    {uncertain&&<div className="employee-conflict" role="alert"><p>Poruka je možda već poslata. Tekst je sačuvan; proverite razgovor pre nove poruke.</p><button className="employee-text-button" onClick={async()=>{if(history.current)history.current.open=true;try{const last=await api(base+'&limit=1');setPage(Math.max(1,Math.ceil(last.total/20)));reload();}catch(e){setError(e.message);}}}>Proveri razgovor</button><button className="employee-text-button" onClick={()=>{setMessage('');setParent(null);setUncertain(false);setError('');}}>Odbaci tekst i započni novu poruku</button></div>}
     {notice && <p className="employee-form-success" role="status">{notice}</p>}
   </section>;
 }

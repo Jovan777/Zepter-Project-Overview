@@ -118,10 +118,12 @@ export const Audit=models.Audit || model('Audit',auditSchema);
 
 const sessionSchema=new Schema({
  user:{...ref('User',true),index:true},tokenHash:{type:String,required:true,unique:true},
+ presidentLink:ref('PresidentAccessLink'),presidentLinkGeneration:Number,
  expiresAt:{type:Date,required:true},revokedAt:Date,createdIp:txt(100),device:txt(240)
 },opts);
 sessionSchema.index({expiresAt:1},{expireAfterSeconds:0});
 export const Session=models.Session || model('Session',sessionSchema);
+export {PresidentAccessLink} from './president-access-link.js';
 
 const subscriptionSchema=new Schema({user:{...ref('User',true),index:true},endpoint:{type:String,required:true,unique:true},
  keys:{p256dh:String,auth:String}},opts);

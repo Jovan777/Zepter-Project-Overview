@@ -3,9 +3,13 @@ import {fail} from './errors.js';
 import {requireId,same,inRefs} from './utils.js';
 
 export const omniscient=u=>['president','admin'].includes(u.role);
-export const managing=(u,sector)=>omniscient(u)||(u.role==='manager'&&same(u.sector,sector));
+export const managing=(u,sector)=>omniscient(u)||(u.role==='manager'&&!!u.sector&&!!sector&&same(u.sector,sector));
+export function requireSectorScope(req,_res,next){
+ if(!omniscient(req.user)&&!req.user.sector)return next(Object.assign(new Error('Nalog nema dodeljen sektor.'),{status:403}));
+ next();
+}
 export const projectMember=(u,p)=>inRefs(p.members,u._id)||same(p.owner,u._id);
-export function canReadProject(u,p){return managing(u,p.sector)||(u.role==='employee'&&projectMember(u,p));}
+export function canReadProject(u,p){return managing(u,p.sector)||(u.role==='employee'&&!!u.sector&&same(u.sector,p.sector)&&projectMember(u,p));}
 export async function sectorAccess(u,id,write=false){
  requireId(id);const sector=await Sector.findById(id);if(!sector)fail(404,'Sektor nije pronađen.');
  if(write?!managing(u,id):!(omniscient(u)||same(u.sector,id)))fail(403,'Nemate pristup sektoru.');

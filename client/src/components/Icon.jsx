@@ -1,6 +1,7 @@
 import React from 'react';
 
 const shapes = {
+  grid: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
   crown: <><path d="m2 6 5 4 5-7 5 7 5-4-3 13H5Z"/><path d="M5 22h14"/></>,
   warning: <><path d="m12 3 10 18H2Z"/><path d="M12 9v5m0 3h.01"/></>,
   plusSquare: <><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 7v10M7 12h10"/></>,

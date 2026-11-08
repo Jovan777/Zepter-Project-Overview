@@ -3,9 +3,9 @@ import {useBlocker} from 'react-router-dom';
 import Icon from '../../components/Icon.jsx';
 import {personId, personName, priorities} from './projectForm.js';
 
-export function useProjectGuard(dirty, complete) {
+export function useProjectGuard(dirty, complete, {ignoreSearch=false}={}) {
   const dialog = useRef(null);
-  const blocker = useBlocker(({currentLocation, nextLocation}) => dirty && !complete.current && nextLocation.pathname !== '/login' && currentLocation.pathname + currentLocation.search !== nextLocation.pathname + nextLocation.search);
+  const blocker = useBlocker(({currentLocation, nextLocation}) => dirty && !complete.current && !['/login','/predsednik','/president'].includes(nextLocation.pathname) && (ignoreSearch?currentLocation.pathname!==nextLocation.pathname:currentLocation.pathname + currentLocation.search !== nextLocation.pathname + nextLocation.search));
   useEffect(() => {if (blocker.state === 'blocked') dialog.current?.showModal(); else dialog.current?.close();}, [blocker.state]);
   useEffect(() => {
     const prevent = event => {if (dirty && !complete.current) {event.preventDefault(); event.returnValue = '';}};

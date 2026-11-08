@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import {Project,Activity,User,Sector} from '../models/index.js';
-import {projectAccess,sectorAccess,managing,omniscient,canReadProject,validateTeam} from '../lib/access.js';
+import {projectAccess,sectorAccess,managing,omniscient,canReadProject,validateTeam,requireSectorScope} from '../lib/access.js';
 import {schemas} from '../lib/validation.js';
 import {dateValue,requireId,safePage,same} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
@@ -9,12 +9,17 @@ import {allow} from '../lib/auth.js';
 import {employeeProjects} from '../services/employee.js';
 import {managerProjects} from '../services/manager.js';
 const r=Router();
+r.use(requireSectorScope);
 r.get('/mine',allow('employee'),async(req,res)=>res.json(await employeeProjects(req.user,req.query)));
 r.get('/sector',allow('manager'),async(req,res)=>res.json(await managerProjects(req.user,req.query)));
 r.get('/',async(req,res)=>{
  const {limit,skip,page}=safePage(req.query),filter={archived:false};
  if(req.query.sectorId){requireId(req.query.sectorId);await sectorAccess(req.user,req.query.sectorId);filter.sector=req.query.sectorId;}
  if(req.query.status){if(!['planned','active','at_risk','on_hold','completed','cancelled'].includes(req.query.status))fail(422,'Neispravan status.');filter.status=req.query.status;}
+ if(req.query.activeOnly==='1'){
+  const active=['active','at_risk','on_hold'];
+  filter.status=req.query.status?{$in:active.filter(status=>status===req.query.status)}:{$in:active};
+ }
  if(req.user.role==='employee'){
   filter.$or=[{members:req.user._id},{owner:req.user._id}];
   filter.sector=req.user.sector;
@@ -24,6 +29,7 @@ r.get('/',async(req,res)=>{
 });
 r.post('/',async(req,res)=>{
  const d=schemas.project.parse(req.body);
+ if(d.startDate&&d.dueDate&&d.startDate>d.dueDate)fail(422,'Rok projekta ne može biti pre datuma početka.');
  if(!managing(req.user,d.sectorId))fail(403,'Samo rukovodilac sektora kreira njegove projekte.');
  const sector=await Sector.findById(d.sectorId);if(!sector?.active)fail(422,'Nepostojeći ili neaktivan sektor.');
  const members=await validateTeam(d.memberIds,d.sectorId);
@@ -59,6 +65,7 @@ r.patch('/:id',async(req,res)=>{
  }
  for(const key of ['title','description','status','priority','archived'])if(d[key]!==undefined)p[key]=d[key];
  for(const key of ['dueDate','startDate'])if(d[key]!==undefined)p[key]=d[key]===null?null:dateValue(d[key]);
+ if(p.startDate&&p.dueDate&&p.startDate>p.dueDate)fail(422,'Rok projekta ne može biti pre datuma početka.');
  if(p.status==='completed'&&await Activity.exists({project:p._id,status:{$ne:'completed'}}))fail(409,'Za završetak projekta potrebno je završiti sve aktivnosti.');
  const oldProgress=p.progress;
  if(version){

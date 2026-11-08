@@ -2,6 +2,8 @@ export const notificationTabs = [['all', 'Sva'], ['tasks', 'Zadaci'], ['projects
 export function notificationDestination(link) {
   if (typeof link !== 'string') return null;
   if (['/projects', '/ideas', '/reports', '/daily', '/assignments', '/requests'].includes(link)) return link;
+  const report=/^\/reports\?scope=sector&type=daily&day=(\d{4}-\d{2}-\d{2})$/.exec(link);
+  if(report&&Number.isFinite(Date.parse(report[1]+'T00:00:00Z'))&&new Date(report[1]+'T00:00:00Z').toISOString().slice(0,10)===report[1])return link;
   return /^\/(projects|activities|ideas|sectors|reports|assignments|requests)\/[a-f\d]{24}$/i.test(link) ? link : null;
 }
 export function notificationIcon(item) {

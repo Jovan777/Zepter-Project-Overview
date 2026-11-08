@@ -34,6 +34,11 @@
 .manager-report-period .manager-report-tabs {margin-bottom:12px;}
 .manager-report-period label {font-size:12px; display:block; margin-bottom:6px; color:#5c687e;}
 .manager-report-period input {width:100%; min-height:44px; border:1px solid #e0dce6; border-radius:9px; padding:9px; font:inherit; font-size:16px; color:#293851; background:white; box-sizing:border-box;}
+.manager-report-date-controls {display:flex; gap:8px; flex-wrap:wrap; align-items:stretch;}
+.manager-report-date-controls input {flex:1 1 160px; min-width:0;}
+.manager-report-date-controls button {flex:1 1 150px; font-size:13px;}
+.manager-report-period-step {display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin-top:8px;}
+.manager-report-period-step button {min-height:44px;}
 .manager-report-period-label {display:flex; align-items:center; flex-wrap:wrap; gap:7px; font-size:13px; color:#58667e; margin-bottom:15px;}
 .manager-report-explainer {display:flex; align-items:center; gap:10px; padding:11px; margin-bottom:18px; border:1px solid #f0e0c3; border-radius:10px; color:#9e701f; background:#fff9ef;}
 .manager-report-explainer > svg {flex-shrink:0;}
@@ -109,10 +114,9 @@
   .manager-person-initials {width:32px; height:32px; font-size:12px;}
   .manager-idea-card-bottom p {font-size:14px;}
   .manager-idea-card-bottom > span {font-size:13px; padding:10px;}
-  .manager-report-period {display:flex; align-items:center; gap:15px; max-width:1000px;}
-  .manager-report-period .manager-report-tabs {flex:1; margin:0;}
-  .manager-report-period input {width:190px;}
-  .manager-report-period label {margin:0; max-width:110px;}
+  .manager-report-period {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; gap:15px; max-width:1100px;}
+  .manager-report-period .manager-report-tabs {margin:0;}
+  .manager-report-period-step {grid-column:1/-1;}
   .manager-report-explainer {padding:16px; gap:13px; margin-block:23px;}
   .manager-report-explainer p {font-size:14px;}
   .manager-report-source h2,.manager-report-summary h2 {font-size:21px;}

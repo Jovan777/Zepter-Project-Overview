@@ -28,7 +28,7 @@ export function ProfileMenu({user, logout}) {
   }, []);
   return <details className="employee-profile" ref={menu} onKeyDown={event => {if (event.key === 'Escape') {menu.current.open = false; menu.current.querySelector('summary').focus();}}}>
     <summary className="employee-icon-button" aria-label="Moj nalog" title="Moj nalog"><Icon name="profile" size={27}/></summary>
-    <div className="employee-profile-menu"><strong>{user.firstName} {user.lastName}</strong><span>{user.jobTitle || (user.role === 'manager' ? 'Rukovodilac sektora' : 'Zaposleni')}</span><Link to="/daily"><Icon name="calendar" size={18}/>Moj dnevni unos</Link><button onClick={logout}><Icon name="logout" size={18}/>Odjavi se</button></div>
+    <div className="employee-profile-menu"><strong>{user.firstName} {user.lastName}</strong><span>{user.jobTitle || (user.role === 'president' ? 'Predsednik' : user.role === 'manager' ? 'Rukovodilac sektora' : 'Zaposleni')}</span>{user.role!=='president'&&<Link to="/daily"><Icon name="calendar" size={18}/>Moj dnevni unos</Link>}<button onClick={logout}><Icon name="logout" size={18}/>Odjavi se</button></div>
   </details>;
 }
 

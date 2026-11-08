@@ -6,10 +6,11 @@ import os from 'node:os';
 import http from 'node:http';
 import {randomBytes} from 'node:crypto';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import {Server} from 'socket.io';
 
 if (process.env.ZEPTER_UI_FIXTURE !== '1') throw Error('Set ZEPTER_UI_FIXTURE=1 to run this isolated test server.');
-if (process.env.ZEPTER_UI_ROLE && !['employee','manager'].includes(process.env.ZEPTER_UI_ROLE)) throw Error('Fixture role must be employee or manager.');
+if (process.env.ZEPTER_UI_ROLE && !['employee','manager','president'].includes(process.env.ZEPTER_UI_ROLE)) throw Error('Fixture role must be employee, manager or president.');
 const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'zepter-ui-fixture-'));
 process.env.UPLOAD_DIR = folder;
 delete process.env.VAPID_PUBLIC_KEY;
@@ -22,9 +23,14 @@ const projectId = '444444444444444444444444', activityId = '55555555555555555555
 const president = '777777777777777777777777', colleague = '888888888888888888888888';
 const user = {_id: self, firstName: 'Test', lastName: 'Zaposleni', jobTitle: 'UI test', role: 'employee', approval: 'approved', sector};
 const people = [user, {_id: manager, firstName: 'Test', lastName: 'Rukovodilac', role: 'manager', approval: 'approved', sector}, {_id: president, firstName: 'Test', lastName: 'Predsednik', role: 'president', approval: 'approved'}, {_id: colleague, firstName: 'Test', lastName: 'Kolega', role: 'employee', approval: 'approved', sector}];
-const authUser = process.env.ZEPTER_UI_ROLE === 'manager' ? people.find(person => person.role === 'manager') : user;
+const authUser = people.find(person=>person.role===(process.env.ZEPTER_UI_ROLE||'employee'));
+if(authUser.role==='president'){
+ process.env.JWT_SECRET=randomBytes(48).toString('hex');
+ process.env.CLIENT_ORIGIN='http://127.0.0.1:4002';
+ process.env.COOKIE_SECURE='false';
+}
 const now = () => new Date();
-const stores = Object.fromEntries(['User', 'Sector', 'Project', 'Activity', 'Comment', 'Attachment', 'WorkLog', 'Notification', 'Audit', 'Idea', 'Report'].map(key => [key, new Map()]));
+const stores = Object.fromEntries(['User', 'Sector', 'Project', 'Activity', 'Comment', 'Attachment', 'WorkLog', 'Notification', 'Audit', 'Idea', 'Report','DecisionRequest','Assignment','Session','PresidentAccessLink'].map(key => [key, new Map()]));
 for (const p of people) stores.User.set(p._id, p);
 stores.Sector.set(sector, {_id: sector, name: 'Test sektor', code: 'UI_TEST', active: true, manager});
 stores.Project.set(projectId, {_id: projectId, title: 'Test projekat — web sajt', description: 'Izolovani podaci za proveru čuvanja, priloga i komentara. Ovaj projekat ne postoji u demo bazi.', status: 'active', progress: 80, priority: 'medium', sector, owner: manager, members: [self, manager, colleague], createdAt: now(), updatedAt: now(), dueDate: new Date('2026-12-15T12:00:00Z')});
@@ -110,6 +116,21 @@ function matches(row, filter = {}) {
     return values.some(v => refId(v) === refId(value));
   });
 }
+if(authUser.role==='president'){
+ stores.Sector.get(sector).name='Marketing';
+ const other='e1'.repeat(12);for(const [id,name]of [[other,'IT'],['e2'.repeat(12),'Prodaja'],['e3'.repeat(12),'Finansije'],['e4'.repeat(12),'Logistika']])stores.Sector.set(id,{_id:id,name,active:true});
+ const risk='e5'.repeat(12),closed='e6'.repeat(12),old=new Date(Date.now()-3*86400000);
+ stores.Project.set(risk,{_id:risk,sector,title:'Oktobarska kampanja',description:'Proverite materijale i plan kampanje.',status:'at_risk',progress:45,priority:'high',owner:manager,members:[self,manager],archived:false,dueDate:old,updatedAt:now(),createdAt:old});
+ stores.Project.set(closed,{_id:closed,sector,title:'Završen projekat',status:'completed',progress:100,archived:false,dueDate:old,updatedAt:old});
+ stores.Activity.set('e7'.repeat(12),{_id:'e7'.repeat(12),project:closed,sector,title:'Zatvoren posao se ne prikazuje kao kašnjenje',status:'blocked',dueDate:old});
+ stores.Activity.set('e8'.repeat(12),{_id:'e8'.repeat(12),project:risk,sector,title:'Kašnjenje koje je već obuhvaćeno projektom',status:'blocked',dueDate:old});
+ for(let i=0;i<10;i++){const id='d0'+i.toString(16).padStart(22,'0');stores.Project.set(id,{_id:id,sector:i===9?other:sector,title:'Test projekat '+(i+1),status:i===9?'active':'planned',progress:10+i,owner:manager,members:[manager],archived:false,createdAt:old,updatedAt:old});}
+ stores.DecisionRequest.set('e9'.repeat(12),{_id:'e9'.repeat(12),sector,createdBy:manager,title:'Odobrenje predloga kampanje',description:'Marketing traži pregled i odobrenje novog predloga kampanje.',type:'approval',status:'open',referenceType:'project',referenceId:risk,createdAt:old});
+ stores.Assignment.set('ea'.repeat(12),{_id:'ea'.repeat(12),sector:other,assignedTo:manager,createdBy:president,title:'Potrebna odluka za integraciju',description:'Rukovodilac je prijavio prepreku.',status:'blocked',createdAt:old});
+ stores.Assignment.set('eb'.repeat(12),{_id:'eb'.repeat(12),sector,assignedTo:manager,createdBy:president,title:'Novo zaduženje čeka rukovodioca',status:'new',createdAt:old});
+ const {tokenDigest}=await import('../../src/lib/auth.js');
+ stores.PresidentAccessLink.set('ec'.repeat(12),{_id:'ec'.repeat(12),user:president,tokenHash:tokenDigest('p'.repeat(32)),generation:1,revokedAt:null});
+}
 function documentFor(name, raw) {
   if (!raw) return null;
   const doc = structuredClone(raw);
@@ -151,6 +172,14 @@ let failUploadOnce = process.env.ZEPTER_UI_FAIL_UPLOAD_ONCE === '1';
 let activityCreates = 0;
 for (const [name, store] of Object.entries(stores)) {
   const Model = models[name];
+  Model.aggregate=async pipeline=>{
+   let rows=[...store.values()];
+   for(const stage of pipeline){
+    if(stage.$match)rows=rows.filter(row=>matches(row,stage.$match));
+    if(stage.$sort)rows=[...rows].sort((a,b)=>{for(const[key,dir]of Object.entries(stage.$sort)){if(a[key]>b[key])return dir;if(a[key]<b[key])return -dir;}return 0;});
+    if(stage.$group){const g=stage.$group,groups=new Map(),value=(row,spec)=>typeof spec==='string'&&spec.startsWith('$')?row[spec.slice(1)]:spec;for(const row of rows){const rawId=value(row,g._id),key=refId(rawId);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}rows=[...groups.values()].map(items=>{const output={_id:value(items[0],g._id)};for(const[key,spec]of Object.entries(g)){if(key==='_id')continue;if('$sum'in spec)output[key]=items.reduce((sum,row)=>sum+(Number(value(row,spec.$sum))||0),0);if('$avg'in spec){const values=items.map(row=>value(row,spec.$avg)).filter(n=>typeof n==='number');output[key]=values.length?values.reduce((a,b)=>a+b,0)/values.length:null;}if('$first'in spec)output[key]=value(items[0],spec.$first);}return output;});}
+   }return rows;
+  };
   Model.find = filter => query(name, [...store.values()].filter(row => matches(row, filter)));
   Model.findById = key => query(name, store.get(refId(key)), true);
   Model.findOne = filter => {const rows = [...store.values()].filter(row => matches(row,filter));const q=query(name,rows);const original=q.then;q.then=(ok,fail)=>original(value=>ok(value[0]||null),fail);q.lean=async()=>JSON.parse(JSON.stringify((await q)||null));return q;};
@@ -169,23 +198,42 @@ models.Report.prototype.save=async function(){
  if([...stores.Report.values()].some(row=>row._id!==raw._id&&refId(row.sector)===raw.sector&&row.type===raw.type&&row.periodStart===raw.periodStart))throw Object.assign(new Error('Fixture duplicate report'),{code:11000});
  raw.createdAt=raw.createdAt||now();raw.updatedAt=now();stores.Report.set(raw._id,raw);Object.assign(this,raw);return this;
 };
-const app = express(); app.use(express.json());
+const app = express(); app.use(express.json());app.use(cookieParser());
+if(authUser.role==='president')app.use('/api/auth',(await import('../../src/routes/auth.js')).default);
 app.post('/api/auth/refresh', (_req, res) => res.json({user:authUser, accessToken: 'isolated-ui-fixture'}));
 app.post('/api/auth/logout', (_req, res) => res.json({ok: true}));
-app.use('/api', (req, _res, next) => {req.user = authUser; next();});
+app.use('/api', (req, res, next) => {
+ res.set('Cache-Control','no-store');
+ // Explicit QA-only role simulation, never mounted by the production server.
+ const role=req.get('X-Zepter-Fixture-Role');
+ if(role){
+  if(process.env.ZEPTER_UI_QA!=='1'||req.get('Authorization')!=='Bearer isolated-ui-fixture')return res.sendStatus(403);
+  const person=people.find(p=>p.role===role);if(!person)return res.sendStatus(403);req.user=person;
+ }else if(authUser.role==='president')return import('../../src/lib/auth.js').then(({requireAuth})=>requireAuth(req,res,next));else req.user=authUser;
+ next();
+});
 // Optional fault controls, available only in this explicitly enabled in-memory fixture.
-if(process.env.ZEPTER_UI_QA==='1'&&authUser.role==='manager'){
+if(process.env.ZEPTER_UI_QA==='1'){
  for(let i=0;i<12;i++){
   const id='ae'+i.toString(16).padStart(22,'0');
   stores.Idea.set(id,{_id:id,sector,author:self,title:'QA predlog '+(i+1),description:'Izolovani predlog za proveru dodatnih stranica.',status:'submitted',createdAt:new Date(Date.now()+i*1000),updatedAt:now()});
  }
- const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false};
+ const controls={ideasMode:'normal',ideasFailOnce:false,prepareFailOnce:false,prepareDelayOnce:false,saveFailOnce:false,publishFailOnce:false,saveResponseLostOnce:false,reviewFailOnce:false,reviewResponseLostOnce:false,notificationFailOnce:false,notificationsEmpty:false,readFailOnce:false,commentResponseLostOnce:false,worklogResponseLostOnce:false,attachmentResponseLostOnce:false,presidentFailOnce:false,socketDisconnect:false};
+ app.get('/api/dashboard/president',(req,res,next)=>{if(controls.presidentFailOnce){controls.presidentFailOnce=false;return res.status(503).json({error:'Test: pregled kompanije trenutno nije dostupan.'});}next();});
+ for(const [route,control,property]of [['comments','commentResponseLostOnce','comment'],['worklogs','worklogResponseLostOnce','workLog'],['attachments','attachmentResponseLostOnce','attachment']])app.post('/api/'+route,(req,res,next)=>{
+  if(controls[control]){
+   controls[control]=false;const json=res.json.bind(res);
+   res.json=body=>body?.[property]&&res.statusCode<300?json.call(res.status(503),{error:'Test: potvrda upisa nije dostupna. Proverite sačuvan sadržaj.'}):json(body);
+  }
+  next();
+ });
  app.post('/api/__fixture/controls',(req,res)=>{
-  if(req.get('Authorization')!=='Bearer isolated-ui-fixture')return res.sendStatus(403);
+  if(req.get('Authorization')!=='Bearer isolated-ui-fixture'&&!(authUser.role==='president'&&req.user.role==='president'))return res.sendStatus(403);
   for(const [key,value]of Object.entries(req.body)){
    if(!Object.hasOwn(controls,key)||(key==='ideasMode'?!['normal','empty'].includes(value):typeof value!=='boolean'))return res.status(422).json({error:'Invalid fixture control'});
   }
   Object.assign(controls,req.body);io.to('sector:'+sector).emit('data:changed',{entity:'Fixture'});res.json({ok:true});
+  if(controls.socketDisconnect){controls.socketDisconnect=false;io.disconnectSockets(true);}
  });
  app.get('/api/ideas/sector',async(req,res,next)=>{
   if(controls.ideasFailOnce){controls.ideasFailOnce=false;return res.status(503).json({error:'Test: ideje trenutno nisu dostupne. Pokušajte ponovo.'});}
@@ -224,7 +272,7 @@ if(process.env.ZEPTER_UI_QA==='1'&&authUser.role==='manager'){
  app.patch('/api/notifications/:id/read',(req,res,next)=>{if(controls.readFailOnce){controls.readFailOnce=false;return res.status(503).json({error:'Test: označavanje nije uspelo.'});}next();});
 }
 app.get('/api/sectors', (_req, res) => res.json({items: [...stores.Sector.values()]}));
-for (const [prefix, file] of [['projects', 'projects'], ['activities', 'activities'], ['comments', 'comments'], ['attachments', 'attachments'], ['worklogs', 'worklogs'], ['ideas', 'ideas'], ['notifications','notifications'], ['dashboard','dashboard'], ['sectors','sectors'], ['reports','reports']]) {
+for (const [prefix, file] of [['projects', 'projects'], ['activities', 'activities'], ['comments', 'comments'], ['attachments', 'attachments'], ['worklogs', 'worklogs'], ['ideas', 'ideas'], ['notifications','notifications'], ['dashboard','dashboard'], ['sectors','sectors'], ['reports','reports'],['requests','requests'],['assignments','assignments']]) {
   app.use('/api/' + prefix, (await import('../../src/routes/' + file + '.js')).default);
 }
 app.use('/api', (_req, res) => res.status(404).json({error: 'Fixture route not implemented'}));
@@ -236,7 +284,7 @@ app.use(async (req, res, next) => {
 });
 app.use(errorHandler);
 const server = http.createServer(app), io = new Server(server);
-io.on('connection', socket => {socket.join('user:' + authUser._id); socket.join('sector:' + sector);}); attachSocket(io);
+io.on('connection', socket => {socket.join('user:' + authUser._id); socket.join('sector:' + sector);if(authUser.role==='president')socket.join('presidents');}); attachSocket(io);
 await new Promise(resolve => server.listen(4002, '127.0.0.1', resolve));
 console.log(`Isolated UI fixture: http://127.0.0.1:4002/projects/${projectId}`);
 console.log('No MongoDB connection. Type stop to close and remove temporary files.');

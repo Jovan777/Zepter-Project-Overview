@@ -4,6 +4,12 @@ export const validReportDay=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$
 export function reportFilters(search) {
   return {type:search.get('type')==='weekly'?'weekly':'daily',page:Math.max(1,Math.min(10000,Math.floor(Number(search.get('page'))||1))),day:validReportDay(search.get('day'))?search.get('day'):belgradeDate()};
 }
+export function shiftReportDay(type,day,direction) {
+  if(!validReportDay(day)||![-1,1].includes(direction))throw Error('Neispravan period izveštaja.');
+  const value=new Date(day+'T12:00:00Z');
+  value.setUTCDate(value.getUTCDate()+direction*(type==='weekly'?7:1));
+  return value.toISOString().slice(0,10);
+}
 const date=value=>validReportDay(value)?new Intl.DateTimeFormat('sr-Latn-RS',{timeZone:'Europe/Belgrade',day:'numeric',month:'short',year:'numeric'}).format(new Date(value+'T12:00:00Z')):'Datum nije dostupan';
 export function reportPeriod(report) {
   return report.type==='weekly'&&report.periodEnd!==report.periodStart?`${date(report.periodStart)} – ${date(report.periodEnd)}`:date(report.periodStart);

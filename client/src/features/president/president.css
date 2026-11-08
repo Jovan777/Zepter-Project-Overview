@@ -1,0 +1,94 @@
+.president-shell {--president-gold:#b47a19; --president-border:#eadcc7; background:#fff;}
+.president-header {border-bottom:1px solid var(--president-border);padding:14px 18px;min-height:64px;}
+.president-header>div {display:flex;align-items:center;gap:4px;min-width:0;}
+.president-brand {font-size:24px;font-weight:850;color:#b27a27;letter-spacing:-.04em;}
+.president-header .employee-icon-button {min-width:40px;min-height:44px;}
+.president-bell {position:relative;}
+.president-bell>span {position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;background:#c78d21;border:1px solid white;}
+.president-content {padding:18px 16px calc(100px + env(safe-area-inset-bottom));}
+.president-greeting {margin-bottom:18px;}
+.president-greeting h1 {font-size:25px;line-height:1.2;margin:0 0 5px;font-weight:780;overflow-wrap:anywhere;}
+.president-greeting>p {font-size:14px;color:#6b7080;line-height:1.45;margin:0;}
+.president-metrics,.president-reports {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+.president-metrics>a,.president-reports>a {border:1px solid var(--president-border);border-radius:11px;padding:13px 10px;display:flex;align-items:center;gap:9px;color:#202536;min-width:0;background:linear-gradient(120deg,#fff,#fdfaf5);}
+.president-metrics .employee-icon-disc,.president-reports .employee-icon-disc {width:36px;height:36px;flex-shrink:0;}
+.president-metrics .employee-icon-disc svg,.president-reports .employee-icon-disc svg {width:21px;height:21px;}
+.president-metrics>a>span:nth-child(2),.president-reports>a>span:nth-child(2) {flex:1;min-width:0;}
+.president-metrics strong {display:block;font-size:28px;line-height:1.1;font-weight:780;}
+.president-metrics small,.president-reports small {display:block;color:#687184;font-size:11px;line-height:1.4;margin-top:4px;}
+.president-metrics>a:nth-child(2) strong {color:#a76c12;}
+.president-reports>a {min-height:86px;align-items:flex-start;position:relative;padding-bottom:22px;}
+.president-reports strong {display:block;font-size:12px;line-height:1.4;}
+.president-reports>a>svg {position:absolute;right:10px;bottom:8px;color:#b67d21;}
+.president-section-heading {display:flex;justify-content:space-between;gap:12px;align-items:center;margin:22px 0 12px;}
+.president-shell .president-section-heading h2 {font-size:21px;margin:0;}
+.president-section-heading>a,.president-section-heading>span {font-size:12px;color:#a86e17;flex-shrink:0;}
+.president-attention-card {display:flex;gap:11px;border:1px solid var(--president-border);border-radius:12px;padding:14px 12px;color:#24293a;margin-bottom:11px;background:linear-gradient(125deg,#fff,#fffbf5);}
+.president-attention-card>.employee-icon-disc {width:36px;height:36px;flex-shrink:0;}
+.president-attention-card>div {min-width:0;flex:1;}
+.president-card-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-width:0;}
+.president-shell .president-card-heading h3 {font-size:15px;line-height:1.35;margin:0;overflow-wrap:anywhere;}
+.president-card-heading .employee-badge {font-size:10px;flex-shrink:0;padding:4px 8px;}
+.president-context {display:flex;gap:5px;align-items:center;font-size:12px;color:#737989;margin:5px 0 12px;}
+.president-attention-description {font-size:13px;line-height:1.55;color:#61697c;margin:0 0 9px;overflow-wrap:anywhere;}
+.president-open {color:#a66a0c;display:flex;justify-content:flex-end;align-items:center;gap:5px;font-size:12px;font-weight:650;}
+.president-sector-row {display:flex;align-items:center;gap:12px;padding:15px 2px;border-bottom:1px solid #eee5d8;min-height:52px;color:#242d40;}
+.president-sector-row>svg:first-child {color:#a67427;}
+.president-sector-row>span {flex:1;min-width:0;font-size:15px;overflow-wrap:anywhere;}
+.president-sector-row small {font-size:11px;color:#b87a16;}
+.president-sector-row>span>small {display:block;margin-top:4px;color:#777;}
+.president-sector-row>svg:last-child {color:#70798d;}
+.president-search {margin-bottom:18px;}
+.president-search label {display:block;font-size:13px;margin-bottom:6px;color:#657084;}
+.president-search>div {display:flex;border:1px solid #e3ded4;border-radius:9px;background:#fff;overflow:hidden;}
+.president-search input {min-width:0;flex:1;width:100%;border:0;padding:11px;font:inherit;font-size:16px;}
+.president-search>button {margin-top:8px;}
+.president-sector .president-greeting h1 {font-size:24px;}
+.president-sector .president-reports>a {min-height:75px;}
+.president-sector-conversation {padding:15px;border:1px solid #eee7dc;border-radius:12px;box-shadow:0 4px 14px #35271107;margin:18px 0;}
+.president-conversation-caption {margin:0 0 9px;font-size:12px;color:#758095;}
+.president-sector-conversation .employee-discussion {margin:0;}
+.president-sector-conversation .employee-discussion>h2 {font-size:17px;margin:0 0 12px;}
+.president-sector-conversation .manager-comment-kind {display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:9px;}
+.president-sector-conversation .manager-comment-kind select {flex:1;min-height:40px;background:white;border:1px solid #e5dece;border-radius:7px;color:#3c4555;padding:6px;font:inherit;}
+.president-sector-conversation .employee-comment-composer {display:flex;flex-wrap:wrap;gap:8px;}
+.president-sector-conversation .employee-comment-composer>.manager-comment-kind {width:100%;}
+.president-sector-conversation .employee-comment-composer>textarea {flex-basis:100%;min-height:85px;}
+.president-sector-conversation .employee-send-button {margin-left:auto;min-width:52px;min-height:44px;}
+.president-sector-conversation .employee-send-button {width:auto;padding:9px 13px;gap:7px;border-radius:8px;font-size:12px;}
+.president-thread-history {margin-bottom:12px;}
+.president-thread-history>summary {min-height:38px;cursor:pointer;font-size:12px;color:#9d6d21;}
+.president-sector-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #eee7dc;border-radius:12px;box-shadow:0 4px 14px #35271107;margin:18px 0; padding:14px 5px;}
+.president-sector-stats>* {min-width:0;padding:0 9px;color:#222a3d;border-right:1px solid #eee7dc;}
+.president-sector-stats>:last-child {border:0;}
+.president-sector-stats strong {display:block;font-size:25px;}
+.president-sector-stats span {font-size:10px;color:#768094;display:flex;align-items:center;gap:4px;margin-top:5px;}
+.president-sector-stats small {display:block;color:#7f8797;font-size:9px;line-height:1.35;margin-top:4px;}
+.president-sector-stats>a:nth-child(2) strong {color:#ba7f1e;}
+.president-project-filters {display:flex;gap:7px;margin-bottom:13px;}
+.president-project-filters button {min-height:40px;padding:7px 12px;background:#fff;border:1px solid #e6dfd4;border-radius:8px;font:inherit;font-size:12px;color:#636b7d;display:flex;align-items:center;gap:5px;}
+.president-project-filters button[aria-pressed=true] {background:#fcf0d6;color:#a56f17;border-color:#eedab7;}
+.president-project-filters button:last-child {margin-left:auto;}
+.president-project-card {display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;border:1px solid #ece5da;border-radius:12px;padding:11px;margin-bottom:12px;color:#232b40;box-shadow:0 4px 12px #31271707;}
+.president-project-card>.employee-project-thumbnail {width:62px;height:61px;border-radius:8px;}
+.president-project-card>div {min-width:0;}
+.president-team {font-size:11px;line-height:1.45;color:#717a8d;margin:4px 0 9px;overflow-wrap:anywhere;}
+.president-project-card .employee-progress-row {gap:10px;}
+.president-project-card .employee-progress-row strong {font-size:12px;}
+.president-project-card .employee-progress {height:6px;}
+.president-project-meta {display:flex;flex-wrap:wrap;gap:7px;justify-content:space-between;align-items:center;margin-top:9px;}
+.president-project-meta>span {font-size:10px;display:flex;align-items:center;gap:4px;color:#858a98;}
+.president-project-meta>.president-open {color:#a66a0c;margin-left:auto;}
+.president-bottom {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;z-index:25;background:#fff;border-top:1px solid #eadcc7;padding:8px 0 calc(9px + env(safe-area-inset-bottom));}
+.president-bottom>nav {display:flex;justify-content:space-around;}
+.president-bottom>nav>a {display:flex;align-items:center;justify-content:center;flex:1;gap:4px;min-height:48px;flex-direction:column;color:#818695;font-size:11px;position:relative;}
+.president-bottom>nav>a.is-active {color:#b37a1c;font-weight:700;}
+.president-bottom>nav>a>i {width:5px;height:5px;border-radius:50%;background:#b37a1c;}
+.president-entry {max-width:480px;margin:12vh auto;padding:25px;text-align:center;color:#283248;}
+.president-entry h1 {color:#b47a19;}
+.president-entry p {line-height:1.6;}
+.president-entry button {margin:15px auto;}
+@media(max-width:359px){.president-metrics>a{gap:6px;padding:11px 8px;}.president-metrics .employee-icon-disc{width:29px;height:29px;}.president-metrics small{font-size:10px;}.president-reports>a{gap:6px;padding:10px 8px 22px;}.president-reports .employee-icon-disc{width:27px;height:27px;}.president-reports strong{font-size:11px;}.president-card-heading{flex-wrap:wrap;}.president-project-card{grid-template-columns:48px minmax(0,1fr);gap:8px;}.president-project-card>.employee-project-thumbnail{width:48px;height:50px;}.president-sector-stats>*{padding:0 6px;}.president-header{padding-inline:12px;}.president-header .employee-icon-button{min-width:36px;}}
+@media(min-width:768px){.president-greeting h1{font-size:32px;}.president-greeting>p{font-size:16px;}.president-metrics,.president-reports{gap:18px;}.president-metrics>a,.president-reports>a{padding:20px;min-height:100px;}.president-reports strong{font-size:16px;}.president-metrics small,.president-reports small{font-size:13px;}.president-project-card{padding:17px;grid-template-columns:85px minmax(0,1fr);gap:17px;}.president-project-card>.employee-project-thumbnail{width:85px;height:80px;}.president-shell .president-card-heading h3{font-size:18px;}.president-team{font-size:13px;}.president-project-meta>span{font-size:12px;}.president-sector-conversation{padding:22px;}.president-sector-stats{padding:20px;}.president-sector-stats span{font-size:13px;}.president-sector-stats small{font-size:11px;}.president-bottom{max-width:none;transform:none;left:0;}}
+@media(min-width:1024px){.president-header .president-brand{display:none;}.president-bottom{transform:none;}.president-greeting h1{font-size:34px;}}
+@media(min-width:1200px){.president-home{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:22px 32px;align-items:start;}.president-home>.president-greeting,.president-home>.employee-error,.president-home>.employee-loading{grid-column:1/-1;}.president-home>.president-metrics,.president-home>.president-reports{margin-bottom:0;height:100%;}.president-home>.president-attention{grid-column:1;}.president-home>.president-sectors{grid-column:2;}.president-home>.president-sectors:only-of-type{grid-column:1/-1;}.president-sector{display:block;}.president-sector>.president-reports{margin-bottom:24px;}.president-sector-body{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.3fr);gap:22px 32px;align-items:start;}.president-sector-body>.president-sector-conversation{grid-column:1;grid-row:1/3;margin:0;position:sticky;top:105px;}.president-sector-body>.president-sector-stats{grid-column:2;grid-row:1;margin:0;}.president-sector-body>.president-sector-projects{grid-column:2;grid-row:2;min-width:0;}.president-sector-projects>.president-section-heading{margin-top:0;}.president-attention-description{font-size:14px;}.president-sector-row{padding-block:19px;}}

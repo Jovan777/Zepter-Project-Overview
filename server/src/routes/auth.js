@@ -2,13 +2,26 @@ import {Router} from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import {rateLimit} from 'express-rate-limit';
-import {User,Sector,Session} from '../models/index.js';
+import {User,Sector,Session,PresidentAccessLink} from '../models/index.js';
 import {schemas} from '../lib/validation.js';
-import {requireAuth,createSession,setRefreshCookie,clearRefreshCookie,refreshCookieName,tokenDigest,originGuard} from '../lib/auth.js';
+import {requireAuth,createSession,setRefreshCookie,clearRefreshCookie,refreshCookieName,tokenDigest,originGuard,validPresidentLink} from '../lib/auth.js';
 import {fail} from '../lib/errors.js';
 import {audit} from '../services/events.js';
 const r=Router();
 const limit=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja. Pokušajte kasnije.'}});
+const linkLimit=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja otvaranja linka. Pokušajte kasnije.'}});
+r.post('/president-link',linkLimit,originGuard,async(req,res)=>{
+ const key=req.body?.key;
+ if(typeof key!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(key))fail(401,'Lični link nije važeći ili je opozvan.');
+ const tokenHash=tokenDigest(key),link=await PresidentAccessLink.findOne({tokenHash,revokedAt:null});
+ const user=link?await User.findById(link.user):null;
+ if(!link||!await validPresidentLink(link._id,link.generation,user))fail(401,'Lični link nije važeći ili je opozvan.');
+ const active=await PresidentAccessLink.findOneAndUpdate({_id:link._id,tokenHash,generation:link.generation,revokedAt:null},{$set:{lastUsedAt:new Date()}},{new:true});
+ if(!active)fail(401,'Lični link nije važeći ili je opozvan.');
+ const session=await createSession(req,user,active);setRefreshCookie(res,session.refresh);
+ user.lastLoginAt=new Date();await user.save();
+ res.set('Cache-Control','no-store').json({accessToken:session.accessToken,user:user.toJSON()});
+});
 r.post('/register',limit,async(req,res)=>{
  const d=schemas.register.parse(req.body);
  const sector=await Sector.findById(d.sectorId);if(!sector?.active)fail(422,'Nepostojeći ili neaktivan sektor.');
@@ -35,10 +48,11 @@ r.post('/refresh',originGuard,async(req,res)=>{
  if(!s||s.revokedAt||s.expiresAt<new Date()){clearRefreshCookie(res);fail(401,'Prijavite se ponovo.');}
  const user=await User.findById(s.user);
  if(!user||user.approval!=='approved'){await s.deleteOne();clearRefreshCookie(res);fail(401,'Nalog nije aktivan.');}
+ if(s.presidentLink&&!await validPresidentLink(s.presidentLink,s.presidentLinkGeneration,user)){await s.deleteOne();clearRefreshCookie(res);fail(401,'Lični pristup je opozvan. Otvorite novi lični link.');}
  // Atomic rotation: an old refresh token cannot be used twice.
  const updated=await Session.findOneAndUpdate({_id:s._id,revokedAt:null},{$set:{revokedAt:new Date()}},{new:true});
  if(!updated){clearRefreshCookie(res);fail(401,'Sesija je već obnovljena.');}
- const {accessToken,refresh}=await createSession(req,user);setRefreshCookie(res,refresh);
+ const {accessToken,refresh}=await createSession(req,user,s.presidentLink?{_id:s.presidentLink,generation:s.presidentLinkGeneration}:undefined);setRefreshCookie(res,refresh);
  res.json({accessToken,user:user.toJSON()});
 });
 r.post('/logout',originGuard,async(req,res)=>{

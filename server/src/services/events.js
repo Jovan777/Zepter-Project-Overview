@@ -1,13 +1,14 @@
 import webpush from 'web-push';
 import {Notification,PushSubscription,User,Audit} from '../models/index.js';
 import {managerRecipients} from '../lib/access.js';
+import {emitAuthorized} from '../lib/president-socket.js';
 let io;
 export function attachSocket(serverIO){io=serverIO;}
 export async function audit(req,action,entity,entityId,details={}){
  await Audit.create({actor:req?.user?._id,action,entity,entityId,details,ip:req?.ip});
  if(io){
-  io.to('presidents').emit('data:changed',{entity,action});
-  if(req?.user?.sector)io.to('sector:'+req.user.sector).emit('data:changed',{entity,action});
+  await emitAuthorized(io,'presidents','data:changed',{entity,action});
+  if(req?.user?.sector)await emitAuthorized(io,'sector:'+req.user.sector,'data:changed',{entity,action});
  }
 }
 let pushEnabled=false;
@@ -20,7 +21,7 @@ export async function notify(userIds,payload,actor){
  const recipients=await User.find({_id:{$in:ids},approval:'approved'}).select('_id');
  await Promise.all(recipients.map(async u=>{
   const n=await Notification.create({user:u._id,actor,type:payload.type,title:payload.title,body:payload.body,link:payload.link});
-  io?.to('user:'+u._id).emit('notification:new',n.toJSON());
+  if(io)await emitAuthorized(io,'user:'+u._id,'notification:new',n.toJSON());
   if(pushEnabled){
    const subs=await PushSubscription.find({user:u._id});
    await Promise.all(subs.map(async sub=>{

@@ -2,11 +2,12 @@ import {Router} from 'express';
 import {DecisionRequest,User} from '../models/index.js';
 import {allow} from '../lib/auth.js';
 import {schemas} from '../lib/validation.js';
-import {requestAccess,targetAccess} from '../lib/access.js';
+import {requestAccess,targetAccess,requireSectorScope} from '../lib/access.js';
 import {safePage} from '../lib/utils.js';
 import {audit,notify} from '../services/events.js';
 import {fail} from '../lib/errors.js';
 const r=Router();
+r.use(requireSectorScope);
 r.get('/',async(req,res)=>{
  if(!['manager','president','admin'].includes(req.user.role))fail(403,'Zahtevi nisu dostupni zaposlenima.');
  const filter=req.user.role==='manager'?{sector:req.user.sector}:{};

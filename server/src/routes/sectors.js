@@ -1,9 +1,14 @@
 import {Router} from 'express';
 import {Sector,User,Project,Activity} from '../models/index.js';
-import {sectorAccess,omniscient} from '../lib/access.js';
+import {sectorAccess,omniscient,requireSectorScope} from '../lib/access.js';
 import {same} from '../lib/utils.js';
+import {allow} from '../lib/auth.js';
+import {presidentSector,presidentSectorProjects} from '../services/president.js';
 const r=Router();
 r.get('/public',async(_req,res)=>res.json({items:await Sector.find({active:true}).select('_id name code').sort({name:1})}));
+r.use(requireSectorScope);
+r.get('/:id/president',allow('president'),async(req,res)=>res.json(await presidentSector(req.user,req.params.id)));
+r.get('/:id/president/projects',allow('president'),async(req,res)=>res.json(await presidentSectorProjects(req.user,req.params.id,req.query)));
 r.get('/',async(req,res)=>{
  const filter=omniscient(req.user)?{}:{_id:req.user.sector};
  res.json({items:await Sector.find(filter).populate('manager','firstName lastName jobTitle').sort({name:1})});

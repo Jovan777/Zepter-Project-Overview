@@ -25,7 +25,7 @@ r.post('/',async(req,res)=>{
  if(d.addressedTo?.length){
   const users=await User.find({_id:{$in:d.addressedTo},approval:'approved'}).select('_id');
   if(users.length!==new Set(d.addressedTo).size)fail(422,'Nepostojeći primalac komentara.');
-  const members=await User.find({approval:'approved',role:'president'}).select('_id');
+  const members=d.targetType==='idea'&&target.status!=='forwarded'?[]:await User.find({approval:'approved',role:'president'}).select('_id');
   const allowed=new Set(members.map(x=>String(x._id)));
   if(d.targetType==='sector'||d.targetType==='project'||d.targetType==='activity'||d.targetType==='idea'||d.targetType==='assignment'||d.targetType==='request') {
    const sectorId=d.targetType==='sector'?target._id:target.sector;
@@ -57,6 +57,10 @@ r.post('/',async(req,res)=>{
  if(d.targetType==='assignment'){sectorId=target.sector;people.add(String(target.assignedTo));people.add(String(target.createdBy));}
  if(d.targetType==='request'){sectorId=target.sector;people.add(String(target.createdBy));}
  if(sectorId){const managers=await managerRecipients(sectorId);managers.forEach(x=>people.add(String(x._id)));}
+ if(d.targetType==='idea'&&target.status!=='forwarded'){
+  const presidents=await User.find({role:'president'}).select('_id');
+  presidents.forEach(person=>people.delete(String(person._id)));
+ }
  // President receives a reply to their comment, not every routine employee update.
  const link=`/${d.targetType==='activity'?'activities':d.targetType==='sector'?'sectors':d.targetType==='assignment'?'assignments':d.targetType==='request'?'requests':d.targetType==='idea'?'ideas':'projects'}/${d.targetId}`;
  await notify([...people],{type:'comment',title:d.kind==='instruction'?'Nova instrukcija':'Novi komentar',body:d.body.slice(0,130),link},req.user._id);

@@ -106,8 +106,8 @@
 @media (max-width: 359px) {
   .manager-project-header strong {font-size: 14px;}
   .manager-project-header .manager-header-actions {gap: 0;}
-  .manager-project-overview-heading {flex-wrap: wrap;}
-  .manager-project-overview-heading .employee-badge {margin-left: 50px;}
+  .manager-project-overview-heading {display: grid; grid-template-columns: 40px minmax(0, 1fr);}
+  .manager-project-overview-heading .employee-badge {grid-column: 2; justify-self: start; margin: 0;}
   .manager-project-tabs button {font-size: 10px;}
   .manager-project-activity-end {flex-direction: column; align-items: end;}
   .manager-project-actions > * {font-size: 11px;}

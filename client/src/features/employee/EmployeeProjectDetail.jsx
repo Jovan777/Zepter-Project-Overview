@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef,useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import Icon from '../../components/Icon.jsx';
 import useEmployeeResource from './useEmployeeResource.js';
@@ -7,6 +7,7 @@ import {activityStatuses, formatDeadline, projectStatus} from './presentation.js
 import EmployeeThread from './EmployeeThread.jsx';
 import EmployeeAttachments from './EmployeeAttachments.jsx';
 import {useEmployeeBackLink} from './EmployeeShell.jsx';
+import {ProjectExitDialog,useProjectGuard} from '../manager/ProjectFormParts.jsx';
 
 const personId = person => person?._id || person;
 export function DetailProgress({value, label, leading = false}) {
@@ -18,6 +19,8 @@ export function ActivityBadge({status}) {
 }
 export default function EmployeeProjectDetail({user}) {
   const {id} = useParams();
+  const [threadDirty,setThreadDirty]=useState(false),complete=useRef(false);
+  const guard=useProjectGuard(threadDirty,complete,{ignoreSearch:true});
   useEmployeeBackLink('/projects', 'Nazad na moje projekte');
   const project = useEmployeeResource('/projects/' + id, {keepPreviousData: true});
   const tasks = useEmployeeResource('/activities/project/' + id, {keepPreviousData: true});
@@ -49,6 +52,6 @@ export default function EmployeeProjectDetail({user}) {
     <details className="employee-detail-disclosure" id="project-team" open={teamOpen} onToggle={event => setTeamOpen(event.currentTarget.open)}><summary><Icon name="users" size={21}/><span>Tim projekta</span><small>{team.length}</small><Icon name="chevron" size={17}/></summary><div className="employee-team-list">{team.map(person => <div key={person._id}><IconDisc name="user"/><div><strong>{person.firstName} {person.lastName}{person._id === user._id ? ' (vi)' : ''}</strong><span>{person._id === personId(p.owner) ? 'Odgovorna osoba' : person.jobTitle || 'Član tima'}</span></div></div>)}</div></details>
     <details className="employee-detail-disclosure" id="project-info" open={detailsOpen} onToggle={event => setDetailsOpen(event.currentTarget.open)}><summary><Icon name="info" size={21}/><span>Detalji projekta</span><Icon name="chevron" size={17}/></summary><dl className="employee-summary-facts"><div><dt>Početak</dt><dd>{formatDeadline(p.startDate)}</dd></div><div><dt>Prioritet</dt><dd>{({low: 'Nizak', medium: 'Srednji', high: 'Visok', urgent: 'Hitan'})[p.priority]}</dd></div></dl><p className="employee-small-note">Rokove, tim i osnovne podatke projekta uređuje rukovodilac. Svoje aktivnosti možete otvoriti i ažurirati iz liste iznad.</p></details>
     <details className="employee-detail-disclosure"><summary><Icon name="clip" size={21}/><span>Prilozi projekta</span><small>{attachments.data?.items.length ?? '—'}</small><Icon name="chevron" size={17}/></summary><EmployeeAttachments type="project" id={id} user={user} editable={p.members.some(person => personId(person) === user._id)} resource={attachments}/></details>
-    </div><div className="workspace-detail-aside"><EmployeeThread type="project" id={id} user={user} heading="Komentari na projekat" sectionId="project-comments"/></div></div>
+    </div><div className="workspace-detail-aside"><EmployeeThread type="project" id={id} user={user} heading="Komentari na projekat" sectionId="project-comments" onDraftChange={setThreadDirty}/></div></div><ProjectExitDialog guard={guard} saving={false} entity="komentara"/>
   </div>;
 }

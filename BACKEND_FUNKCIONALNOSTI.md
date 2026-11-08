@@ -1,5 +1,11 @@
 # Zepter Management Overview — funkcionalna specifikacija backend-a
 
+## Prvi predsednički talas
+
+Dodati su read-only feed-ovi kompanije, pitanja za pažnju i sektora/projekata; iste definicije služe brojačima i paginiranim listama. Projects feed prihvata opcioni activeOnly=1. Višekratni lični link uspostavlja sesiju preko POST /api/auth/president-link, bez formulara i odjave u predsedničkom UI-ju. Posebna PresidentAccessLink kolekcija i opciona polja sesije omogućavaju zamenu/opoziv bez promene poslovnih šema, naloga i lozinki. Autentifikacija ličnog pristupa proverava se i pre socket dostave. [Ugovori, komande, kompatibilnost i provere](docs/PRESIDENT_WAVE_01.md).
+
+Naknadni [pregled zaposlenog i rukovodioca](docs/REVIEW_EMPLOYEE_MANAGER.md) uvodi ranu proveru nedodeljenog sektora, granicu sektora uz članstvo u projektu, validaciju redosleda datuma i konteksta dnevnog unosa, konzistentnost zatvorenog projekta, privatnost komentara neprosleđene ideje, ispravne linkove prepreka i serijalizaciju napretka unutar jedne API instance. Modeli i statusi ostaju isti, bez migracije; svi API odgovori koriste `no-store`. Povezani test prati zaposlenog do stvarno pročitanog objavljenog izveštaja predsedničkom ulogom.
+
 ## Peti talas rukovodiočevih ekrana
 
 `POST /api/ideas/:id/review` zadržava postojeće telo zahteva, prihvata opcioni `If-Match` i atomski proverava sektor i status `submitted`/`in_review`. Dorada zahteva obrazloženje; konkurentna ili ponovljena odluka vraća 409 bez duplih događaja. `GET /api/notifications?view=manager` dodaje kategorije `all`, `president`, `employees`, `projects`, `ideas`, ulogu aktera i `no-store`; primalac je uvek korisnik sesije. Stari feed ostaje kompatibilan. Modeli i statusi nisu menjani. [Detalji, granice klasifikacije i provere](docs/MANAGER_WAVE_05.md).
@@ -87,4 +93,4 @@ Dodate su autentifikovane rute samo za ulogu `employee`: `GET /api/dashboard/emp
 
 ## Plan pre produkcije
 
-MFA (obavezno predsednik/admin), recovery lozinke, skeniranje dokumenata, distribucija rate limita, backup/restore, bezbednosni audit, testovi svih dozvola, automatski reminder posle radnog dana i produkcioni SSL/reverse proxy. Za slučaj međusektorskih timova mora se proširiti postojeća pretpostavka da svi članovi projekta pripadaju istom sektoru.
+MFA/recovery za standardne naloge, operatersko izdavanje i opoziv predsedničkog ličnog linka, skeniranje dokumenata, distribucija rate limita, backup/restore, bezbednosni audit, testovi svih dozvola, automatski reminder posle radnog dana i produkcioni SSL/reverse proxy. Za slučaj međusektorskih timova mora se proširiti postojeća pretpostavka da svi članovi projekta pripadaju istom sektoru.

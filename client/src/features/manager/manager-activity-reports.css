@@ -103,8 +103,8 @@
 .manager-report-preview-section article p {font-size: 13px; line-height: 1.55; color: #505e75; white-space: pre-wrap; overflow-wrap: anywhere;}
 @media (max-width: 359px) {
   .manager-activity-detail > h1 {font-size: 20px;}
-  .manager-activity-overview-heading {flex-wrap: wrap;}
-  .manager-activity-overview-heading > .employee-badge {margin-left: 49px;}
+  .manager-activity-overview-heading {display: grid; grid-template-columns: 39px minmax(0, 1fr);}
+  .manager-activity-overview-heading > .employee-badge {grid-column: 2; justify-self: start; margin: 0;}
   .manager-activity-actions > * {min-width: 80px;}
   .manager-report-create-links > a {flex-wrap: wrap;}
   .manager-report-create-links > a > div {flex-basis: 100%;}

@@ -30,7 +30,7 @@
 - Integracioni testovi nad postojećom bazom smeju samo da čitaju poslovne podatke. Prijava menja `lastLoginAt` i pravi sesiju; testne sesije odjavi. Testove pisanja izvršavaj sa modelima u memoriji ili posebnom izolovanom bazom.
 - Za browser provere pisanja dostupan je `server/tests/fixtures/employee-ui-server.mjs`, sa eksplicitnim `ZEPTER_UI_FIXTURE=1`, bez MongoDB veze, na loopback portu 4002. Pročitaj `docs/EMPLOYEE_WAVE_02.md` za pokretanje i gašenje; kroz agentski terminal koristi `tty:true` ako želiš da radi komanda `stop`. Ugasiti testni proces i očistiti njegove privremene priloge pre završetka zadatka.
 - Ne menjaj postojeće podatke da bi test postao zelen. Jasno prijavi zastarele demo pretpostavke i stvaran rezultat.
-- Dopunska browser QA za izveštaje/ideje koristi opcioni `ZEPTER_UI_QA=1` samo u izolovanom fixture-u i `server/tests/fixtures/manager-ui-qa.mjs`. Kontrole simuliraju greške i prazne odgovore bez MongoDB veze; postupak je u `docs/MANAGER_WAVE_04.md`. Standardni `manager-wave04-check.mjs` pokreni na svežem fixture-u bez QA režima (početna četiri predloga); QA režim dodaje još 12 ideja.
+- Dopunska browser QA koristi opcioni `ZEPTER_UI_QA=1` samo u izolovanom fixture-u i `server/tests/fixtures/manager-ui-qa.mjs`. Podržani su employee/manager režimi i kontrole `comment-lost`, `worklog-lost`, `attachment-lost`; postupak je u `docs/REVIEW_EMPLOYEE_MANAGER.md` i `docs/MANAGER_WAVE_04.md`. Standardni `manager-wave04-check.mjs` pokreni na svežem fixture-u bez QA režima (početna četiri predloga); QA režim dodaje još 12 ideja.
 
 ## Ovlašćenja
 
@@ -45,6 +45,8 @@
 - Pri promeni autorizacije dodaj pozitivne i negativne regresione testove za uloge i granice sektora.
 
 ## Interfejs i izveštaji
+
+- Predsednički prvi talas je u docs/PRESIDENT_WAVE_01.md: kompanija i sektor, mobilni/tablet/desktop. Predsednik nema login formular, meni naloga ni odjavu. Isti lični link otvara početni pregled i radi na novom uređaju; ne uvodi jednokratno vezivanje ili dodatne korisničke korake bez naloga korisnika. Autentifikacija je u pozadini; sama ruta nije ovlašćenje. Ključ izdaje eksplicitni CLI, čuva se hash i skida fragment pre router-a. Privatni izlaz je u ignorisanom server/private-access; ne ispisuj ceo link. Opoziv/zamena proveravaju se i pri socket dostavi. Standardne sesije ostaju kompatibilne.
 
 - Prioritet je predsednik na telefonu: mali broj koraka, jasni nazivi i veliki dodirni ciljevi.
 - Implementirano je svih osam ekrana zaposlenog i svih deset rukovodiočevih ekrana. Zaposleni i prva dva rukovodiočeva ekrana prošli su prilagođavanje opisano u `docs/RESPONSIVE_LAYOUTS.md`; naredni talasi su u `docs/MANAGER_WAVE_02.md`, `docs/MANAGER_WAVE_03.md`, `docs/MANAGER_WAVE_04.md` i `docs/MANAGER_WAVE_05.md`, sa zasebno navedenim granicama vizuelne provere. Dostavljene slike određuju mobilni raspored i izgled; prikazani primeri imena, brojeva i projekata nisu podaci za hardkodovanje.
@@ -63,6 +65,10 @@
 - Development server podrazumevano ostaje na localhost; mrežni pristup i produkciono objavljivanje traže odgovarajući zaseban zadatak.
 
 ## Završna provera
+
+- Pregled pre predsedničkog interfejsa i naknadne browser provere su u `docs/REVIEW_EMPLOYEE_MANAGER.md`: obe uloge, 76 merenja širina i izolovani tokovi pisanja. To ne zatvara realni telefon, push ili produkcionu proveru. Ne uklanjaj zabranu čitanja projekta iz drugog aktuelnog sektora, ranu proveru nedodeljenog sektora, zaštitu neposlatih komentara ili blokadu slepog POST retry-ja. `workflow-audit-check.mjs` zahteva svež izolovani manager fixture sa `ZEPTER_UI_QA=1`; simulacija uloga ostaje samo u tom fixture-u. Red preračunavanja napretka važi za jednu API instancu, ne predstavlja distribuiranu transakciju.
+- „Novi nedeljni izveštaj“ ostaje u toku kreiranja: za već objavljen period jasno objasni ograničenje i ponudi drugi period ili otvaranje sačuvanog izveštaja. Postojeći nacrt se nastavlja. Izmena datuma se priprema eksplicitno; period se ne menja posle svakog delimičnog unosa datuma. Nejasna potvrda čuvanja/objave blokira novi upis do provere servera.
+- Live RBAC i demo smoke dele ograničenje prijava od 12 pokušaja na 15 minuta. Ne pokreći ih uzastopno/više puta bez potrebe niti menjaj limiter da bi test prošao. Smoke mora odjaviti sve sesije koje je sam napravio, uključujući neočekivano uspešnu prijavu kandidata; ne opozivaj druge korisničke sesije.
 
 - Pokreni relevantne testove, serversku proveru sintakse i frontend build nakon značajne izmene.
 - Za UI promene proveri mobilni raspored, stanja učitavanja/greške/praznih lista, pristupačnost i sve relevantne uloge.
