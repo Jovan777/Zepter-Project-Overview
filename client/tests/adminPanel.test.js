@@ -10,10 +10,12 @@ import os from 'node:os';
 import path from 'node:path';
 import {userDraft,adminUserQuery,protectedAccount} from '../src/features/admin/adminPresentation.js';
 let vite,cacheDir,AdminUserDialog,AdminShell,AdminPanel;
+let LegacyPages,Auth;
 before(async()=>{
  cacheDir=await fs.mkdtemp(path.join(os.tmpdir(),'zepter-admin-render-'));
  vite=await createServer({root:fileURLToPath(new URL('../',import.meta.url)),configFile:false,cacheDir,optimizeDeps:{noDiscovery:true,include:[]},server:{middlewareMode:true},appType:'custom'});
  ({default:AdminUserDialog}=await vite.ssrLoadModule('/src/features/admin/AdminUserDialog.jsx'));({default:AdminShell}=await vite.ssrLoadModule('/src/features/admin/AdminShell.jsx'));({default:AdminPanel}=await vite.ssrLoadModule('/src/features/admin/AdminPanel.jsx'));
+ LegacyPages=await vite.ssrLoadModule('/src/features/legacy/LegacyPages.jsx');({Auth}=await vite.ssrLoadModule('/src/features/workspace/AuthContext.js'));
 });
 after(async()=>{await vite?.close();if(cacheDir){if(path.dirname(path.resolve(cacheDir))!==path.resolve(os.tmpdir())||!path.basename(cacheDir).startsWith('zepter-admin-render-'))throw Error('Unexpected cache path');await fs.rm(cacheDir,{recursive:true,force:true});}});
 function render(element,url='/admin/users',pattern='*'){const router=createMemoryRouter([{path:pattern,element}],{initialEntries:[url]});try{return renderToStaticMarkup(React.createElement(RouterProvider,{router}));}finally{router.dispose();}}
@@ -41,4 +43,11 @@ test('All four administrative routes render their own page and loading state',()
  for(const [url,title]of [['/admin','Pregled administracije'],['/admin/users','Korisnici i pristup'],['/admin/sectors','Sektori kompanije'],['/admin/audit','Istorija promena']]){
   const html=render(React.createElement(AdminPanel),url,'/admin/*');assert.ok(html.includes(title));assert.match(html,/role="status"/);
  }
+});
+test('Lazy shared presidential flows keep the same auth context and their forms remain available',()=>{
+ const president={...user,role:'president',approval:'approved'};
+ for(const [name,title]of [['AssignmentNew','Novo zaduženje rukovodiocu'],['RequestNew','Pitanje za predsednika']]){
+  const page=React.createElement(Auth.Provider,{value:{user:president}},React.createElement(LegacyPages[name]));const html=render(page,'/assignments/new');assert.ok(html.includes(title));assert.equal((html.match(/<form/g)||[]).length,1);
+ }
+ const html=render(React.createElement(Auth.Provider,{value:{user:president}},React.createElement(LegacyPages.LegacyLayout,null,'Shared authenticated content')),'/requests/new');assert.match(html,/Shared authenticated content/);assert.match(html,/Komentari/);
 });

@@ -1,0 +1,20 @@
+/*
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/wake.js
+  Cache-Control: no-cache, must-revalidate
+
+/president-zp-*
+  Cache-Control: no-store

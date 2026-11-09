@@ -4,6 +4,7 @@ import {Link} from '../workspace/MotionNavigation.jsx';
 import WorkspacePage from '../workspace/WorkspacePage.jsx';
 import Icon from '../../components/Icon.jsx';
 import {personName} from './adminPresentation.js';
+import '../employee/employee.css';
 import './admin.css';
 
 const links=[['/admin','Pregled','grid'],['/admin/users','Korisnici','users'],['/admin/sectors','Sektori','folder'],['/admin/audit','Istorija','clock']];

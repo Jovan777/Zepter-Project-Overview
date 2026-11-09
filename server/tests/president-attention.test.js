@@ -54,3 +54,15 @@ test('Attention rejects foreign roles, invalid categories and missing sector con
  await assert.rejects(presidentAttention(president,{sectorId:'bad'},now),error=>error.status===400);
  await assert.rejects(presidentAttention(president,{sectorId:key(99)},now),error=>error.status===404);
 });
+
+test('Attention reuses repeated counts within one request and never caches them across requests',async t=>{
+ const rows=fixture(t);await presidentAttention(president,{limit:50},now);
+ const models=[Project,Activity,Comment,Assignment,DecisionRequest,Idea],calls=()=>models.reduce((sum,Model)=>sum+Model.countDocuments.mock.calls.length,0);
+ assert.equal(calls(),8,'Six base counts plus approvals and delayed activities; project deadlines reuse the base count.');
+ rows.get(DecisionRequest)[0].status='answered';const changed=await presidentAttention(president,{limit:50},now);assert.equal(calls(),16);assert.equal(changed.total,8);assert.equal(changed.stats.approvals,0);
+});
+test('Company overview derives attention totals from grouped sector counts without six extra count queries',async t=>{
+ fixture(t);const result=await presidentOverview(president,{},now);assert.equal(result.stats.attention,9);assert.equal(result.sectors.items.reduce((sum,row)=>sum+row.attentionCount,0),9);
+ for(const Model of [Activity,Comment,Assignment,DecisionRequest,Idea])assert.equal(Model.countDocuments.mock.calls.length,0);
+ assert.equal(Project.countDocuments.mock.calls.length,1,'Only the separate active-project metric needs a count.');
+});

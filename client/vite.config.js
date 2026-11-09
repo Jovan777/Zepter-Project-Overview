@@ -2,9 +2,10 @@ import {defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
 import {VitePWA} from 'vite-plugin-pwa';
 export default defineConfig({
+ build:{manifest:true},
  plugins:[react(),VitePWA({
   strategies:'injectManifest',srcDir:'src',filename:'sw.js',registerType:'autoUpdate',
-  injectManifest:{globPatterns:['**/*.{js,css,html,svg,png,ico}'],maximumFileSizeToCacheInBytes:6000000},
+  injectManifest:{globPatterns:['index.html','manifest.webmanifest','wake.js','icons/*.{png,svg,ico}'],maximumFileSizeToCacheInBytes:6000000},
   devOptions:{enabled:true,type:'module'},
   manifest:{id:'/',name:'Zepter Management Overview',short_name:'Zepter Overview',description:'Interni pregled sektora, projekata i aktivnosti',
    lang:'sr-Latn',start_url:'/',display:'standalone',scope:'/',background_color:'#FFFFFF',theme_color:'#FFFFFF',

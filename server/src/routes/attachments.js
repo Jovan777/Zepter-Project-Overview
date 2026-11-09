@@ -10,6 +10,7 @@ import {targetAccess,managing} from '../lib/access.js';
 import {requireId,same} from '../lib/utils.js';
 import {fail} from '../lib/errors.js';
 import {audit,userDataChanged} from '../services/events.js';
+import {persistAttachment,deleteStoredAttachment,downloadStoredAttachment} from '../services/attachment-storage.js';
 const r=Router(),storageDir=path.resolve(process.env.UPLOAD_DIR||'./private-uploads');
 const fileMap={
  '.pdf':['application/pdf'],'.png':['image/png'],'.jpg':['image/jpeg'],'.jpeg':['image/jpeg'],'.webp':['image/webp'],
@@ -46,13 +47,15 @@ r.post('/',async(req,res)=>{
  await fs.mkdir(storageDir,{recursive:true});
  await uploadOne(req,res);if(!req.file)fail(422,'Pošaljite fajl u polju file.');
  const full=path.join(storageDir,path.basename(req.file.filename));
- let attachment;
+ let attachment,storage;
  try{
   const ext=path.extname(req.file.originalname).toLowerCase(), detected=await fileTypeFromFile(full);
   if(!detected||!fileMap[ext].includes(detected.mime))fail(422,'Sadržaj fajla ne odgovara dozvoljenom formatu.');
+  storage=await persistAttachment(req.file,full,detected.mime);
   attachment=await Attachment.create({targetType:type,targetId:id,owner:req.user._id,...(commentId?{comment:commentId}:{}),...(uploadId?{uploadId}:{}),
-   originalName:path.basename(req.file.originalname).slice(0,255),fileName:req.file.filename,mime:detected.mime,size:req.file.size});
- }catch(e){await fs.unlink(full).catch(()=>{});if(uploadId&&e.code===11000){const a=await existing();if(a)return res.json({attachment:a});}throw e;}
+   originalName:path.basename(req.file.originalname).slice(0,255),fileName:req.file.filename,mime:detected.mime,size:req.file.size,storage});
+ }catch(e){await fs.unlink(full).catch(()=>{});if(storage==='gridfs')await deleteStoredAttachment({storage,fileName:req.file.filename});if(uploadId&&e.code===11000){const a=await existing();if(a)return res.json({attachment:a});}throw e;}
+ if(storage==='gridfs')await fs.unlink(full).catch(()=>{});
  // Once metadata exists, a later audit/socket failure must not remove its physical file.
  await audit(req,'attachment.created','Attachment',attachment._id,{targetType:type,targetId:id});
  if(commentId){for(const person of [resource.author,...(resource.assignees||[])].filter(Boolean))await userDataChanged(person,'Attachment');}
@@ -66,6 +69,7 @@ r.get('/:id',async(req,res)=>{
  const a=await Attachment.findById(requireId(req.params.id));if(!a)fail(404,'Prilog ne postoji.');
  await targetAccess(req.user,a.targetType,String(a.targetId));
  res.set('Cache-Control','no-store');res.set('X-Content-Type-Options','nosniff');
+ if(a.storage==='gridfs'){await downloadStoredAttachment(a,res);return;}
  res.download(path.join(storageDir,path.basename(a.fileName)),a.originalName);
 });
 r.delete('/:id',async(req,res)=>{
@@ -74,7 +78,7 @@ r.delete('/:id',async(req,res)=>{
  const allowed=same(a.owner,req.user._id)|| (a.targetType==='project'&&managing(req.user,resource.sector))||
   (a.targetType==='activity'&&managing(req.user,resource.sector))||(a.targetType==='idea'&&req.user.role==='admin');
  if(!allowed)fail(403,'Nemate pravo brisanja priloga.');
- await a.deleteOne();await fs.unlink(path.join(storageDir,path.basename(a.fileName))).catch(()=>{});
+ await deleteStoredAttachment(a);await a.deleteOne();if(a.storage!=='gridfs')await fs.unlink(path.join(storageDir,path.basename(a.fileName))).catch(()=>{});
  await audit(req,'attachment.deleted','Attachment',a._id);res.json({ok:true});
 });
 export default r;

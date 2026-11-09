@@ -10,6 +10,9 @@
 
 ## Instalacija i komande
 
+- Optimizacija/hosting su u `docs/PERFORMANCE_FREE_HOSTING.md`. Sačuvaj lazy shell/legacy module i eksplicitne zajedničke CSS zavisnosti; `check:bundle` posle build-a meri i deljene zavisnosti. Početni wake sme da ponavlja samo javni readiness GET, nikada auth ili poslovne upise. Ne vraćaj bulk PWA precache svih ekrana ili keš privatnih API-ja. Istovremena GET čitanja mogu deliti transport, ali ne čuvaj završene privatne odgovore i očuvaj nezavisan abort i izolaciju sesija.
+- Render koristi GridFS; lokalni upload disk je ephemeral. Attachment.storage je opcion i stari lokalni podaci ostaju kompatibilni. Migracija priloga je eksplicitna (`attachments:gridfs -- --apply`), čuva ID-jeve/originalne fajlove i proverava sadržaj. Nije deo starta/build-a. Produkcija ne auto-indeksira pri cold startu; `db:indexes` se izvršava zasebno posle uvoza, bez syncIndexes/dropIndexes. Ne briši produkcione indekse ili podatke radi merenja.
+
 - `client` i `server` su nezavisni npm projekti, svaki sa svojim `package-lock.json` i `node_modules`.
 - Root `package.json` služi samo kao skup pomoćnih komandi. Ne uvodi ponovo npm workspaces ni root zavisnosti bez obrazloženog zadatka.
 - Instalacija iz root-a: `npm run install:all`. Zasebno: `npm ci` iz `server/` ili `client/`.

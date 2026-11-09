@@ -1,5 +1,7 @@
 # Predlog faznog razvoja React frontend-a
 
+**Optimizacija:** lazy shell/stilovi i postojeći pomoćni tokovi, mali početni status sa paralelnim API buđenjem, objedinjeni istovremeni GET zahtevi i PWA statički resursi po potrebi opisani su u [PERFORMANCE_FREE_HOSTING.md](PERFORMANCE_FREE_HOSTING.md). Novi ekran nije uveden. Cloud deployment, Lighthouse, stvarni cold-start i browser pregled ostaju zasebne provere; nisu zamenjeni bundle merenjem ili SSR testom.
+
 **Administracija sektora:** implementirani su pregled/pretraga i dodavanje novog sektora na `/admin`, sa predlogom šifre, proverom duplikata, stanjima greške i zaštitom od ponavljanja upisa nepoznatog ishoda. Novi sektori dolaze iz API-ja u registraciju i predsednički pregled. [Podaci, ugovor i provere](COMPANY_SEED.md). Zasebna vizuelna/browser provera novog admin obrasca ostaje otvorena zbog nedostupnog browser alata.
 
 **Predsednik — peti talas:** implementiran je ekran 9, [Moji komentari i instrukcije](PRESIDENT_WAVE_05.md), sa stvarnim odgovorima, globalnim brojačima, kombinovanim filterima i fokusom konkretne poruke. Mobilni/tablet/desktop rasporedi su implementirani; browser vizuelna provera novog ekrana još nije potvrđena. Time je implementirano svih devet planiranih predsedničkih ekrana, uz dokumentovane preostale provere. Sledeći razvoj određuje korisnik.

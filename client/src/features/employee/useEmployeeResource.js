@@ -7,12 +7,17 @@ export default function useEmployeeResource(url, {live = true, keepPreviousData 
   const previousUrl = useRef(null);
   useEffect(() => {
     if (!live) return;
-    const reload = () => setVersion(v => v + 1);
+    let timer;
+    const reload = () => {clearTimeout(timer);timer=setTimeout(()=>setVersion(v=>v+1),120);};
+    const visible = () => {if(document.visibilityState==='visible')reload();};
     window.addEventListener('zepter:data-changed', reload);
     window.addEventListener('zepter:notifications-changed', reload);
+    document.addEventListener('visibilitychange', visible);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('zepter:data-changed', reload);
       window.removeEventListener('zepter:notifications-changed', reload);
+      document.removeEventListener('visibilitychange', visible);
     };
   }, [live]);
   useEffect(() => {

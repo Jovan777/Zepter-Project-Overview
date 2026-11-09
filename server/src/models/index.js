@@ -29,6 +29,8 @@ const projectSchema=new Schema({
  createdBy:ref('User')
 },opts);
 projectSchema.index({sector:1,status:1,dueDate:1});
+projectSchema.index({archived:1,status:1,dueDate:1});
+projectSchema.index({sector:1,members:1,archived:1});
 export const Project=models.Project || model('Project',projectSchema);
 
 const activitySchema=new Schema({
@@ -39,6 +41,7 @@ const activitySchema=new Schema({
  actualWork:txt(5000),nextStep:txt(4000),blockers:txt(4000),createdBy:ref('User')
 },opts);
 activitySchema.index({sector:1,project:1,status:1});
+activitySchema.index({assignees:1,sector:1,status:1});
 export const Activity=models.Activity || model('Activity',activitySchema);
 
 const workLogSchema=new Schema({
@@ -48,6 +51,7 @@ const workLogSchema=new Schema({
  updatedProgress:{type:Number,min:0,max:100}
 },opts);
 workLogSchema.index({user:1,day:1,activity:1});
+workLogSchema.index({sector:1,day:1});
 export const WorkLog=models.WorkLog || model('WorkLog',workLogSchema);
 
 const commentSchema=new Schema({
@@ -59,6 +63,8 @@ const commentSchema=new Schema({
  addressedTo:[ref('User')]
 },opts);
 commentSchema.index({targetType:1,targetId:1,createdAt:1});
+commentSchema.index({author:1,kind:1,responseStatus:1});
+commentSchema.index({parent:1,targetType:1,targetId:1,createdAt:-1});
 export const Comment=models.Comment || model('Comment',commentSchema);
 
 const ideaSchema=new Schema({
@@ -70,6 +76,7 @@ const ideaSchema=new Schema({
  decisionDelivery:{type:Schema.Types.Mixed,select:false}
 },opts);
 ideaSchema.index({'decision.deliveryStatus':1,'decisionDelivery.lastAttemptAt':1,'decision.at':1});
+ideaSchema.index({sector:1,status:1,createdAt:-1});
 ideaSchema.set('toJSON',{transform(_doc,ret){delete ret.decisionDelivery;return ret;}});
 export const Idea=models.Idea || model('Idea',ideaSchema);
 export {IdeaRead} from './idea-read.js';
@@ -107,13 +114,15 @@ const notificationSchema=new Schema({
  link:{type:String,required:true,maxlength:400},readAt:Date
 },opts);
 notificationSchema.index({user:1,createdAt:-1});
+notificationSchema.index({user:1,readAt:1});
 export const Notification=models.Notification || model('Notification',notificationSchema);
 
 const attachmentSchema=new Schema({
  targetType:{type:String,enum:['project','activity','idea'],required:true},targetId:{type:O,required:true},
  comment:ref('Comment'),uploadId:{type:String},
  owner:{...ref('User',true)},originalName:{...txt(255),required:true},fileName:{...txt(255),required:true},
- mime:{type:String,required:true},size:{type:Number,required:true}
+ mime:{type:String,required:true},size:{type:Number,required:true},
+ storage:{type:String,enum:['local','gridfs']}
 },opts);
 attachmentSchema.index({owner:1,uploadId:1},{unique:true,partialFilterExpression:{uploadId:{$type:'string'}}});
 attachmentSchema.index({targetType:1,targetId:1,comment:1});

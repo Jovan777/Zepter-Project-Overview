@@ -11,12 +11,12 @@ const escape=value=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 export function presidentOnly(user){if(user.role!=='president')fail(403,'Pregled je namenjen predsedniku.');}
 async function answeredInstructions(user,sectorId){
  const candidates=await Comment.find({author:user._id,kind:'instruction',responseStatus:'answered'}).select('_id targetType targetId').lean(),targets=new Map(),parents=new Map();
- for(const [type,Model]of [['sector',Sector],['project',Project],['activity',Activity],['idea',Idea],['assignment',Assignment],['request',DecisionRequest]]){
-  const ids=candidates.filter(c=>c.targetType===type).map(c=>c.targetId);if(!ids.length)continue;
+ await Promise.all([['sector',Sector],['project',Project],['activity',Activity],['idea',Idea],['assignment',Assignment],['request',DecisionRequest]].map(async([type,Model])=>{
+  const ids=candidates.filter(c=>c.targetType===type).map(c=>c.targetId);if(!ids.length)return;
   const filter={_id:{$in:ids},...(sectorId?(type==='sector'?{_id:oid(sectorId)}:{sector:oid(sectorId)}):{}),...(type==='idea'?{status:{$in:['forwarded','approved','rejected']}}:{})};
   const read=Model.find(filter).select('_id title name sector');if(type!=='sector')read.populate('sector','name');const rows=await read.lean();
   for(const row of rows)targets.set(type+':'+ref(row),{title:row.title||row.name,sectorId:type==='sector'?row._id:row.sector?._id||row.sector,sectorName:type==='sector'?row.name:row.sector?.name||'Sektor nije dostupan'});
- }
+ }));
  for(const c of candidates){const target=targets.get(c.targetType+':'+ref(c.targetId));if(target)parents.set(ref(c),target);}
  return {kind:'comment',Model:Comment,filter:{author:user._id,kind:'instruction',responseStatus:'answered',_id:{$in:[...parents.keys()]}},order:{updatedAt:1,_id:1},parents};
 }
@@ -24,7 +24,7 @@ async function signals(user,sectorId,now){
  presidentOnly(user);const today=managerDayStart(now),scope=sectorId?{sector:oid(requireId(sectorId))}:{};
  const open={...scope,archived:false,status:{$in:current}};
  const risk={...open,$or:[{status:'at_risk'},{dueDate:{$lt:today}}]};
- const [openIds,riskIds]=await Promise.all([Project.distinct('_id',open),Project.distinct('_id',risk)]);
+ const [openIds,riskIds,instructions]=await Promise.all([Project.distinct('_id',open),Project.distinct('_id',risk),answeredInstructions(user,sectorId)]);
  // One project-level warning takes precedence over its delayed activities.
  return [
   {kind:'request',Model:DecisionRequest,filter:{...scope,status:'open'},path:'requests',order:{createdAt:1,_id:1}},
@@ -32,7 +32,7 @@ async function signals(user,sectorId,now){
   {kind:'project',Model:Project,filter:risk,path:'projects',order:{dueDate:1,_id:1}},
   {kind:'activity',Model:Activity,filter:{...scope,status:{$ne:'completed'},$and:[{project:{$in:openIds}},{project:{$nin:riskIds}}],$or:[{status:'blocked'},{dueDate:{$lt:today}}]},path:'activities',order:{dueDate:1,_id:1}},
   {kind:'idea',Model:Idea,filter:{...scope,status:'forwarded'},path:'ideas',order:{forwardedAt:1,createdAt:1,_id:1}},
-  await answeredInstructions(user,sectorId)
+  instructions
  ];
 }
 const categories=['all','approvals','deadlines','comments','ideas'];
@@ -42,9 +42,10 @@ function forCategory(groups,tab,today){
  if(tab==='approvals')return groups.filter(g=>g.kind==='request').map(g=>({...g,filter:{$and:[g.filter,{type:'approval'}]}}));
  return groups.filter(g=>['project','activity'].includes(g.kind)).map(g=>g.kind==='activity'?{...g,filter:{$and:[g.filter,{dueDate:{$lt:today}}]}}:g);
 }
-async function attentionFrom(groups,query={},now=new Date()){
+const defaultCount=group=>group.Model.countDocuments(group.filter);
+async function attentionFrom(groups,query={},now=new Date(),count=defaultCount){
  const {page,limit,skip}=safePage(query);
- const counts=await Promise.all(groups.map(g=>g.Model.countDocuments(g.filter)));
+ const counts=await Promise.all(groups.map(count));
  let offset=skip,remaining=limit;const selected=[];
  for(let i=0;i<groups.length&&remaining;i++){
   if(offset>=counts[i]){offset-=counts[i];continue;}
@@ -66,9 +67,10 @@ export async function presidentAttention(user,query={},now=new Date()){
  presidentOnly(user);const tab=query.tab||'all';if(!categories.includes(tab))fail(422,'Nepoznat filter važnih pitanja.');
  if(query.sectorId&&!await Sector.exists({_id:requireId(query.sectorId)}))fail(404,'Sektor nije pronađen.');
  const groups=await signals(user,query.sectorId,now);
+ const pending=new Map(),count=group=>{const key=group.kind+':'+JSON.stringify(group.filter);if(!pending.has(key))pending.set(key,Promise.resolve(defaultCount(group)));return pending.get(key);};
  const names=['all','approvals','deadlines','comments','ideas'],stats={};
- await Promise.all(names.map(async name=>{const values=await Promise.all(forCategory(groups,name,managerDayStart(now)).map(g=>g.Model.countDocuments(g.filter)));stats[name]=values.reduce((a,b)=>a+b,0);}));
- return {...await attentionFrom(forCategory(groups,tab,managerDayStart(now)),query,now),stats,tab,sectorId:query.sectorId||null};
+ await Promise.all(names.map(async name=>{const values=await Promise.all(forCategory(groups,name,managerDayStart(now)).map(count));stats[name]=values.reduce((a,b)=>a+b,0);}));
+ return {...await attentionFrom(forCategory(groups,tab,managerDayStart(now)),query,now,count),stats,tab,sectorId:query.sectorId||null};
 }
 export async function presidentOverview(user,query={},now=new Date()){
  presidentOnly(user);
@@ -77,8 +79,11 @@ export async function presidentOverview(user,query={},now=new Date()){
  const [groups,rows,total,activeProjects]=await Promise.all([
   signals(user,null,now),Sector.find(filter).select('name active description').sort({active:-1,name:1,_id:1}).skip(pagination.skip).limit(pagination.limit).lean(),Sector.countDocuments(filter),Project.countDocuments({archived:false,status:{$in:active}})
  ]);
- const sectorIds=rows.map(row=>row._id),counts=await Promise.all(groups.map(g=>g.kind==='comment'?Promise.resolve([...g.parents.values()].filter(row=>sectorIds.some(id=>ref(id)===ref(row.sectorId))).map(row=>({_id:row.sectorId,count:1}))):g.Model.aggregate([{$match:{...g.filter,sector:{$in:sectorIds}}},{$group:{_id:'$sector',count:{$sum:1}}}])));
- const attention=await attentionFrom(groups,{page:query.attentionPage,limit:4},now);
+ // One grouped result supplies both global totals and the visible sector rows.
+ // Sector search/pagination must not narrow the company's attention total.
+ const counts=await Promise.all(groups.map(g=>g.kind==='comment'?Promise.resolve([...g.parents.values()].map(row=>({_id:row.sectorId,count:1}))):g.Model.aggregate([{$match:g.filter},{$group:{_id:'$sector',count:{$sum:1}}}])));
+ const totals=new Map(groups.map((group,index)=>[group,counts[index].reduce((sum,row)=>sum+row.count,0)]));
+ const attention=await attentionFrom(groups,{page:query.attentionPage,limit:4},now,group=>Promise.resolve(totals.get(group)));
  return {stats:{activeProjects,attention:attention.total},attention,sectors:{items:rows.map(row=>({...row,attentionCount:counts.flat().filter(x=>ref(x._id)===ref(row)).reduce((n,x)=>n+x.count,0)})),total,page:pagination.page,limit:pagination.limit},today:belgradeDay(now)};
 }
 export async function presidentSector(user,id,now=new Date()){

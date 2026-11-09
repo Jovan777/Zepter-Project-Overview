@@ -1,5 +1,7 @@
 # ZEPTER | Management Overview
 
+**Optimizacija i besplatni probni hosting:** [PERFORMANCE_FREE_HOSTING.md](docs/PERFORMANCE_FREE_HOSTING.md) opisuje lakše početno učitavanje, paralelno buđenje backend-a, odložene ekrane/stilove, manje ponovljenih API/DB upita, indekse, privatni GridFS storage i pripremljeni Cloudflare Pages/Render deployment. Render Free cold start i dalje zavisi od hostinga. Migracija postojeće baze/priloga i cloud deploy nisu automatski izvršeni. Merenje build-a: `npm run check:bundle` posle `npm run build:client`.
+
 **Administracija:** [pregled, korisnici, sektori i istorija promena](docs/ADMIN_PANEL.md) sada su na `/admin`. Panel podržava pretragu/filtere, eksplicitno odobravanje uloge/sektora, uređivanje postojećih korisnika, deaktiviranje/reaktiviranje i uređivanje sektora, uz zaštitu dodela i privilegovanih naloga. Implementirani su telefon/desktop i zajednički prelazi; interaktivna browser provera ovog panela još nije potvrđena.
 
 **Sektori i podaci kompanije:** [inicijalizacija i očuvanje podataka](docs/COMPANY_SEED.md) uvodi 12 traženih sektora, uklanja prikazne demo oznake i čuva postojeće naloge, lozinke, istoriju i predsednikov URL. Administrator na `/admin` dodaje nove sektore. Lokalne adrese sada koriste `@zepter.test`; stare adrese rade kao alias van produkcije. Pregled bez upisa: `npm run seed:company`. Potvrđeno: 154 serverska, 75 klijentskih testova, 19 smoke i 40 RBAC podprovera. Novi admin obrazac još nema potvrđenu browser vizuelnu proveru.

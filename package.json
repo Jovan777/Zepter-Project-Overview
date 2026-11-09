@@ -8,6 +8,7 @@
     "dev:server":"npm --prefix server run dev",
     "dev:client":"npm --prefix client run dev",
     "build:client":"npm --prefix client run build",
+    "check:bundle":"npm --prefix client run check:bundle",
     "start:server":"npm --prefix server start",
     "test:server":"npm --prefix server test",
     "test:client":"npm --prefix client test",

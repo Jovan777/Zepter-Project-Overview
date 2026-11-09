@@ -281,6 +281,7 @@ models.Report.prototype.save=async function(){
  raw.createdAt=raw.createdAt||now();raw.updatedAt=now();stores.Report.set(raw._id,raw);Object.assign(this,raw);return this;
 };
 const app = express(); app.use(express.json());app.use(cookieParser());
+app.get('/api/ready',(_req,res)=>res.set('Cache-Control','no-store').json({ok:true}));
 if(authUser.role==='president'&&process.env.ZEPTER_UI_QA==='1'&&process.env.ZEPTER_UI_WAVE02==='1'){
  for(const [role,personId]of [['manager',manager],['employee',self]])app.get('/__fixture/'+role,async(req,res)=>{
   const {createSession,setRefreshCookie}=await import('../../src/lib/auth.js');

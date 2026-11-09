@@ -1,18 +1,24 @@
-import {io} from 'socket.io-client';
+import {createInflightReads} from './features/workspace/inflight.js';
+import {scheduleDataEvent} from './features/workspace/dataEvents.js';
+const reads=createInflightReads();let socketLoad=0;
 let accessToken=null;let refreshPromise=null;let socket=null;let sessionGeneration=0;
-export const setToken=(value)=>{sessionGeneration++;accessToken=value;refreshPromise=null;};
+export const setToken=(value)=>{sessionGeneration++;reads.clear();accessToken=value;refreshPromise=null;};
 const sessionChanged=()=>Object.assign(Error('Prijava je promenjena. Otvorite sadržaj ponovo.'),{name:'AbortError'});
 function expireSession(generation){
  if(generation!==sessionGeneration)return;
  setToken(null);disconnectSocket();window.dispatchEvent(new Event('zepter:session-expired'));
 }
 export const getSocket=()=>socket;
-export function connectSocket(onNotification){
+export async function connectSocket(onNotification){
  if(!accessToken)return;
+ const loading=++socketLoad,generation=sessionGeneration;
+ const module=await import('socket.io-client').catch(()=>null);if(!module)return;
+ const {io}=module;
+ if(loading!==socketLoad||generation!==sessionGeneration||!accessToken)return;
  socket?.disconnect();
  const current=socket=io('/',{path:'/socket.io',autoConnect:true,auth:{token:accessToken},transports:['websocket','polling']});
  socket.on('notification:new',()=>{onNotification();window.dispatchEvent(new Event('zepter:notifications-changed'));});
- socket.on('data:changed',()=>window.dispatchEvent(new Event('zepter:data-changed')));
+ socket.on('data:changed',()=>{reads.clear();scheduleDataEvent();});
  let renewing=false;
  const renewConnection=async()=>{
   const generation=sessionGeneration;
@@ -22,10 +28,12 @@ export function connectSocket(onNotification){
   catch(e){if(socket===current)current.disconnect();if(e.status===401||e.status===403)expireSession(generation);}
   finally{renewing=false;}
  };
- socket.on('connect_error',renewConnection);
+ // Transport errors during a hosting wake-up do not imply an expired login.
+ // Socket.IO already retries its transport; avoid a storm of refresh POSTs.
+ socket.on('connect_error',error=>{if(error?.message==='Unauthorized')void renewConnection();});
  socket.on('disconnect',reason=>{if(reason==='io server disconnect')renewConnection();});
 }
-export function disconnectSocket(){socket?.disconnect();socket=null;}
+export function disconnectSocket(){socketLoad++;socket?.disconnect();socket=null;}
 export async function logoutSession(){
  // A rotating refresh can set its HttpOnly cookie after logout has started.
  // Drain it before asking the server to revoke and clear that cookie.
@@ -45,11 +53,17 @@ async function refresh(){
  return refreshPromise;
 }
 export async function bootstrap(){try{return await refresh();}catch{return null;}}
-export async function api(endpoint,{method='GET',body,headers={},isForm=false,retry=true,signal}={}){
+export function api(endpoint,options={}){
+ const {method='GET',body,headers,signal}=options;
+ if(method==='GET'&&body===undefined&&!headers)return reads.read(endpoint+'|'+(options.retry!==false),sharedSignal=>requestApi(endpoint,{...options,signal:sharedSignal}),signal);
+ if(method!=='GET')reads.clear();
+ return requestApi(endpoint,options);
+}
+async function requestApi(endpoint,{method='GET',body,headers={},isForm=false,retry=true,signal}={}){
  const generation=sessionGeneration;
  const send=()=>{if(generation!==sessionGeneration)throw sessionChanged();return fetch('/api'+endpoint,{method,signal,cache:'no-store',credentials:'same-origin',headers:{...(!isForm&&body!==undefined?{'Content-Type':'application/json'}:{}),...(accessToken?{Authorization:'Bearer '+accessToken}:{}),...headers},body:body===undefined?undefined:isForm?body:JSON.stringify(body)});};
  let response;
- try { response=await send(); } catch(error) { if(signal?.aborted)throw error;throw Error('Ne mogu da kontaktiram API. Proverite da li backend radi na portu 4000.'); }
+ try { response=await send(); } catch(error) { if(signal?.aborted)throw error;throw Error('Veza sa serverom trenutno nije dostupna. Proverite internet vezu i pokušajte ponovo.'); }
  if(generation!==sessionGeneration)throw sessionChanged();
  if(response.status===401&&retry&&!endpoint.startsWith('/auth/')){
   try{await refresh();response=await send();}catch(e){if(e.name==='AbortError')throw e;if(e.status===401||e.status===403)expireSession(generation);else throw Object.assign(Error('Prijava trenutno ne može da se osveži. Proverite vezu i pokušajte ponovo.'),{status:e.status});}

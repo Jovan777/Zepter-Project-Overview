@@ -49,3 +49,14 @@ test('Temporary refresh failure retains login, terminal failure expires it once'
  await assert.rejects(api('/projects'),{status:503});assert.equal(expired,0);
  terminal=true;await assert.rejects(api('/projects'));assert.equal(expired,1);
 });
+
+test('Identical GETs share one authenticated transport, but a later read and every write remain fresh',async t=>{
+ fixture(t);const pending=deferred();let gets=0,writes=0;
+ t.mock.method(globalThis,'fetch',async(_url,options)=>{
+  assert.equal(options.cache,'no-store');assert.equal(options.headers.Authorization,'Bearer initial-test-token');
+  if(options.method==='POST'){writes++;return json({ok:true});}gets++;return pending.promise.then(response=>response.clone());
+ });
+ const a=api('/projects'),b=api('/projects');assert.equal(gets,1);pending.resolve(json({items:[]}));await Promise.all([a,b]);
+ await api('/projects');assert.equal(gets,2);
+ await Promise.all([api('/ideas',{method:'POST',body:{title:'A'}}),api('/ideas',{method:'POST',body:{title:'A'}})]);assert.equal(writes,2);
+});

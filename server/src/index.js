@@ -14,6 +14,8 @@ import {bindPresidentSocket} from './lib/president-socket.js';
 import {errorHandler} from './lib/errors.js';
 import {attachSocket} from './services/events.js';
 import {startIdeaDecisionDelivery} from './services/idea-decisions.js';
+import {databaseOptions} from './lib/database-options.js';
+import {attachmentStorage} from './services/attachment-storage.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import sectorRoutes from './routes/sectors.js';
@@ -30,6 +32,7 @@ import attachmentRoutes from './routes/attachments.js';
 import requestRoutes from './routes/requests.js';
 
 for(const k of ['MONGODB_URI','JWT_SECRET','CLIENT_ORIGIN'])if(!process.env[k])throw new Error(`Nedostaje ${k} u .env`);
+attachmentStorage();
 if(process.env.JWT_SECRET.length<64)throw new Error('JWT_SECRET mora imati bar 64 znaka.');
 if(process.env.NODE_ENV==='production'&&process.env.COOKIE_SECURE!=='true')throw new Error('U produkciji je obavezan COOKIE_SECURE=true.');
 const app=express();
@@ -39,7 +42,8 @@ app.use(helmet());app.use(compression());
 app.use(cors({origin:process.env.CLIENT_ORIGIN,credentials:true,methods:['GET','POST','PATCH','DELETE','OPTIONS']}));
 app.use(cookieParser());app.use(express.json({limit:'600kb'}));
 app.use('/api',(_req,res,next)=>{res.set('Cache-Control','no-store');next();});
-app.get('/health',(_req,res)=>res.json({ok:mongoose.connection.readyState===1,service:'zepter-management-api'}));
+const health=(_req,res)=>res.status(mongoose.connection.readyState===1?200:503).set('Cache-Control','no-store').json({ok:mongoose.connection.readyState===1,service:'zepter-management-api'});
+app.get('/health',health);app.get('/api/ready',health);
 app.use('/api/auth',authRoutes);
 app.get('/api/public/sectors',async(_req,res)=>{
  const {Sector}=await import('./models/index.js');res.json({items:await Sector.find({active:true}).select('_id name code').sort({name:1})});
@@ -73,7 +77,7 @@ io.use(async(socket,next)=>{
 io.on('connection',socket=>{socket.join('user:'+socket.data.userId);if(socket.data.sectorId)socket.join('sector:'+socket.data.sectorId);if(socket.data.role==='president')socket.join('presidents');if(socket.data.role==='admin')socket.join('admins');});
 attachSocket(io);
 await fs.mkdir(path.resolve(process.env.UPLOAD_DIR||'./private-uploads'),{recursive:true});
-await mongoose.connect(process.env.MONGODB_URI);
+await mongoose.connect(process.env.MONGODB_URI,databaseOptions());
 const stopIdeaDelivery=startIdeaDecisionDelivery();
 const port=Number(process.env.PORT||4000);
 server.listen(port,()=>console.log(`ZEPTER API http://localhost:${port}`));

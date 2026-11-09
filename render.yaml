@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: zepter-management-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: strict
+      - key: TRUST_PROXY
+        value: "1"
+      - key: ATTACHMENT_STORAGE
+        value: gridfs
+      - key: MAX_UPLOAD_MB
+        value: "12"
+      - key: MONGO_POOL_SIZE
+        value: "10"

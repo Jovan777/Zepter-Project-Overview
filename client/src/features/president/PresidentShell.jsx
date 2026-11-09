@@ -6,6 +6,8 @@ import useEmployeeResource from '../employee/useEmployeeResource.js';
 import WorkspaceNavigation from '../workspace/WorkspaceNavigation.jsx';
 import WorkspacePage from '../workspace/WorkspacePage.jsx';
 import {PresidentBackContext} from './navigation.jsx';
+import '../employee/employee.css';
+import '../employee/employee-details.css';
 import './president.css';
 
 export default function PresidentShell({user,children}){
