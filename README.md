@@ -6,7 +6,7 @@
 
 **Sektori i podaci kompanije:** [inicijalizacija i očuvanje podataka](docs/COMPANY_SEED.md) uvodi 12 traženih sektora, uklanja prikazne demo oznake i čuva postojeće naloge, lozinke, istoriju i predsednikov URL. Administrator na `/admin` dodaje nove sektore. Lokalne adrese sada koriste `@zepter.test`; stare adrese rade kao alias van produkcije. Pregled bez upisa: `npm run seed:company`. Potvrđeno: 154 serverska, 75 klijentskih testova, 19 smoke i 40 RBAC podprovera. Novi admin obrazac još nema potvrđenu browser vizuelnu proveru.
 
-**Stalni predsednički URL:** `/president-zp-<nasumični-deo>` ostaje u adresnoj traci, radi na novom uređaju i čuva prefiks pri navigaciji i osvežavanju detalja. Tačan lokalni URL je u ignorisanom `server/private-access/predsednik-link.txt`. [Formatiranje postojećeg linka, kompatibilnost i provere](docs/PRESIDENT_PERSONAL_URL.md).
+**Stalni predsednički URL:** `/president/zp/002/<12-karaktera>` ostaje u adresnoj traci i čuva prefiks pri navigaciji i osvežavanju detalja. Jednokratno lokalno podešavanje: `npm run setup:president`; ponavljanje čuva isti link i sesije. Tačan URL je u ignorisanom `server/private-access/predsednik-link.txt`. Stari linkovi ostaju podržani. [Podešavanje, prenos i provere](docs/PRESIDENT_PERSONAL_URL.md).
 
 **Vizuelni prelazi:** zajednički odlazni/dolazni prelazi ekrana, klizni indikator navigacije/tabova/filtera, postepeno pojavljivanje stvarno učitanih kartica i animacija panela/dijaloga za sve tri uloge. Telefon i desktop koriste isti sadržaj uz sistemsko smanjeno kretanje. [Ponašanje, provere i preostala vizuelna potvrda](docs/INTERFACE_MOTION.md).
 

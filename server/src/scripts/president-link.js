@@ -7,7 +7,7 @@ import path from 'node:path';
 import {parseArgs} from 'node:util';
 import {User,Session,PresidentAccessLink} from '../models/index.js';
 import {tokenDigest} from '../lib/auth.js';
-import {presidentAccessUrl,presidentUrlKey} from '../lib/president-link-url.js';
+import {presidentAccessUrl,presidentUrlKey,newPresidentKey} from '../lib/president-link-url.js';
 
 let file,output;
 try{
@@ -41,7 +41,7 @@ try{
  }else{
   const folder=path.resolve('private-access');await fs.mkdir(folder,{recursive:true});
   output=path.join(folder,values.file);file=await fs.open(output,'wx',0o600);
-  const key=crypto.randomBytes(24).toString('base64url');
+  const key=newPresidentKey();
   const link=await PresidentAccessLink.findOneAndUpdate({user:user._id},{$set:{tokenHash:tokenDigest(key),revokedAt:null,expiresAt:null},$inc:{generation:1}},{upsert:true,new:true,runValidators:true});
   await Session.updateMany({user:user._id,presidentLink:link._id,revokedAt:null},{$set:{revokedAt:new Date()}});
   await file.writeFile(presidentAccessUrl(origin,key)+'\n','utf8');await file.close();file=null;

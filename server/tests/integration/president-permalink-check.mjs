@@ -6,7 +6,7 @@ import {presidentUrlKey} from '../../src/lib/president-link-url.js';
 import {revokeMarkedReadSession} from '../helpers/live-session-cleanup.mjs';
 if(process.env.ZEPTER_PRESIDENT_URL_CHECK!=='1')throw Error('Enable ZEPTER_PRESIDENT_URL_CHECK=1 explicitly.');
 const url=new URL((await fs.readFile(new URL('../../private-access/predsednik-link.txt',import.meta.url),'utf8')).trim());
-if(!['localhost','127.0.0.1'].includes(url.hostname)||url.origin!==process.env.CLIENT_ORIGIN||!/^\/president-zp-[-_A-Za-z0-9]{32}$/.test(url.pathname)||url.hash||url.search)throw Error('Expected the local permanent presidential URL.');
+if(!['localhost','127.0.0.1'].includes(url.hostname)||url.origin!==process.env.CLIENT_ORIGIN||!/^\/(?:president\/zp\/002\/(?:[A-Za-z0-9]{12}|[-_A-Za-z0-9]{32})|president-zp-[-_A-Za-z0-9]{32})$/.test(url.pathname)||url.hash||url.search)throw Error('Expected the local permanent presidential URL.');
 const key=presidentUrlKey(url.href,url.origin),base='http://127.0.0.1:'+(process.env.PORT||4000)+'/api',sessions=[];
 let checks=0;
 const check=(condition,message)=>{if(!condition)throw Error(message);checks++;};

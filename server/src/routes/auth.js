@@ -8,12 +8,13 @@ import {requireAuth,createSession,setRefreshCookie,clearRefreshCookie,refreshCoo
 import {fail} from '../lib/errors.js';
 import {audit} from '../services/events.js';
 import {legacyLocalLogin} from '../lib/account-email.js';
+import {isPresidentKey} from '../lib/president-link-url.js';
 const r=Router();
 const limit=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja. Pokušajte kasnije.'}});
-const linkLimit=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja otvaranja linka. Pokušajte kasnije.'}});
+const linkLimit=rateLimit({windowMs:15*60*1000,limit:12,skipSuccessfulRequests:true,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Previše pokušaja otvaranja linka. Pokušajte kasnije.'}});
 r.post('/president-link',linkLimit,originGuard,async(req,res)=>{
  const key=req.body?.key;
- if(typeof key!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(key))fail(401,'Lični link nije važeći ili je opozvan.');
+ if(!isPresidentKey(key))fail(401,'Lični link nije važeći ili je opozvan.');
  const tokenHash=tokenDigest(key),link=await PresidentAccessLink.findOne({tokenHash,revokedAt:null});
  const user=link?await User.findById(link.user):null;
  if(!link||!await validPresidentLink(link._id,link.generation,user))fail(401,'Lični link nije važeći ili je opozvan.');

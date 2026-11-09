@@ -17,6 +17,7 @@
     "smoke:company":"npm --prefix server run smoke:company",
     "test:rbac":"npm --prefix server run test:rbac",
     "bootstrap":"npm --prefix server run bootstrap",
+    "setup:president":"npm --prefix server run setup:president",
     "seed:company":"npm --prefix server run seed:company"
   }
 }

@@ -1,22 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {presidentAccessUrl,presidentUrlKey} from '../src/lib/president-link-url.js';
+import {presidentAccessUrl,presidentUrlKey,newPresidentKey,isPresidentKey} from '../src/lib/president-link-url.js';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 const key='t'.repeat(32),origin='https://app.example.test';
-test('Formatting preserves the same key and origin in a stable president-zp path',()=>{
+test('Formatting preserves the same key and origin in the permanent nested path and reads legacy URLs',()=>{
  const url=presidentAccessUrl(origin,key);
- assert.equal(url,origin+'/president-zp-'+key);
+ assert.equal(url,origin+'/president/zp/002/'+key);
  assert.equal(presidentUrlKey(url,origin),key);
  assert.equal(presidentUrlKey(url+'/',origin),key);
  assert.equal(presidentAccessUrl(origin,presidentUrlKey(origin+'/predsednik#'+key,origin)),url);
  assert.equal(presidentUrlKey(origin+'/president#'+key,origin),key);
+ assert.equal(presidentUrlKey(origin+'/president-zp-'+key,origin),key);
+});
+test('New permanent URLs use twelve readable random characters and round-trip without a fragment',()=>{
+ const keys=new Set(Array.from({length:100},()=>newPresidentKey()));
+ assert.equal(keys.size,100);
+ for(const key of keys){assert.match(key,/^[A-Za-z0-9]{12}$/);assert.ok(isPresidentKey(key));assert.equal(presidentUrlKey(presidentAccessUrl(origin,key),origin),key);}
+ for(const key of ['a'.repeat(11),'a'.repeat(13),'a'.repeat(11)+'_',null,{},'a'.repeat(12)+'%2f'])assert.equal(isPresidentKey(key),false);
 });
 test('Foreign origins, embedded credentials and invalid or guessed URLs cannot be reformatted',()=>{
- for(const url of ['https://foreign.example.test/president-zp-'+key,origin+'/president-zp-short',origin+'/president-zp-'+key+'extra',origin+'/projects/'+key,'not-a-url','https://user:pass@app.example.test/president-zp-'+key])assert.throws(()=>presidentUrlKey(url,origin));
+ for(const url of ['https://foreign.example.test/president-zp-'+key,origin+'/president-zp-short',origin+'/president-zp-'+key+'extra',origin+'/president/zp/002/short',origin+'/president/zp/002/'+'a'.repeat(12)+'/projects',origin+'/president/zp/003/'+'a'.repeat(12),origin+'/projects/'+key,'not-a-url','https://user:pass@app.example.test/president-zp-'+key])assert.throws(()=>presidentUrlKey(url,origin));
  assert.throws(()=>presidentAccessUrl(origin,'short'));assert.throws(()=>presidentAccessUrl('javascript:invalid',key));
 });
 test('The format command changes only the private URL file, is idempotent and does not connect to MongoDB',async()=>{

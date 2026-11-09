@@ -11,6 +11,7 @@
     "start": "node src/index.js",
     "bootstrap": "node src/scripts/bootstrap.js",
     "president:link": "node src/scripts/president-link.js",
+    "setup:president": "node src/scripts/setup-president.js",
     "seed:company": "node src/scripts/seed-company.js",
     "test": "node --test tests/*.test.js",
     "check": "node scripts/check.mjs",

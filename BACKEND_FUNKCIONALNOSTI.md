@@ -6,7 +6,7 @@
 
 **Sektori i inicijalni planovi:** [katalog i lokalno usklađivanje](docs/COMPANY_SEED.md) čuvaju postojeće ID-jeve, uloge, lozinke, napredak i predsednički pristup; nije menjana šema. `POST /api/admin/sectors` ostaje samo za administratora, normalizuje naziv/šifru i vraća 409 za duplikate. Stare rezervisane lokalne mejl adrese imaju alias samo van produkcije, uz postojeću proveru lozinke i odobrenja. CLI podrazumevano samo prikazuje plan; `--apply` pravi privatnu kopiju pre upisa i proverava verziju postojećih zapisa.
 
-**Naknadna dopuna predsedničkog ulaza:** stalni `/president-zp-…` URL koristi isti postojeći auth ugovor i hash. CLI `format` preformatira samo privatni fajl bez MongoDB veze, promene ključa ili opoziva sesija. `issue` zapisuje novi format, a obični i legacy fragment pristup ostaju kompatibilni. [Provere i granice](docs/PRESIDENT_PERSONAL_URL.md).
+**Naknadna dopuna predsedničkog ulaza:** novi `/president/zp/002/<12-karaktera>` URL koristi isti auth ugovor i hash. Eksplicitni lokalni `setup:president` inicijalizuje nedostajući predsednički nalog i link bez isteka; ponavljanje ne menja aktivni link, generaciju ni sesije. Nije deo API starta ili instalacije. Uspešni ulasci ne troše limiter neuspešnih pokušaja. CLI `format` menja samo privatni fajl; stari URL-ovi ostaju podržani. [Podešavanje, provere i granice](docs/PRESIDENT_PERSONAL_URL.md).
 
 ## Peti predsednički talas
 

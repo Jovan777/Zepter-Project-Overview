@@ -12,13 +12,13 @@ import {presidentAccessUrl,presidentUrlKey} from '../src/lib/president-link-url.
 
 const userId='77'.repeat(12),linkId='ec'.repeat(12);
 let address=0;
-async function fixture(t,run){
+async function fixture(t,run,keyLength=32){
  const saved={JWT_SECRET:process.env.JWT_SECRET,CLIENT_ORIGIN:process.env.CLIENT_ORIGIN};
  t.after(()=>{for(const [key,value]of Object.entries(saved)){if(value===undefined)delete process.env[key];else process.env[key]=value;}});
  process.env.JWT_SECRET=crypto.randomBytes(48).toString('hex');
  process.env.CLIENT_ORIGIN='https://app.example.test';
  const user={_id:userId,role:'president',approval:'approved',sessionVersion:0,save:async()=>{},toJSON(){return {_id:this._id,role:this.role,approval:this.approval};}};
- const key=crypto.randomBytes(24).toString('base64url'),link={_id:linkId,user:userId,tokenHash:tokenDigest(key),generation:1,revokedAt:null},sessions=[];
+ const key=keyLength===12?crypto.randomBytes(6).toString('hex'):crypto.randomBytes(24).toString('base64url'),link={_id:linkId,user:userId,tokenHash:tokenDigest(key),generation:1,revokedAt:null},sessions=[];
  const matches=(row,filter)=>Object.entries(filter).every(([key,value])=>value===null?row[key]==null:String(row[key])===String(value));
  t.mock.method(User,'findById',async()=>user);
  t.mock.method(PresidentAccessLink,'findById',async()=>link);
@@ -56,6 +56,21 @@ test('A reusable personal link opens two independent president sessions with a p
  assert.equal(sessions[0].presidentLink,link._id);assert.equal(sessions[0].presidentLinkGeneration,1);
  assert.equal(Object.hasOwn(data,'key'),false);assert.equal(Object.hasOwn(data,'refresh'),false);
 }));
+
+test('The short permanent link opens repeatedly from the same device without consuming the failed-attempt limit',async t=>fixture(t,async({key,post,sessions,link})=>{
+ for(let opening=0;opening<20;opening++)assert.equal((await post('president-link',{key},null,process.env.CLIENT_ORIGIN,'198.51.100.41')).status,200);
+ assert.equal(sessions.length,20);
+ link.revokedAt=new Date();assert.equal((await post('president-link',{key})).status,401);
+},12));
+
+test('Short links keep role, approval, origin and revocation checks and reject a changed key',async t=>fixture(t,async({key,post,user,link,sessions})=>{
+ assert.equal((await post('president-link',{key:'x'.repeat(12)})).status,401);
+ for(const role of ['employee','manager','admin']){user.role=role;assert.equal((await post('president-link',{key})).status,401);}
+ user.role='president';user.approval='disabled';assert.equal((await post('president-link',{key})).status,401);
+ user.approval='approved';assert.equal((await post('president-link',{key},null,'https://foreign.example.test')).status,403);
+ link.expiresAt=new Date(Date.now()-1000);assert.equal((await post('president-link',{key})).status,401);
+ assert.equal(sessions.length,0);
+},12));
 
 test('Malformed, changed, expired and revoked keys cannot create a session',async t=>fixture(t,async({key,post,link,sessions})=>{
  for(const candidate of [undefined,'short','x'.repeat(32),key+'?'])assert.equal((await post('president-link',{key:candidate})).status,401);

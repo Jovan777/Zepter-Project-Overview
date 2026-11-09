@@ -21,6 +21,32 @@ test('A personal URL remains in the address bar and supports a fresh opening on 
  assert.equal(presidentKeyFromPath(pathname),key);
 });
 
+test('The short nested URL survives repeated openings, reloads, queries and comment anchors',()=>{
+ const key='AbcDef234567',basename='/president/zp/002/'+key;
+ for(const tail of ['', '/', '/projects/123456789012345678901234','/my-comments']){
+  const pathname=basename+tail;
+  const location={pathname,search:'?commentId=123456789012345678901234',hash:'#president-project-comments'};
+  for(let device=0;device<2;device++){
+   const entry=capturePresidentEntry(location,{replaceState(){assert.fail('Keep the address unchanged.');}});
+   assert.equal(entry.invalid,false);assert.equal(entry.basename,basename);assert.equal(entry.takeKey(),key);
+   assert.equal(presidentKeyFromPath(pathname),key);
+   assert.equal(presidentScopedPath(pathname,'/ideas?tab=new'),basename+'/ideas?tab=new');
+   assert.equal(presidentScopedPath(pathname,'/'),basename);
+   assert.equal(presidentScopedPath(pathname,basename+'/projects'),basename+'/projects');
+  }
+ }
+ // Formatting a previously issued key must not invalidate its credentials.
+ assert.equal(presidentKeyFromPath('/president/zp/002/'+'c'.repeat(32)),'c'.repeat(32));
+});
+
+test('Incomplete or guessed nested prefixes do not fall through to a regular login or yield credentials',()=>{
+ for(const pathname of ['/president/zp','/president/zp/002','/president/zp/002/','/president/zp/003/AbcDef234567',...['short','a'.repeat(11),'a'.repeat(13),'a'.repeat(12)+'%2f','a'.repeat(12)+'.json'].map(key=>'/president/zp/002/'+key)]){
+  const entry=capturePresidentEntry({pathname,hash:'',search:''},{});
+  assert.equal(isPresidentEntryPath(pathname),true);assert.equal(entry.invalid,true);assert.equal(entry.basename,null);assert.equal(entry.takeKey(),null);
+ }
+ assert.equal(capturePresidentEntry({pathname:'/projects/president/zp/002/AbcDef234567'},{}),null);
+});
+
 test('Reloading a personal project/comment link preserves its nested route, query and anchor',()=>{
  const basename='/president-zp-'+'c'.repeat(32),pathname=basename+'/projects/123456789012345678901234';
  const entry=capturePresidentEntry({pathname,search:'?commentId=123456789012345678901234',hash:'#president-project-comments'},{replaceState(){assert.fail('Do not rewrite the deep link.');}});
